@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "xpath-test"
+version = "0.1.0"
+description = ""
+authors = ["offbynull <offbynull@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+antlr4-python3-runtime = "^4.13.2"
+
+
+[tool.poetry.group.dev.dependencies]
+antlr4-tools = "^0.2.1"
+
+
+[tool.poetry.group.test.dependencies]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
