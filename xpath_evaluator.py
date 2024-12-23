@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Hashable, Literal, Callable
 
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
@@ -71,6 +71,63 @@ class Context:
 
 
 
+def _to_list(value: Any) -> list[Any]:
+    if isinstance(value, list):
+        return value
+    return [value]
+
+def _coerce_list_to_numbers(values: list[Any]) -> list[float | int]:
+    ret = []
+    for v in values:
+        if isinstance(v, Path):
+            v = v.last().value
+        if isinstance(v, str):
+            try:
+                v = int(v)
+            except (ValueError, TypeError):
+                try:
+                    v = float(v)
+                except (ValueError, TypeError):
+                    ...
+        if isinstance(v, (float, int)):
+            ret.append(v)
+    return ret
+
+def _coerece_to_set(value: list[Any]) -> dict[tuple[Literal['PATH', 'RAW'], Hashable], Any]:
+    ret: dict[tuple[Literal['PATH', 'RAW'], Hashable], Any] = {}
+    for v in value:
+        if isinstance(v, Path):
+            ret['PATH', tuple(v.label())] = v
+        else:
+            ret['RAW', v] = v
+    return ret
+
+def _coerece_to_number(value: Any) -> int | float | None:
+    if isinstance(value, list) and len(value) == 1:
+        value = value[0]
+        if isinstance(value, (int, float)):
+            return value
+        if isinstance(value, str):
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                try:
+                    return float(value)
+                except (ValueError, TypeError):
+                    ...
+    elif isinstance(value, str):
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            try:
+                return float(value)
+            except (ValueError, TypeError):
+                ...
+    elif isinstance(value, (float, int)):
+        return value
+    return None
+
+
 class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def __init__(self, root: Any):
         self.root = root
@@ -80,22 +137,113 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def visitExprPath(self, ctx: XPath31GrammarParser.ExprPathContext):
         return self.visit(ctx.path())
 
+    def visitExprLiteral(self, ctx: XPath31GrammarParser.ExprLiteralContext):
+        return self.visit(ctx.literal())
+
+    def visitExprVariable(self, ctx: XPath31GrammarParser.ExprVariableContext):
+        raise ValueError('Variables not supported yet')
+
+    def visitExprSimpleMap(self, ctx: XPath31GrammarParser.ExprSimpleMapContext):
+        raise ValueError('Not supported')
+
+    def visitExprUnary(self, ctx: XPath31GrammarParser.ExprUnaryContext):
+        ret = []
+        for p in self.context.paths:
+            self.context.push_state([p])
+            try:
+                inner_res = self.visit(ctx.expr())
+                if ctx.MINUS() is not None:
+                    inner_res = _coerce_list_to_numbers(inner_res)
+                    for v in inner_res:
+                        ret.append(-v)
+                else:
+                    ret += inner_res
+            finally:
+                self.context.pop_state()
+        return ret
+
     def visitExprConcatenate(self, ctx: XPath31GrammarParser.ExprConcatenateContext):
         l_paths = self.visit(ctx.expr(0))
         r_paths = self.visit(ctx.expr(1))
-        return l_paths + r_paths
-
-    def visitExprSetUnion(self, ctx: XPath31GrammarParser.ExprSetUnionContext):
-        l_paths = self.visit(ctx.expr(0))
-        r_paths = self.visit(ctx.expr(1))
-        collapsed_paths = {p.label(): p for p in l_paths} | {p.label(): p for p in r_paths}
-        return list(collapsed_paths.values())
+        return _to_list(l_paths) + _to_list(r_paths)
 
     def visitExprSetIntersect(self, ctx: XPath31GrammarParser.ExprSetIntersectContext):
-        l_paths = self.visit(ctx.expr(0))
-        r_paths = self.visit(ctx.expr(1))
-        collapsed_paths = {p.label(): p for p in l_paths} & {p.label(): p for p in r_paths}
-        return list(collapsed_paths.values())
+        l_paths = _coerece_to_set(self.visit(ctx.expr(0)))
+        r_paths = _coerece_to_set(self.visit(ctx.expr(1)))
+        intersected_paths = l_paths.keys() & r_paths.keys()
+        return list(l_paths[p] for p in intersected_paths)
+
+    def visitExprSetUnion(self, ctx: XPath31GrammarParser.ExprSetUnionContext):
+        l_paths = _coerece_to_set(self.visit(ctx.expr(0)))
+        r_paths = _coerece_to_set(self.visit(ctx.expr(1)))
+        unioned = l_paths | r_paths
+        return list(unioned.values())
+
+    def _apply_binary_op(
+            self,
+            l: int | float | str | list[Any],
+            r: int | float | str | list[Any],
+            op: Callable[[Any, Any], Any]
+    ):
+        if isinstance(l, (int, float, str)) and isinstance(r, (int, float, str)):
+            return op(l, r)
+        elif isinstance(l, (int, float, str)) and isinstance(r, list):
+            r_paths = _coerce_list_to_numbers(r)
+            return [op(l, r) for r in r_paths]
+        elif isinstance(l, list) and isinstance(r, (int, float, str)):
+            l_paths = _coerce_list_to_numbers(l)
+            return [op(l, r) for l in l_paths]
+        elif isinstance(l, list) and isinstance(r, list):
+            l_paths = _coerce_list_to_numbers(l)
+            r_paths = _coerce_list_to_numbers(r)
+            return [op(l, r) for l, r in zip(l_paths, r_paths)]
+        raise ValueError('Unexpected data type')
+
+    def visitExprMultiplicative(self, ctx: XPath31GrammarParser.ExprMultiplicativeContext):
+        l = self.visit(ctx.expr(0))
+        r = self.visit(ctx.expr(1))
+        if ctx.STAR() is not None:
+            return self._apply_binary_op(l, r, lambda _l, _r: _l * _r)
+        elif ctx.KW_DIV() is not None:
+            return self._apply_binary_op(l, r, lambda _l, _r: _l / _r)
+        elif ctx.KW_IDIV() is not None:
+            return self._apply_binary_op(l, r, lambda _l, _r: _l // _r)
+        elif ctx.KW_MOD() is not None:
+            return self._apply_binary_op(l, r, lambda _l, _r: _l % _r)
+        raise ValueError('Unexpected')
+
+    def visitExprAdditive(self, ctx: XPath31GrammarParser.ExprAdditiveContext):
+        l = self.visit(ctx.expr(0))
+        r = self.visit(ctx.expr(1))
+        if ctx.PLUS() is not None:
+            return self._apply_binary_op(l, r, lambda _l, _r: _l + _r)
+        elif ctx.MINUS() is not None:
+            return self._apply_binary_op(l, r, lambda _l, _r: _l - _r)
+        raise ValueError('Unexpected')
+
+    def visitExprRange(self, ctx: XPath31GrammarParser.ExprRangeContext):
+        l = _coerece_to_number(self.visit(ctx.expr(0)))
+        r = _coerece_to_number(self.visit(ctx.expr(1)))
+        if isinstance(l, float) and l.is_integer():
+            l = int(l)
+        if isinstance(r, float) and r.is_integer():
+            r = int(r)
+        if isinstance(l, int) and isinstance(r, int):
+            return [v for v in range(l, r+1)]
+        return []
+
+    def visitExprComparison(self, ctx: XPath31GrammarParser.ExprComparisonContext):
+        FILL ME IN
+        FILL ME IN
+        FILL ME IN
+        FILL ME IN
+        FILL ME IN
+
+    def visitExprWrap(self, ctx: XPath31GrammarParser.ExprWrapContext):
+        return self.visit(ctx.expr())
+
+    def visitExprWrapForceList(self, ctx: XPath31GrammarParser.ExprWrapForceListContext):
+        return _to_list(self.visit(ctx.expr()))
 
     def visitPathRootContext(self, ctx: XPath31GrammarParser.PathRootContextContext):
         try:
@@ -263,12 +411,8 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def visitForwardStepDirectSelf(self, ctx: XPath31GrammarParser.ForwardStepDirectSelfContext):
         return self.context.paths[:]  # Return existing
 
-    def visitNodeTestLiteral(self, ctx: XPath31GrammarParser.NodeTestLiteralContext):
-        name = self.visit(ctx.literal())
-        return self._label_test([name])
-
     def visitNodeTestExact(self, ctx: XPath31GrammarParser.NodeTestExactContext):
-        name = ctx.eqname().getText()
+        name = ctx.Name().getText()
         return self._label_test([name])
 
     def _label_test(self, name: list[Any]) -> list[Path]:
@@ -293,13 +437,10 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                     ...  # do nothing
         return ret
 
-    def visitNodeTestVarRef(self, ctx: XPath31GrammarParser.NodeTestVarRefContext):
-        raise ValueError('Variables unsupported')
-
     def visitNodeTestWildcard(self, ctx: XPath31GrammarParser.NodeTestWildcardContext):
         return self.context.paths[:]  # Return existing
 
-    def visitNodeTestLookupSubExpression(self, ctx: XPath31GrammarParser.NodeTestLookupSubExpressionContext):
+    def visitNodeTestExpr(self, ctx: XPath31GrammarParser.NodeTestExprContext):
         self.context.push_state(PrimeMode.PRIME_WITH_SELF)
         try:
             result = self.visit(ctx.expr())
@@ -310,12 +451,6 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             return self._label_test(result)
         finally:
             self.context.pop_state()
-
-    def visitNodeTestUnionMany(self, ctx: XPath31GrammarParser.NodeTestUnionManyContext):
-        res = []
-        for n in ctx.nodetest():
-            res += self.visit(n)
-        return res
 
     def visitPredicate(self, ctx: XPath31GrammarParser.PredicateContext):
         orig_paths = self.context.paths
@@ -355,63 +490,96 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
 
 
 def test(root, expr):
+    print(f'---- res for {expr}')
     input_stream = InputStream(expr)
     lexer = XPath31GrammarLexer(input_stream)
     token_stream = CommonTokenStream(lexer)
     parser = XPath31GrammarParser(token_stream)
 
-    tree = parser.path()
+    tree = parser.expr()
 
     visitor = PathEvaluatorVisitor(root)
     ret = tree.accept(visitor)
 
-    print(f'---- res for {expr}')
-    for v in ret:
-        print(f'  {v.last()}')
-    return ret
+    if isinstance(ret, list):
+        for v in ret:
+            if isinstance(v, Path):
+                print(f'  {v.last()}')
+            else:
+                print(f'  {v}')
+        return ret
+    else:
+        print(f'  {ret}')
 
 
 if __name__ == '__main__':
     root = { 'a': { 'b': { 'c': 1, 'd': 2, 'e': -1, 'f': -2 } }, 'y': 3, 'z': 4, 'ptrs': { 'd_ptr': 'd', 'f_ptr': 'f' } }
 
-    test(root, '/')
-    test(root, '/*')
-    test(root, '/a')
-    test(root, '/a/b')
-    test(root, '/a/*')
-    test(root, '/a/b/c')
-    test(root, '/a/b/d')
-    test(root, '/a/b/*')
-    test(root, '/a/b/following::*')
-    test(root, '/a/b/following::z')
-    test(root, '/a/b/d/following-sibling::*')
-    test(root, '/a/b/d/following-sibling::f')
-    test(root, '/a/descendant-or-self::*')
-    test(root, '/a/descendant-or-self::d')
-    test(root, '/a/descendant::*')
-    test(root, '/a/descendant::d')
-    test(root, '/a/b/self::*')
-    test(root, '/a/b/self::d')
-    test(root, '/a/b/self::b')
-    test(root, '/a/b/child::*')
-    test(root, '/a/b/child::d')
+    # test(root, '/')
+    # test(root, '/*')
+    # test(root, '/a')
+    # test(root, '/a/b')
+    # test(root, '/a/*')
+    # test(root, '/a/b/c')
+    # test(root, '/a/b/d')
+    # test(root, '/a/b/*')
+    # test(root, '/a/b/following::*')
+    # test(root, '/a/b/following::z')
+    # test(root, '/a/b/d/following-sibling::*')
+    # test(root, '/a/b/d/following-sibling::f')
+    # test(root, '/a/descendant-or-self::*')
+    # test(root, '/a/descendant-or-self::d')
+    # test(root, '/a/descendant::*')
+    # test(root, '/a/descendant::d')
+    # test(root, '/a/b/self::*')
+    # test(root, '/a/b/self::d')
+    # test(root, '/a/b/self::b')
+    # test(root, '/a/b/child::*')
+    # test(root, '/a/b/child::d')
+    #
+    # test(root, '/a/b/..')
+    # test(root, '/a/b/e/ancestor-or-self::*')
+    # test(root, '/a/b/e/ancestor-or-self::a')
+    # test(root, '/y/preceding::*')
+    # test(root, '/y/preceding::b')
+    # test(root, '/y/preceding-sibling::*')
+    # test(root, '/y/preceding-sibling::b')
+    # test(root, '/a/b/e/parent::*')
+    # test(root, '/a/b/e/parent::d')
+    # test(root, '/a/b/e/parent::b')
+    #
+    # test(root, '/a/"b"')  # Test literal in path
+    # test(root, '/a/"b"/./d')   # Test dot in path
+    # test(root, '/a/b/*[. = /ptrs/*]')  # Test looking up another path to walk forward
 
-    test(root, '/a/b/..')
-    test(root, '/a/b/e/ancestor-or-self::*')
-    test(root, '/a/b/e/ancestor-or-self::a')
-    test(root, '/y/preceding::*')
-    test(root, '/y/preceding::b')
-    test(root, '/y/preceding-sibling::*')
-    test(root, '/y/preceding-sibling::b')
-    test(root, '/a/b/e/parent::*')
-    test(root, '/a/b/e/parent::d')
-    test(root, '/a/b/e/parent::b')
+    test(root, '-/a/b/*')
+    test(root, '-/*')
 
-    test(root, '/a/"b"')  # Test literal in path
-    test(root, '/a/"b"/./d')   # Test dot in path
-    test(root, '/a/b/(/ptrs/*)')  # Test looking up another path to walk forward
-    test(root, '/a/b/[d,f]')  # Test looking up many
+    test(root, '/a/b/* , /a/b/*')
+    test(root, '/a/b/* , /y')
 
-    test(root, '/a/b[./d]')  # Predicate - check for child
-    test(root, '/a/b[./x]')  # Predicate - check for child (missing)
-    test(root, '/a/b/*[2]')  # Predicate - position test
+    test(root, '/a/b/* intersect /a/b/*')
+    test(root, '/a/b/* intersect (/a/b/c, /a/b/e)')
+    test(root, '/a/b/* intersect /y')
+
+    test(root, '/a/b/* union /a/b/*')
+    test(root, '/a/b/* union (/a/b/c, /a/b/e)')
+    test(root, '/a/b/* union /y')
+
+    test(root, '/a/b/* + /a/b/*')
+    test(root, '/a/b/* + 1')
+    test(root, '/a/b/* + [1]')  # right is now a sequence - meaning only first elem is added
+    test(root, '/a/b/* + [1,2]')  # right is now a sequence - meaning only first elem is added
+    test(root, '5+4')
+
+    test(root, '5 to 7')
+    test(root, '5.0 to 7')
+    test(root, '5 to 7.0')
+    test(root, '5.0 to 7.0')
+    test(root, '5 to 5')
+    test(root, '5 to 4')
+
+    # THESE DONT WORK YET
+    # test(root, '/a/b[./d]')  # Predicate - check for child
+    # test(root, '/a/b[./x]')  # Predicate - check for child (missing)
+    # test(root, '/a/b/*[2]')  # Predicate - position test

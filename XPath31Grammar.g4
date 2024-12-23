@@ -162,56 +162,21 @@ xpath
 
 expr
     : path                                          # ExprPath
+    | literal                                       # ExprLiteral
+    | varref                                        # ExprVariable
     | expr BANG expr                                # ExprSimpleMap
     | <assoc=right> (MINUS | PLUS) expr             # ExprUnary
-    | expr EG arrowfunctionspecifier argumentlist   # ExprArrow
-    | expr KW_CAST KW_AS singletype                 # ExprCast
-    | expr KW_CASTABLE KW_AS singletype             # ExprCastable
-    | expr KW_TREAT KW_AS sequencetype              # ExprTreat
-    | expr KW_INSTANCE KW_OF sequencetype           # ExprInstanceOf
+    | expr (COMMA) expr                             # ExprConcatenate
     | expr (KW_INTERSECT | KW_EXCEPT) expr          # ExprSetIntersect
     | expr (KW_UNION | P) expr                      # ExprSetUnion
-    | expr (COMMA) expr                             # ExprConcatenate
     | expr (STAR | KW_DIV | KW_IDIV | KW_MOD) expr  # ExprMultiplicative
     | expr (PLUS | MINUS) expr                      # ExprAdditive
     | expr KW_TO expr                               # ExprRange
-    | expr PP expr                                  # ExprStringConcat
     | expr comp expr                                # ExprComparison
     | expr KW_AND expr                              # ExprAnd
     | expr KW_OR expr                               # ExprOr
     | OP expr CP                                    # ExprWrap
-    | if                                            # ExprIf
-    | quantified                                    # ExprQuantified
-    | let                                           # ExprLet
-    | for                                           # ExprFor
-    ;
-
-for
-    : KW_FOR forbinding (COMMA forbinding)* KW_RETURN expr
-    ;
-
-forbinding
-    : DOLLAR varname KW_IN expr
-    ;
-
-let
-    : KW_LET letbinding (COMMA letbinding)* KW_RETURN expr
-    ;
-
-letbinding
-    : DOLLAR varname CEQ expr
-    ;
-
-quantified
-    : (KW_SOME | KW_EVERY) quantifiedbinding (COMMA quantifiedbinding)* KW_SATISFIES expr
-    ;
-
-quantifiedbinding
-    : DOLLAR varname KW_IN expr
-    ;
-
-if
-    : KW_IF OP expr CP KW_THEN expr KW_ELSE expr
+    | OB expr CB                                    # ExprWrapForceList
     ;
 
 comp
@@ -265,12 +230,9 @@ reversestep
     ;
 
 nodetest
-    : eqname                              # NodeTestExact
-    | literal                             # NodeTestLiteral
-    | varref                              # NodeTestVarRef
-    | STAR                                # NodeTestWildcard
-    | OP expr CP                          # NodeTestLookupSubExpression
-    | OB nodetest ( COMMA nodetest )* CB  # NodeTestUnionMany
+    : Name  # NodeTestExact
+    | STAR  # NodeTestWildcard
+    | expr  # NodeTestExpr
     ;
 
 argumentlist
@@ -285,12 +247,6 @@ predicate
     : OB expr CB
     ;
 
-arrowfunctionspecifier
-    : eqname
-    | varref
-    | parenthesizedexpr
-    ;
-
 literal
     : IntegerLiteral
     | DecimalLiteral
@@ -299,96 +255,5 @@ literal
     ;
 
 varref
-    : DOLLAR varname
-    ;
-
-varname
-    : eqname
-    ;
-
-parenthesizedexpr
-    : OP expr? CP
-    ;
-
-singletype
-    : typename_ QM?
-    ;
-
-sequencetype
-    : KW_EMPTY_SEQUENCE OP CP
-    | itemtype occurrenceindicator?
-    ;
-
-occurrenceindicator
-    : QM
-    | STAR
-    | PLUS
-    ;
-
-itemtype
-    : KW_ITEM OP CP
-    | functiontest
-    | maptest
-    | arraytest
-    | atomicoruniontype
-    | parenthesizeditemtype
-    ;
-
-atomicoruniontype
-    : eqname
-    ;
-
-typename_
-    : eqname
-    ;
-
-functiontest
-    : anyfunctiontest
-    | typedfunctiontest
-    ;
-
-anyfunctiontest
-    : KW_FUNCTION OP STAR CP
-    ;
-
-typedfunctiontest
-    : KW_FUNCTION OP (sequencetype ( COMMA sequencetype)*)? CP KW_AS sequencetype
-    ;
-
-maptest
-    : anymaptest
-    | typedmaptest
-    ;
-
-anymaptest
-    : KW_MAP OP STAR CP
-    ;
-
-typedmaptest
-    : KW_MAP OP atomicoruniontype COMMA sequencetype CP
-    ;
-
-arraytest
-    : anyarraytest
-    | typedarraytest
-    ;
-
-anyarraytest
-    : KW_ARRAY OP STAR CP
-    ;
-
-typedarraytest
-    : KW_ARRAY OP sequencetype CP
-    ;
-
-parenthesizeditemtype
-    : OP itemtype CP
-    ;
-
-// Original grammar claimed "Error in the spec. EQName also includes acceptable keywords." To work around this, it included
-// "acceptable keywords" (also known as reserved words) into this rule, then used a chunk of code that stopped the rule from
-// running if certain "acceptable keywords" were detected? I've simplified the grammar by removing this (at the cost of
-// potentially being incorrect).
-eqname
-    : Name
+    : DOLLAR Name
     ;

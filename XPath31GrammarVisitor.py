@@ -24,23 +24,8 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprFor.
-    def visitExprFor(self, ctx:XPath31GrammarParser.ExprForContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprCastable.
-    def visitExprCastable(self, ctx:XPath31GrammarParser.ExprCastableContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XPath31GrammarParser#ExprConcatenate.
     def visitExprConcatenate(self, ctx:XPath31GrammarParser.ExprConcatenateContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprStringConcat.
-    def visitExprStringConcat(self, ctx:XPath31GrammarParser.ExprStringConcatContext):
         return self.visitChildren(ctx)
 
 
@@ -54,13 +39,8 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprQuantified.
-    def visitExprQuantified(self, ctx:XPath31GrammarParser.ExprQuantifiedContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprTreat.
-    def visitExprTreat(self, ctx:XPath31GrammarParser.ExprTreatContext):
+    # Visit a parse tree produced by XPath31GrammarParser#ExprWrapForceList.
+    def visitExprWrapForceList(self, ctx:XPath31GrammarParser.ExprWrapForceListContext):
         return self.visitChildren(ctx)
 
 
@@ -69,18 +49,8 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprLet.
-    def visitExprLet(self, ctx:XPath31GrammarParser.ExprLetContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XPath31GrammarParser#ExprOr.
     def visitExprOr(self, ctx:XPath31GrammarParser.ExprOrContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprCast.
-    def visitExprCast(self, ctx:XPath31GrammarParser.ExprCastContext):
         return self.visitChildren(ctx)
 
 
@@ -99,8 +69,8 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprInstanceOf.
-    def visitExprInstanceOf(self, ctx:XPath31GrammarParser.ExprInstanceOfContext):
+    # Visit a parse tree produced by XPath31GrammarParser#ExprLiteral.
+    def visitExprLiteral(self, ctx:XPath31GrammarParser.ExprLiteralContext):
         return self.visitChildren(ctx)
 
 
@@ -109,58 +79,18 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprIf.
-    def visitExprIf(self, ctx:XPath31GrammarParser.ExprIfContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XPath31GrammarParser#ExprPath.
     def visitExprPath(self, ctx:XPath31GrammarParser.ExprPathContext):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XPath31GrammarParser#ExprVariable.
+    def visitExprVariable(self, ctx:XPath31GrammarParser.ExprVariableContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XPath31GrammarParser#ExprSimpleMap.
     def visitExprSimpleMap(self, ctx:XPath31GrammarParser.ExprSimpleMapContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprArrow.
-    def visitExprArrow(self, ctx:XPath31GrammarParser.ExprArrowContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#for.
-    def visitFor(self, ctx:XPath31GrammarParser.ForContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#forbinding.
-    def visitForbinding(self, ctx:XPath31GrammarParser.ForbindingContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#let.
-    def visitLet(self, ctx:XPath31GrammarParser.LetContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#letbinding.
-    def visitLetbinding(self, ctx:XPath31GrammarParser.LetbindingContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#quantified.
-    def visitQuantified(self, ctx:XPath31GrammarParser.QuantifiedContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#quantifiedbinding.
-    def visitQuantifiedbinding(self, ctx:XPath31GrammarParser.QuantifiedbindingContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#if.
-    def visitIf(self, ctx:XPath31GrammarParser.IfContext):
         return self.visitChildren(ctx)
 
 
@@ -274,28 +204,13 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#NodeTestLiteral.
-    def visitNodeTestLiteral(self, ctx:XPath31GrammarParser.NodeTestLiteralContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#NodeTestVarRef.
-    def visitNodeTestVarRef(self, ctx:XPath31GrammarParser.NodeTestVarRefContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XPath31GrammarParser#NodeTestWildcard.
     def visitNodeTestWildcard(self, ctx:XPath31GrammarParser.NodeTestWildcardContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#NodeTestLookupSubExpression.
-    def visitNodeTestLookupSubExpression(self, ctx:XPath31GrammarParser.NodeTestLookupSubExpressionContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#NodeTestUnionMany.
-    def visitNodeTestUnionMany(self, ctx:XPath31GrammarParser.NodeTestUnionManyContext):
+    # Visit a parse tree produced by XPath31GrammarParser#NodeTestExpr.
+    def visitNodeTestExpr(self, ctx:XPath31GrammarParser.NodeTestExprContext):
         return self.visitChildren(ctx)
 
 
@@ -314,11 +229,6 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#arrowfunctionspecifier.
-    def visitArrowfunctionspecifier(self, ctx:XPath31GrammarParser.ArrowfunctionspecifierContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XPath31GrammarParser#literal.
     def visitLiteral(self, ctx:XPath31GrammarParser.LiteralContext):
         return self.visitChildren(ctx)
@@ -326,101 +236,6 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XPath31GrammarParser#varref.
     def visitVarref(self, ctx:XPath31GrammarParser.VarrefContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#varname.
-    def visitVarname(self, ctx:XPath31GrammarParser.VarnameContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#parenthesizedexpr.
-    def visitParenthesizedexpr(self, ctx:XPath31GrammarParser.ParenthesizedexprContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#singletype.
-    def visitSingletype(self, ctx:XPath31GrammarParser.SingletypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#sequencetype.
-    def visitSequencetype(self, ctx:XPath31GrammarParser.SequencetypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#occurrenceindicator.
-    def visitOccurrenceindicator(self, ctx:XPath31GrammarParser.OccurrenceindicatorContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#itemtype.
-    def visitItemtype(self, ctx:XPath31GrammarParser.ItemtypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#atomicoruniontype.
-    def visitAtomicoruniontype(self, ctx:XPath31GrammarParser.AtomicoruniontypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#typename_.
-    def visitTypename_(self, ctx:XPath31GrammarParser.Typename_Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#functiontest.
-    def visitFunctiontest(self, ctx:XPath31GrammarParser.FunctiontestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#anyfunctiontest.
-    def visitAnyfunctiontest(self, ctx:XPath31GrammarParser.AnyfunctiontestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#typedfunctiontest.
-    def visitTypedfunctiontest(self, ctx:XPath31GrammarParser.TypedfunctiontestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#maptest.
-    def visitMaptest(self, ctx:XPath31GrammarParser.MaptestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#anymaptest.
-    def visitAnymaptest(self, ctx:XPath31GrammarParser.AnymaptestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#typedmaptest.
-    def visitTypedmaptest(self, ctx:XPath31GrammarParser.TypedmaptestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#arraytest.
-    def visitArraytest(self, ctx:XPath31GrammarParser.ArraytestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#anyarraytest.
-    def visitAnyarraytest(self, ctx:XPath31GrammarParser.AnyarraytestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#typedarraytest.
-    def visitTypedarraytest(self, ctx:XPath31GrammarParser.TypedarraytestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#parenthesizeditemtype.
-    def visitParenthesizeditemtype(self, ctx:XPath31GrammarParser.ParenthesizeditemtypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#eqname.
-    def visitEqname(self, ctx:XPath31GrammarParser.EqnameContext):
         return self.visitChildren(ctx)
 
 
