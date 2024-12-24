@@ -14,6 +14,11 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XPath31GrammarParser#ExprBoolAggregate.
+    def visitExprBoolAggregate(self, ctx:XPath31GrammarParser.ExprBoolAggregateContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XPath31GrammarParser#ExprSetIntersect.
     def visitExprSetIntersect(self, ctx:XPath31GrammarParser.ExprSetIntersectContext):
         return self.visitChildren(ctx)
@@ -89,13 +94,18 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprSimpleMap.
-    def visitExprSimpleMap(self, ctx:XPath31GrammarParser.ExprSimpleMapContext):
+    # Visit a parse tree produced by XPath31GrammarParser#relop.
+    def visitRelop(self, ctx:XPath31GrammarParser.RelopContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#comp.
-    def visitComp(self, ctx:XPath31GrammarParser.CompContext):
+    # Visit a parse tree produced by XPath31GrammarParser#mulop.
+    def visitMulop(self, ctx:XPath31GrammarParser.MulopContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#addop.
+    def visitAddop(self, ctx:XPath31GrammarParser.AddopContext):
         return self.visitChildren(ctx)
 
 
@@ -214,8 +224,8 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#NodeTestWildcard.
-    def visitNodeTestWildcard(self, ctx:XPath31GrammarParser.NodeTestWildcardContext):
+    # Visit a parse tree produced by XPath31GrammarParser#NodeTestMatcher.
+    def visitNodeTestMatcher(self, ctx:XPath31GrammarParser.NodeTestMatcherContext):
         return self.visitChildren(ctx)
 
 
@@ -241,6 +251,36 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XPath31GrammarParser#literal.
     def visitLiteral(self, ctx:XPath31GrammarParser.LiteralContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#MatcherStrict.
+    def visitMatcherStrict(self, ctx:XPath31GrammarParser.MatcherStrictContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#MatcherRegex.
+    def visitMatcherRegex(self, ctx:XPath31GrammarParser.MatcherRegexContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#MatcherGlob.
+    def visitMatcherGlob(self, ctx:XPath31GrammarParser.MatcherGlobContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#MatcherFuzzy.
+    def visitMatcherFuzzy(self, ctx:XPath31GrammarParser.MatcherFuzzyContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#MatcherWildcard.
+    def visitMatcherWildcard(self, ctx:XPath31GrammarParser.MatcherWildcardContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#coerecefallback.
+    def visitCoerecefallback(self, ctx:XPath31GrammarParser.CoerecefallbackContext):
         return self.visitChildren(ctx)
 
 

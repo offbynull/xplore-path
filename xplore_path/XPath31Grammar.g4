@@ -62,21 +62,30 @@ KW_ANY                    : 'any';
 KW_ALL                    : 'all';
 KW_ZIP                    : 'zip';
 KW_PRODUCT                : 'product';
+KW_SEQUENCE               : 'sequence';
+KW_ON                     : 'on';
+KW_ERROR                  : 'error';
+KW_DISCARD                : 'discard';
+KW_FAIL                   : 'fail';
+KW_NAN                    : 'nan';
+KW_INF                    : 'inf';
 
 // A.2.1. TERMINAL SYMBOLS
 // This isn't a complete list of tokens in the language.
 // Keywords and symbols are terminals.
 
+RegexMatcher     : 'r' FragStringLiteral;
+GlobMatcher      : 'g' FragStringLiteral;
+StrictMatcher    : 's' FragStringLiteral;
+FuzzyMatcher     : 'f' FragStringLiteral;
 IntegerLiteral   : FragDigits;
 DecimalLiteral   : '.' FragDigits | FragDigits '.' [0-9]*;
 DoubleLiteral    : ('.' FragDigits | FragDigits ('.' [0-9]*)?) [eE] [+-]? FragDigits;
-StringLiteral    : '"' (~["] | FragEscapeQuot)* '"' | '\'' (~['] | FragEscapeApos)* '\'';
+StringLiteral    : FragStringLiteral;
 BooleanLiteral   : 'true' | 'false';
-// Error in spec: EscapeQuot and EscapeApos are not terminals!
+fragment FragStringLiteral : '"' (~["] | FragEscapeQuot)* '"' | '\'' (~['] | FragEscapeApos)* '\'';
 fragment FragEscapeQuot : '""';
 fragment FragEscapeApos : '\'\'';
-// Error in spec: Comment isn't really a terminal, but an off-channel object.
-Comment : '(:' (Comment | CommentContents)*? ':)' -> skip;
 Name   : FragmentName;
 // Error in spec: Char is not a terminal!
 fragment Char            : FragChar;
@@ -132,27 +141,35 @@ xpath
     ;
 
 expr
-    : path                                          # ExprPath
-    | literal                                       # ExprLiteral
-    | varref                                        # ExprVariable
-    | expr BANG expr                                # ExprSimpleMap
-    | <assoc=right> (MINUS | PLUS) expr             # ExprUnary
-    | expr (COMMA) expr                             # ExprConcatenate
-    | expr (KW_INTERSECT | KW_EXCEPT) expr          # ExprSetIntersect
-    | expr (KW_UNION | P) expr                      # ExprSetUnion
-    | expr (STAR | KW_DIV | KW_IDIV | KW_MOD) expr  # ExprMultiplicative
-    | expr (PLUS | MINUS) expr                      # ExprAdditive
-    | expr KW_TO expr                               # ExprRange
-    | expr comp expr                                # ExprComparison
-    | expr KW_AND expr                              # ExprAnd
-    | expr KW_OR expr                               # ExprOr
-    | OP expr CP                                    # ExprWrap
-    | OB expr CB                                    # ExprWrapForceList
+    : (KW_ANY | KW_ALL) expr coerecefallback?             # ExprBoolAggregate
+    | expr COMMA expr                                     # ExprConcatenate
+    | expr (KW_INTERSECT | KW_EXCEPT) expr                # ExprSetIntersect
+    | expr (KW_UNION | P) expr                            # ExprSetUnion
+    | expr KW_TO expr                                     # ExprRange
+    | expr KW_OR expr coerecefallback?                    # ExprOr
+    | expr KW_AND expr coerecefallback?                   # ExprAnd
+    | expr relop expr                                     # ExprComparison
+    | expr addop expr coerecefallback?                    # ExprAdditive
+    | expr mulop expr coerecefallback?                    # ExprMultiplicative
+    | <assoc=right> (MINUS | PLUS) expr coerecefallback?  # ExprUnary
+    | OP expr CP                                          # ExprWrap
+    | OB expr? CB                                         # ExprWrapForceList
+    | varref                                              # ExprVariable
+    | literal                                             # ExprLiteral
+    | path                                                # ExprPath
     ;
 
-comp
-    : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL)?  (EQ | NE | LT | LE | GT | GE | LL | GG)
-    | (KW_ANY | KW_ALL)? (KW_ZIP | KW_PRODUCT)? (EQ | NE | LT | LE | GT | GE | LL | GG)
+relop
+    : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? (EQ | NE | LT | LE | GT | GE | LL | GG)
+    | (KW_SEQUENCE | KW_ANY | KW_ALL)? (KW_ZIP | KW_PRODUCT)? (EQ | NE | LT | LE | GT | GE | LL | GG)
+    ;
+
+mulop
+    : (KW_ZIP | KW_PRODUCT)? (STAR | KW_DIV | KW_IDIV | KW_MOD)
+    ;
+
+addop
+    : (KW_ZIP | KW_PRODUCT)? (PLUS | MINUS)
     ;
 
 path
@@ -190,9 +207,9 @@ reversestep
     ;
 
 nodetest
-    : Name  # NodeTestExact
-    | STAR  # NodeTestWildcard
-    | expr  # NodeTestExpr
+    : Name           # NodeTestExact
+    | matcher        # NodeTestMatcher
+    | expr           # NodeTestExpr
     ;
 
 argumentlist
@@ -213,6 +230,21 @@ literal
     | DoubleLiteral
     | StringLiteral
     | BooleanLiteral
+    | KW_NAN
+    | KW_INF
+    | Name
+    ;
+
+matcher
+    : StrictMatcher  # MatcherStrict
+    | RegexMatcher   # MatcherRegex
+    | GlobMatcher    # MatcherGlob
+    | FuzzyMatcher   # MatcherFuzzy
+    | STAR           # MatcherWildcard
+    ;
+
+coerecefallback
+    : KW_ON KW_ERROR (KW_DISCARD | KW_FAIL | expr)
     ;
 
 varref

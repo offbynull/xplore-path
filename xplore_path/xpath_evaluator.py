@@ -1,8 +1,8 @@
+import math
 from dataclasses import dataclass
 from enum import Enum
 from itertools import product
-from math import isnan
-from typing import Any, Hashable, Literal, Callable, TypeVar, Type
+from typing import Any, Literal, Callable
 
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
@@ -11,6 +11,18 @@ from XPath31GrammarLexer import XPath31GrammarLexer
 from XPath31GrammarParser import XPath31GrammarParser
 from XPath31GrammarVisitor import XPath31GrammarVisitor
 from path import Path, PathElement
+from xplore_path.coercer_fallback.coercer_fallback import CoercerFallback
+from xplore_path.coercer_fallbacks.default_coercer_fallback import DefaultCoercerFallback
+from xplore_path.coercer_fallbacks.discard_coercer_fallback import DiscardCoercerFallback
+from xplore_path.coercer_fallbacks.fail_coercer_fallback import FailCoerecerFallback
+from xplore_path.coercions import coerce_single_value, coerce_to_list, coerce_for_set_operation
+from xplore_path.label_matcher.label_matcher import LabelMatcher
+from xplore_path.label_matchers.combined_label_matcher import CombinedLabelMatcher
+from xplore_path.label_matchers.fuzzy_label_matcher import FuzzyLabelMatcher
+from xplore_path.label_matchers.glob_label_matcher import GlobLabelMatcher
+from xplore_path.label_matchers.regex_label_matcher import RegexLabelMatcher
+from xplore_path.label_matchers.strict_label_matcher import StrictLabelMatcher
+from xplore_path.label_matchers.wildcard_label_matcher import WildcardLabelMatcher
 
 
 class PrimeMode(Enum):
@@ -73,73 +85,7 @@ class Context:
 
 
 
-def coerce_to_list(value: Any) -> list[Any]:
-    if isinstance(value, list):
-        return value
-    return [value]
 
-def _coerce_to_set(value: list[Any]) -> dict[tuple[Literal['PATH', 'RAW'], Hashable], Any]:
-    ret: dict[tuple[Literal['PATH', 'RAW'], Hashable], Any] = {}
-    for v in value:
-        if isinstance(v, Path):
-            ret['PATH', tuple(v.label())] = v
-        else:
-            ret['RAW', v] = v
-    return ret
-
-T = TypeVar('T', bool, int, float, str)
-
-def _coerce_for_application_as_single_value(v: bool | int | float | str | Path | list, new_t: Type[T]) -> T | None:
-    if type(v) == new_t:
-        return v
-    elif new_t == bool:
-        if type(v) == Path:
-            return _coerce_for_application_as_single_value(v.last().value, new_t)
-        elif type(v) == str:
-            return len(v) > 0
-        elif type(v) == float:
-            return not isnan(v) and v != 0
-        elif type(v) == int:
-            return v != 0
-        elif type(v) == list and len(v) > 0:
-            return _coerce_for_application_as_single_value(v[0], new_t)  # Use first element if single value expected
-    elif new_t == int:
-        if type(v) == Path:
-            return _coerce_for_application_as_single_value(v.last().value, new_t)
-        elif type(v) == str:
-            try:
-                return int(v)
-            except (ValueError, TypeError):
-                ...
-        elif type(v) == float and v.is_integer():
-            return int(v)
-        elif type(v) == bool:
-            return int(v)
-        elif type(v) == list and len(v) > 0:
-            return _coerce_for_application_as_single_value(v[0], new_t)  # Use first element if single value expected
-    elif new_t == float:
-        if type(v) == Path:
-            return _coerce_for_application_as_single_value(v.last().value, new_t)
-        elif type(v) == str:
-            try:
-                return float(v)
-            except (ValueError, TypeError):
-                ...
-        elif type(v) == int:
-            return float(v)
-        elif type(v) == bool:
-            return float(v)
-        elif type(v) == list and len(v) > 0:
-            return _coerce_for_application_as_single_value(v[0], new_t)  # Use first element if single value expected
-    elif new_t == str:
-        if type(v) == Path:
-            return _coerce_for_application_as_single_value(v.last().value, new_t)
-        else:
-            try:
-                return str(v)
-            except (ValueError, TypeError):
-                ...
-    return None
 
 def _coerce_for_single_value_comparison(
         v1: bool | int | float | str | Path | list,
@@ -156,7 +102,7 @@ def _coerce_for_single_value_comparison(
     if type(v2) == Path:
         v2 = v2.last().value
     # coerce and return
-    v2 = _coerce_for_application_as_single_value(v2, type(v1))
+    v2 = coerce_single_value(v2, type(v1))
     return v1, v2
 
 
@@ -175,119 +121,164 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def visitExprVariable(self, ctx: XPath31GrammarParser.ExprVariableContext):
         raise ValueError('Variables not supported yet')
 
-    def visitExprSimpleMap(self, ctx: XPath31GrammarParser.ExprSimpleMapContext):
-        raise ValueError('Not supported')
-
     def visitExprUnary(self, ctx: XPath31GrammarParser.ExprUnaryContext):
+        if ctx.coerecefallback():
+            coercer_fallback = self.visit(ctx.coerecefallback())
+        else:
+            coercer_fallback = DiscardCoercerFallback()
         ret = []
         for p in self.context.paths:
             self.context.push_state([p])
             try:
-                inner_res = self.visit(ctx.expr())
+                inner = self.visit(ctx.expr())
                 if ctx.MINUS() is not None:
-                    if type(inner_res) == list:
-                        ret = []
-                        for v in inner_res:
-                            v = _coerce_for_application_as_single_value(v, float)
-                            if v is not None:
-                                ret.append(-v)
-                        return ret
+                    if type(inner) == list:
+                        inner = [-coerce_single_value(v, float) for v in inner]
+                        inner = coercer_fallback.coerce(inner)
+                        ret += inner
                     else:
-                        inner_res = _coerce_for_application_as_single_value(inner_res, float)
-                        if inner_res is not None:
-                            ret.append(-inner_res)
+                        inner = [-coerce_single_value(inner, float)]
+                        inner = coercer_fallback.coerce(inner)
+                        if inner:
+                            ret.append(inner[0])
                 elif ctx.PLUS() is not None:
-                    ret += inner_res  # Add as-is
+                    ret += inner  # Keep it as-is -- not required to do any manipulation here
             finally:
                 self.context.pop_state()
         return ret
 
     def visitExprConcatenate(self, ctx: XPath31GrammarParser.ExprConcatenateContext):
-        l_paths = self.visit(ctx.expr(0))
-        r_paths = self.visit(ctx.expr(1))
-        return coerce_to_list(l_paths) + coerce_to_list(r_paths)
+        l = self.visit(ctx.expr(0))
+        r = self.visit(ctx.expr(1))
+        return coerce_to_list(l) + coerce_to_list(r)
 
     def visitExprSetIntersect(self, ctx: XPath31GrammarParser.ExprSetIntersectContext):
-        l_paths = _coerce_to_set(self.visit(ctx.expr(0)))
-        r_paths = _coerce_to_set(self.visit(ctx.expr(1)))
-        intersected_paths = l_paths.keys() & r_paths.keys()
-        return list(l_paths[p] for p in intersected_paths)
+        l = coerce_for_set_operation(self.visit(ctx.expr(0)))
+        r = coerce_for_set_operation(self.visit(ctx.expr(1)))
+        intersected = l.keys() & r.keys()
+        return [l[p] for p in intersected]
 
     def visitExprSetUnion(self, ctx: XPath31GrammarParser.ExprSetUnionContext):
-        l_paths = _coerce_to_set(self.visit(ctx.expr(0)))
-        r_paths = _coerce_to_set(self.visit(ctx.expr(1)))
-        unioned = l_paths | r_paths
+        l = coerce_for_set_operation(self.visit(ctx.expr(0)))
+        r = coerce_for_set_operation(self.visit(ctx.expr(1)))
+        unioned = l | r
         return list(unioned.values())
+
+    def visitExprBoolAggregate(self, ctx: XPath31GrammarParser.ExprBoolAggregateContext):
+        if ctx.coerecefallback():
+            coercer_fallback = self.visit(ctx.coerecefallback())
+        else:
+            coercer_fallback = DefaultCoercerFallback(False)
+        if ctx.KW_ANY():
+            op = any
+        elif ctx.KW_ALL():
+            op = all
+        else:
+            raise ValueError('Unexpected')
+        r = self.visit(ctx.expr())
+        if type(r) == list:
+            r = [coerce_single_value(v, bool) for v in r]
+            r = coercer_fallback.coerce(r)
+            return op(r)
+        else:
+            r = [coerce_single_value(r, bool)]
+            r = coercer_fallback.coerce(r)
+            return op(r)
 
     def _apply_binary_number_op(
             self,
             l: int | float | str | bool | list[Any],
             r: int | float | str | bool | list[Any],
-            op: Callable[[Any, Any], Any]
+            combine_op: Callable[[Any, Any], Any],
+            op: Callable[[Any, Any], Any],
+            coercer_fallback: CoercerFallback
     ):
         if isinstance(l, list) and isinstance(r, list):
-            l_paths = [_coerce_for_application_as_single_value(v, float) for v in l]
-            r_paths = [_coerce_for_application_as_single_value(v, float) for v in r]
-            return [op(l, r) for l, r in zip(l_paths, r_paths) if l is not None and r is not None]
+            l = coercer_fallback.coerce([coerce_single_value(v, float) for v in l])
+            r = coercer_fallback.coerce([coerce_single_value(v, float) for v in r])
+            return [op(l_, r_) for l_, r_ in combine_op(l, r)]
         elif isinstance(l, list):
-            l_paths = [_coerce_for_application_as_single_value(v, float) for v in l]
-            return [op(l, r) for l in l_paths if l is not None]
+            l = coercer_fallback.coerce([coerce_single_value(v, float) for v in l])
+            return [op(l_, r) for l_, r_ in combine_op(l, [r])]
         elif isinstance(r, list):
-            r_paths = [_coerce_for_application_as_single_value(v, float) for v in r]
-            return [op(l, r) for r in r_paths if r is not None]
+            r = coercer_fallback.coerce([coerce_single_value(v, float) for v in r])
+            return [op(l, r_) for l_, r_ in combine_op([l], r)]
         else:
-            l = _coerce_for_application_as_single_value(l, float)
-            r = _coerce_for_application_as_single_value(r, float)
-            return op(l, r)
+            l = coercer_fallback.coerce([coerce_single_value(l, float)])
+            r = coercer_fallback.coerce([coerce_single_value(r, float)])
+            single_or_empty = [op(l_, r_) for l_, r_ in combine_op(l, r)]
+            return single_or_empty[0] if single_or_empty else []
 
     def visitExprMultiplicative(self, ctx: XPath31GrammarParser.ExprMultiplicativeContext):
+        if ctx.coerecefallback():
+            coercer_fallback = self.visit(ctx.coerecefallback())
+        else:
+            coercer_fallback = DiscardCoercerFallback()
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
-        if ctx.STAR() is not None:
-            return self._apply_binary_number_op(l, r, lambda _l, _r: _l * _r)
-        elif ctx.KW_DIV() is not None:
-            return self._apply_binary_number_op(l, r, lambda _l, _r: _l / _r)
-        elif ctx.KW_IDIV() is not None:
-            return self._apply_binary_number_op(l, r, lambda _l, _r: _l // _r)
-        elif ctx.KW_MOD() is not None:
-            return self._apply_binary_number_op(l, r, lambda _l, _r: _l % _r)
+        # default to zip if both are lists, otherwise use product as default - that's what xpath does
+        combine_op = zip if type(l) == list and type(r) == list else product
+        if ctx.mulop().KW_ZIP():
+            combine_op = zip
+        elif ctx.mulop().KW_PRODUCT():
+            combine_op = product
+        if ctx.mulop().STAR() is not None:
+            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l * _r, coercer_fallback)
+        elif ctx.mulop().KW_DIV() is not None:
+            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l / _r, coercer_fallback)
+        elif ctx.mulop().KW_IDIV() is not None:
+            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l // _r, coercer_fallback)
+        elif ctx.mulop().KW_MOD() is not None:
+            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l % _r, coercer_fallback)
         raise ValueError('Unexpected')
 
     def visitExprAdditive(self, ctx: XPath31GrammarParser.ExprAdditiveContext):
+        if ctx.coerecefallback():
+            coercer_fallback = self.visit(ctx.coerecefallback())
+        else:
+            coercer_fallback = DiscardCoercerFallback()
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
-        if ctx.PLUS() is not None:
-            return self._apply_binary_number_op(l, r, lambda _l, _r: _l + _r)
-        elif ctx.MINUS() is not None:
-            return self._apply_binary_number_op(l, r, lambda _l, _r: _l - _r)
+        # default to zip if both are lists, otherwise use product as default - that's what xpath does
+        combine_op = zip if type(l) == list and type(r) == list else product
+        if ctx.addop().KW_ZIP():
+            combine_op = zip
+        elif ctx.addop().KW_PRODUCT():
+            combine_op = product
+        if ctx.addop().PLUS() is not None:
+            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l + _r, coercer_fallback)
+        elif ctx.addop().MINUS() is not None:
+            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l - _r, coercer_fallback)
         raise ValueError('Unexpected')
 
     def visitExprRange(self, ctx: XPath31GrammarParser.ExprRangeContext):
-        l = _coerce_for_application_as_single_value(self.visit(ctx.expr(0)), int)
-        r = _coerce_for_application_as_single_value(self.visit(ctx.expr(1)), int)
-        if type(l) == int and type(r) == int:
-            return [v for v in range(l, r+1)]
-        return []
+        l = self.visit(ctx.expr(0))
+        r = self.visit(ctx.expr(1))
+        if type(l) is list and len(l) > 0:
+            l = l[0]
+        if type(r) is list and len(r) > 0:
+            r = r[0]
+        l = coerce_single_value(l, int)
+        r = coerce_single_value(r, int)
+        if l is None and r is None:
+            return []
+        return [v for v in range(l, r+1)]
 
     def _apply_binary_boolean_op(
             self,
             l: int | float | str | bool | list[Any],
             r: int | float | str | bool | list[Any],
-            mode: Literal['zip', 'product'],
-            op: Callable[[Any, Any], Any]
+            combine_op: Callable[[Any, Any], Any],
+            test_op: Callable[[Any, Any], Any]
     ):
         def _coerce_eval_insert(ret, l_, r_):
             l_, r_ = _coerce_for_single_value_comparison(l_, r_)
             if l_ is None or r_ is None:
                 ret.append(False)
             else:
-                ret.append(op(l_, r_))
+                ret.append(test_op(l_, r_))
 
         if isinstance(l, list) and isinstance(r, list):  # list vs list - what happens depends on mode
-            if mode == 'zip':
-                combine_op = zip
-            elif mode == 'product':
-                combine_op = product
             ret = []
             for l_, r_ in combine_op(l, r):
                 _coerce_eval_insert(ret, l_, r_)
@@ -304,61 +295,106 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             return ret
         else:  # single comparison regardless of mode
             l_, r_ = _coerce_for_single_value_comparison(l, r)
-            return op(l_, r_)
+            return test_op(l_, r_)
 
     def visitExprComparison(self, ctx: XPath31GrammarParser.ExprComparisonContext):
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
-        if ctx.comp().EQ():
+        if ctx.relop().EQ():
             op = lambda _l, _r: _l == _r
-        elif ctx.comp().NE():
+        elif ctx.relop().NE():
             op = lambda _l, _r: _l != _r
-        elif ctx.comp().LT():
+        elif ctx.relop().LT():
             op = lambda _l, _r: _l < _r
-        elif ctx.comp().LE():
+        elif ctx.relop().LE():
             op = lambda _l, _r: _l <= _r
-        elif ctx.comp().GT():
+        elif ctx.relop().GT():
             op = lambda _l, _r: _l > _r
-        elif ctx.comp().GE():
+        elif ctx.relop().GE():
             op = lambda _l, _r: _l >= _r
-        elif ctx.comp().LL():
+        elif ctx.relop().LL():
             raise ValueError('Test if node A is before node B - unimplemented')
-        elif ctx.comp().GG():
+        elif ctx.relop().GG():
             raise ValueError('Test if node A is after node B - unimplemented')
         else:
             raise ValueError('Unexpected')
-        style = 'product'  # default is product, override if set
-        if ctx.comp().KW_ZIP():
-            style = 'zip'
-        elif ctx.comp().KW_PRODUCT():
-            style = 'product'
-        ret = self._apply_binary_boolean_op(l, r, style, op)  # noqa
+        # default is product, override if set - product is default in xpath
+        combine_op = product
+        if ctx.relop().KW_ZIP():
+            combine_op = zip
+        elif ctx.relop().KW_PRODUCT():
+            combine_op = product
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op)  # noqa
         # default don't do any aggregation
-        if ctx.comp().KW_ANY():
-            ret = any(ret)
-        elif ctx.comp().KW_ALL():
-            ret = all(ret)
+        agg_op = any
+        if ctx.relop().KW_ALL():
+            agg_op = all
+        elif ctx.relop().KW_SEQUENCE():  # keep as-is
+            agg_op = lambda x: x
+        elif ctx.relop().KW_ANY:
+             agg_op = any
+        ret = agg_op(ret)
+        return ret
+
+    def visitExprOr(self, ctx: XPath31GrammarParser.ExprAndContext):
+        if ctx.coerecefallback():
+            coercer_fallback = self.visit(ctx.coerecefallback())
+        else:
+            coercer_fallback = DefaultCoercerFallback(False)
+        l = self.visit(ctx.expr(0))
+        r = self.visit(ctx.expr(1))
+        op = lambda _l, _r: _l or _r
+        # default is product, override if set - product is default in xpath
+        combine_op = product
+        if ctx.relop().KW_ZIP():
+            combine_op = zip
+        elif ctx.relop().KW_PRODUCT():
+            combine_op = product
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op)  # noqa
+        # default don't do any aggregation
+        agg_op = any
+        if ctx.relop().KW_ALL():
+            agg_op = all
+        elif ctx.relop().KW_SEQUENCE():  # keep as-is
+            agg_op = lambda x: x
+        elif ctx.relop().KW_ANY:
+             agg_op = any
+        ret = agg_op(ret)
         return ret
 
     def visitExprAnd(self, ctx: XPath31GrammarParser.ExprAndContext):
-        l = _coerce_for_application_as_single_value(self.visit(ctx.expr(0)), bool)
-        r = _coerce_for_application_as_single_value(self.visit(ctx.expr(1)), bool)
-        if l is None or r is None:
-            return False
-        return l and r
-
-    def visitExprOr(self, ctx: XPath31GrammarParser.ExprOrContext):
-        l = _coerce_for_application_as_single_value(self.visit(ctx.expr(0)), bool)
-        r = _coerce_for_application_as_single_value(self.visit(ctx.expr(1)), bool)
-        if l is None or r is None:
-            return False
-        return l or r
+        if ctx.coerecefallback():
+            coercer_fallback = self.visit(ctx.coerecefallback())
+        else:
+            coercer_fallback = DefaultCoercerFallback(False)
+        l = self.visit(ctx.expr(0))
+        r = self.visit(ctx.expr(1))
+        op = lambda _l, _r: _l and _r
+        # default is product, override if set - product is default in xpath
+        combine_op = product
+        if ctx.relop().KW_ZIP():
+            combine_op = zip
+        elif ctx.relop().KW_PRODUCT():
+            combine_op = product
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op)  # noqa
+        # default don't do any aggregation
+        agg_op = any
+        if ctx.relop().KW_ALL():
+            agg_op = all
+        elif ctx.relop().KW_SEQUENCE():  # keep as-is
+            agg_op = lambda x: x
+        elif ctx.relop().KW_ANY:
+             agg_op = any
+        ret = agg_op(ret)
+        return ret
 
     def visitExprWrap(self, ctx: XPath31GrammarParser.ExprWrapContext):
         return self.visit(ctx.expr())
 
     def visitExprWrapForceList(self, ctx: XPath31GrammarParser.ExprWrapForceListContext):
-        return coerce_to_list(self.visit(ctx.expr()))
+        if ctx.expr():
+            return self.visit(ctx.expr())
+        return []
 
     def visitPathFromRoot(self, ctx: XPath31GrammarParser.PathFromRootContext):
         try:
@@ -540,44 +576,36 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def visitForwardStepDirectSelf(self, ctx: XPath31GrammarParser.ForwardStepDirectSelfContext):
         return self.context.paths[:]  # Return existing
 
+    def visitNodeTestMatcher(self, ctx: XPath31GrammarParser.NodeTestMatcherContext):
+        matcher = self.visit(ctx.matcher())
+        return self._label_test(matcher)
+
     def visitNodeTestExact(self, ctx: XPath31GrammarParser.NodeTestExactContext):
         name = ctx.Name().getText()
-        return self._label_test([name])
+        return self._label_test(StrictLabelMatcher(name))
 
-    def _label_test(self, name: list[Any]) -> list[Path]:
+    def _label_test(self, matcher: LabelMatcher) -> list[Path]:
         ret = []
         for path in self.context:
             label = path.last().label
-            if label in name:  # Direct match?
+            if matcher.match(label):
                 ret.append(path)
-            elif isinstance(label, int) and isinstance(name, float) and \
-                    name.is_integer() and label == int(name):  # int vs float - match?
-                ret.append(path)
-            elif isinstance(label, float) and isinstance(name, int) and \
-                    label.is_integer() and int(label) == name:  # float vs int - match?
-                ret.append(path)
-            else:  # Coerce to string - match?
-                try:
-                    label_as_str = str(label)
-                    name_as_str = str(name)
-                    if label_as_str == name_as_str:
-                        ret.append(path)
-                except (ValueError, TypeError):
-                    ...  # do nothing
         return ret
-
-    def visitNodeTestWildcard(self, ctx: XPath31GrammarParser.NodeTestWildcardContext):
-        return self.context.paths[:]  # Return existing
 
     def visitNodeTestExpr(self, ctx: XPath31GrammarParser.NodeTestExprContext):
         self.context.push_state(PrimeMode.PRIME_WITH_SELF)
         try:
             result = self.visit(ctx.expr())
+            matchers = []
             if isinstance(result, list):
-                result = [p.last().value for p in result]  # assume list of paths, get last value
+                for p in result:
+                    if type(p) == Path:
+                        matchers.append(StrictLabelMatcher(p.last().value))  # match against value of the path
+                    else:
+                        matchers.append(StrictLabelMatcher(p))  # match against item
             else:
-                result = [result]
-            return self._label_test(result)
+                matchers.append(StrictLabelMatcher(result))  # match against item
+            return self._label_test(CombinedLabelMatcher(matchers))
         finally:
             self.context.pop_state()
 
@@ -596,32 +624,73 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                 if (type(result) == bool and result == True) \
                         or (type(result) in {int, float} and result == p.position_in_parent()) \
                         or (type(result) == str and len(result) > 0) \
-                        or (type(result) == list and any(_coerce_for_application_as_single_value(v, bool) for v in result)):
+                        or (type(result) == list and any(coerce_single_value(v, bool) for v in result)):
                     ret.append(p)
             return ret
         finally:
             self.context.pop_state()
 
+    def _decode_str(self, text: str) -> str:
+        mode = text[0]
+        text_decoded = text[1:-1]
+        if mode == '"':
+            return text_decoded.replace('""', '"')
+        elif mode == '\'':
+            return text_decoded.replace('\'\'', '\'')
+        else:
+            raise ValueError('Unexpected')
+
     def visitLiteral(self, ctx: XPath31GrammarParser.LiteralContext):
-        if ctx.IntegerLiteral() is not None:
+        if ctx.IntegerLiteral():
             return int(ctx.getText())
-        elif ctx.DecimalLiteral() is not None:
+        elif ctx.DecimalLiteral():
             return float(ctx.getText())
-        elif ctx.DoubleLiteral() is not None:
+        elif ctx.DoubleLiteral():
             return float(ctx.getText())
-        elif ctx.StringLiteral() is not None:
-            text = ctx.getText()
-            mode = text[0]
-            text_decoded = text[1:-1]
-            if mode == '"':
-                text_decoded = text_decoded.replace('""', '"')
-            elif mode == '\'':
-                text_decoded = text_decoded.replace('\'\'', '\'')
-            else:
-                raise ValueError('Unexpected')
-            return text_decoded
-        elif ctx.BooleanLiteral() is not None:
+        elif ctx.StringLiteral():
+            return self._decode_str(ctx.getText())
+        elif ctx.BooleanLiteral():
             return ctx.getText() == 'true'
+        elif ctx.KW_NAN():
+            return math.nan
+        elif ctx.KW_INF():
+            return math.inf
+        elif ctx.Name():
+            return ctx.Name().getText()
+        raise ValueError('Unexpected')
+
+    def visitMatcherStrict(self, ctx: XPath31GrammarParser.MatcherStrictContext):
+        pattern = self._decode_str(ctx.getText()[1:])
+        return StrictLabelMatcher(pattern)
+
+    def visitMatcherRegex(self, ctx: XPath31GrammarParser.MatcherRegexContext):
+        pattern = self._decode_str(ctx.getText()[1:])
+        return RegexLabelMatcher(pattern)
+
+    def visitMatcherGlob(self, ctx: XPath31GrammarParser.MatcherGlobContext):
+        pattern = self._decode_str(ctx.getText()[1:])
+        return GlobLabelMatcher(pattern)
+
+    def visitMatcherFuzzy(self, ctx: XPath31GrammarParser.MatcherGlobContext):
+        pattern = self._decode_str(ctx.getText()[1:])
+        return FuzzyLabelMatcher(pattern)
+
+    def visitMatcherWildcard(self, ctx: XPath31GrammarParser.MatcherWildcardContext):
+        return WildcardLabelMatcher()
+
+    def visitCoerecefallback(self, ctx: XPath31GrammarParser.CoerecefallbackContext):
+        if ctx.KW_DISCARD():
+            return DiscardCoercerFallback()
+        elif ctx.KW_FAIL():
+            return FailCoerecerFallback()
+        elif ctx.expr():
+            res = self.visit(ctx.expr())
+            if type(res) == list:
+                if len(res) == 0:
+                    return DiscardCoercerFallback()
+                else:
+                    res = res[0]
+            return DefaultCoercerFallback(res)
         raise ValueError('Unexpected')
 
 
@@ -686,7 +755,8 @@ if __name__ == '__main__':
     #
     # test(root, '/a/"b"')  # Test literal in path
     # test(root, '/a/"b"/./d')   # Test dot in path
-    # test(root, '/a/b/*[. = /ptrs/*]')  # Test looking up another path to walk forward
+    # test(root, '/a/b/*')  # Test looking up another path to walk forward
+    test(root, '/a/b/*[. = /ptrs/*]')  # Test looking up another path to walk forward
 
     # test(root, '-/a/b/*')
     # test(root, '-/*')
@@ -720,8 +790,8 @@ if __name__ == '__main__':
     # test(root, '/a/b/*[./self::d]')  # Get child with path label d
     # test(root, '/a/b/*[2]')  # Get child in 2nd position
     # test(root, '/a/b/*[. = 2]')  # Get child with value of 2
-    test(root, '[1,2,3] zip = [1,"2","bad"]')
-    test(root, '[1,2,3] zip any = [1,"2","bad"]')
-    test(root, '[1,2,3] zip all = [1,"2","bad"]')
-    test(root, '[1,2,3] product = [1,"2","bad"]')
-    test(root, '[1,2,3] = [1,"2","bad"]')
+    # test(root, '[1,2,3] zip = [1,"2","bad"]')
+    # test(root, '[1,2,3] zip any = [1,"2","bad"]')
+    # test(root, '[1,2,3] zip all = [1,"2","bad"]')
+    # test(root, '[1,2,3] product = [1,"2","bad"]')
+    # test(root, '[1,2,3] = [1,"2","bad"]')

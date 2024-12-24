@@ -17,6 +17,15 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XPath31GrammarParser#ExprBoolAggregate.
+    def enterExprBoolAggregate(self, ctx:XPath31GrammarParser.ExprBoolAggregateContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#ExprBoolAggregate.
+    def exitExprBoolAggregate(self, ctx:XPath31GrammarParser.ExprBoolAggregateContext):
+        pass
+
+
     # Enter a parse tree produced by XPath31GrammarParser#ExprSetIntersect.
     def enterExprSetIntersect(self, ctx:XPath31GrammarParser.ExprSetIntersectContext):
         pass
@@ -152,21 +161,30 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#ExprSimpleMap.
-    def enterExprSimpleMap(self, ctx:XPath31GrammarParser.ExprSimpleMapContext):
+    # Enter a parse tree produced by XPath31GrammarParser#relop.
+    def enterRelop(self, ctx:XPath31GrammarParser.RelopContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#ExprSimpleMap.
-    def exitExprSimpleMap(self, ctx:XPath31GrammarParser.ExprSimpleMapContext):
+    # Exit a parse tree produced by XPath31GrammarParser#relop.
+    def exitRelop(self, ctx:XPath31GrammarParser.RelopContext):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#comp.
-    def enterComp(self, ctx:XPath31GrammarParser.CompContext):
+    # Enter a parse tree produced by XPath31GrammarParser#mulop.
+    def enterMulop(self, ctx:XPath31GrammarParser.MulopContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#comp.
-    def exitComp(self, ctx:XPath31GrammarParser.CompContext):
+    # Exit a parse tree produced by XPath31GrammarParser#mulop.
+    def exitMulop(self, ctx:XPath31GrammarParser.MulopContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#addop.
+    def enterAddop(self, ctx:XPath31GrammarParser.AddopContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#addop.
+    def exitAddop(self, ctx:XPath31GrammarParser.AddopContext):
         pass
 
 
@@ -377,12 +395,12 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#NodeTestWildcard.
-    def enterNodeTestWildcard(self, ctx:XPath31GrammarParser.NodeTestWildcardContext):
+    # Enter a parse tree produced by XPath31GrammarParser#NodeTestMatcher.
+    def enterNodeTestMatcher(self, ctx:XPath31GrammarParser.NodeTestMatcherContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#NodeTestWildcard.
-    def exitNodeTestWildcard(self, ctx:XPath31GrammarParser.NodeTestWildcardContext):
+    # Exit a parse tree produced by XPath31GrammarParser#NodeTestMatcher.
+    def exitNodeTestMatcher(self, ctx:XPath31GrammarParser.NodeTestMatcherContext):
         pass
 
 
@@ -428,6 +446,60 @@ class XPath31GrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XPath31GrammarParser#literal.
     def exitLiteral(self, ctx:XPath31GrammarParser.LiteralContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#MatcherStrict.
+    def enterMatcherStrict(self, ctx:XPath31GrammarParser.MatcherStrictContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#MatcherStrict.
+    def exitMatcherStrict(self, ctx:XPath31GrammarParser.MatcherStrictContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#MatcherRegex.
+    def enterMatcherRegex(self, ctx:XPath31GrammarParser.MatcherRegexContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#MatcherRegex.
+    def exitMatcherRegex(self, ctx:XPath31GrammarParser.MatcherRegexContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#MatcherGlob.
+    def enterMatcherGlob(self, ctx:XPath31GrammarParser.MatcherGlobContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#MatcherGlob.
+    def exitMatcherGlob(self, ctx:XPath31GrammarParser.MatcherGlobContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#MatcherFuzzy.
+    def enterMatcherFuzzy(self, ctx:XPath31GrammarParser.MatcherFuzzyContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#MatcherFuzzy.
+    def exitMatcherFuzzy(self, ctx:XPath31GrammarParser.MatcherFuzzyContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#MatcherWildcard.
+    def enterMatcherWildcard(self, ctx:XPath31GrammarParser.MatcherWildcardContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#MatcherWildcard.
+    def exitMatcherWildcard(self, ctx:XPath31GrammarParser.MatcherWildcardContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#coerecefallback.
+    def enterCoerecefallback(self, ctx:XPath31GrammarParser.CoerecefallbackContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#coerecefallback.
+    def exitCoerecefallback(self, ctx:XPath31GrammarParser.CoerecefallbackContext):
         pass
 
 
