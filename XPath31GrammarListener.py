@@ -170,39 +170,57 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#PathRootContext.
-    def enterPathRootContext(self, ctx:XPath31GrammarParser.PathRootContextContext):
+    # Enter a parse tree produced by XPath31GrammarParser#PathFromRoot.
+    def enterPathFromRoot(self, ctx:XPath31GrammarParser.PathFromRootContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#PathRootContext.
-    def exitPathRootContext(self, ctx:XPath31GrammarParser.PathRootContextContext):
-        pass
-
-
-    # Enter a parse tree produced by XPath31GrammarParser#PathRootExactContext.
-    def enterPathRootExactContext(self, ctx:XPath31GrammarParser.PathRootExactContextContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#PathRootExactContext.
-    def exitPathRootExactContext(self, ctx:XPath31GrammarParser.PathRootExactContextContext):
+    # Exit a parse tree produced by XPath31GrammarParser#PathFromRoot.
+    def exitPathFromRoot(self, ctx:XPath31GrammarParser.PathFromRootContext):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#PathAnyContext.
-    def enterPathAnyContext(self, ctx:XPath31GrammarParser.PathAnyContextContext):
+    # Enter a parse tree produced by XPath31GrammarParser#PathRootExact.
+    def enterPathRootExact(self, ctx:XPath31GrammarParser.PathRootExactContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#PathAnyContext.
-    def exitPathAnyContext(self, ctx:XPath31GrammarParser.PathAnyContextContext):
+    # Exit a parse tree produced by XPath31GrammarParser#PathRootExact.
+    def exitPathRootExact(self, ctx:XPath31GrammarParser.PathRootExactContext):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#PathRelativeContext.
-    def enterPathRelativeContext(self, ctx:XPath31GrammarParser.PathRelativeContextContext):
+    # Enter a parse tree produced by XPath31GrammarParser#PathFromAny.
+    def enterPathFromAny(self, ctx:XPath31GrammarParser.PathFromAnyContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#PathRelativeContext.
-    def exitPathRelativeContext(self, ctx:XPath31GrammarParser.PathRelativeContextContext):
+    # Exit a parse tree produced by XPath31GrammarParser#PathFromAny.
+    def exitPathFromAny(self, ctx:XPath31GrammarParser.PathFromAnyContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#PathFromRelative.
+    def enterPathFromRelative(self, ctx:XPath31GrammarParser.PathFromRelativeContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#PathFromRelative.
+    def exitPathFromRelative(self, ctx:XPath31GrammarParser.PathFromRelativeContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#PathSelf.
+    def enterPathSelf(self, ctx:XPath31GrammarParser.PathSelfContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#PathSelf.
+    def exitPathSelf(self, ctx:XPath31GrammarParser.PathSelfContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#PathParent.
+    def enterPathParent(self, ctx:XPath31GrammarParser.PathParentContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#PathParent.
+    def exitPathParent(self, ctx:XPath31GrammarParser.PathParentContext):
         pass
 
 

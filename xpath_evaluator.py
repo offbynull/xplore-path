@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Hashable, Literal, Callable
+from math import isnan
+from typing import Any, Hashable, Literal, Callable, TypeVar, Type
 
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
@@ -71,29 +72,12 @@ class Context:
 
 
 
-def _to_list(value: Any) -> list[Any]:
+def coerce_to_list(value: Any) -> list[Any]:
     if isinstance(value, list):
         return value
     return [value]
 
-def _coerce_list_to_numbers(values: list[Any]) -> list[float | int]:
-    ret = []
-    for v in values:
-        if isinstance(v, Path):
-            v = v.last().value
-        if isinstance(v, str):
-            try:
-                v = int(v)
-            except (ValueError, TypeError):
-                try:
-                    v = float(v)
-                except (ValueError, TypeError):
-                    ...
-        if isinstance(v, (float, int)):
-            ret.append(v)
-    return ret
-
-def _coerece_to_set(value: list[Any]) -> dict[tuple[Literal['PATH', 'RAW'], Hashable], Any]:
+def _coerce_to_set(value: list[Any]) -> dict[tuple[Literal['PATH', 'RAW'], Hashable], Any]:
     ret: dict[tuple[Literal['PATH', 'RAW'], Hashable], Any] = {}
     for v in value:
         if isinstance(v, Path):
@@ -102,30 +86,77 @@ def _coerece_to_set(value: list[Any]) -> dict[tuple[Literal['PATH', 'RAW'], Hash
             ret['RAW', v] = v
     return ret
 
-def _coerece_to_number(value: Any) -> int | float | None:
-    if isinstance(value, list) and len(value) == 1:
-        value = value[0]
-        if isinstance(value, (int, float)):
-            return value
-        if isinstance(value, str):
+T = TypeVar('T', bool, int, float, str)
+
+def _coerce_for_application_as_single_value(v: bool | int | float | str | Path | list, new_t: Type[T]) -> T | None:
+    if type(v) == new_t:
+        return v
+    elif new_t == bool:
+        if type(v) == Path:
+            return _coerce_for_application_as_single_value(v.last().value, new_t)
+        elif type(v) == str:
+            return len(v) > 0
+        elif type(v) == float:
+            return not isnan(v) and v != 0
+        elif type(v) == int:
+            return v != 0
+        elif type(v) == list and len(v) > 0:
+            return _coerce_for_application_as_single_value(v[0], new_t)  # Use first element if single value expected
+    elif new_t == int:
+        if type(v) == Path:
+            return _coerce_for_application_as_single_value(v.last().value, new_t)
+        elif type(v) == str:
             try:
-                return int(value)
-            except (ValueError, TypeError):
-                try:
-                    return float(value)
-                except (ValueError, TypeError):
-                    ...
-    elif isinstance(value, str):
-        try:
-            return int(value)
-        except (ValueError, TypeError):
-            try:
-                return float(value)
+                return int(v)
             except (ValueError, TypeError):
                 ...
-    elif isinstance(value, (float, int)):
-        return value
+        elif type(v) == float and v.is_integer():
+            return int(v)
+        elif type(v) == bool:
+            return int(v)
+        elif type(v) == list and len(v) > 0:
+            return _coerce_for_application_as_single_value(v[0], new_t)  # Use first element if single value expected
+    elif new_t == float:
+        if type(v) == Path:
+            return _coerce_for_application_as_single_value(v.last().value, new_t)
+        elif type(v) == str:
+            try:
+                return float(v)
+            except (ValueError, TypeError):
+                ...
+        elif type(v) == int:
+            return float(v)
+        elif type(v) == bool:
+            return float(v)
+        elif type(v) == list and len(v) > 0:
+            return _coerce_for_application_as_single_value(v[0], new_t)  # Use first element if single value expected
+    elif new_t == str:
+        if type(v) == Path:
+            return _coerce_for_application_as_single_value(v.last().value, new_t)
+        else:
+            try:
+                return str(v)
+            except (ValueError, TypeError):
+                ...
     return None
+
+def _coerce_for_single_value_comparison(
+        v1: bool | int | float | str | Path | list,
+        v2: bool | int | float | str | Path | list
+) -> tuple[Any, Any]:
+    # prime v1
+    if type(v1) == list and len(v1) > 0:
+        v1 = v1[0]
+    if type(v1) == Path:
+        v1 = v1.last().value
+    # prime v2
+    if type(v2) == list and len(v2) > 0:
+        v2 = v2[0]
+    if type(v2) == Path:
+        v2 = v2.last().value
+    # coerce and return
+    v2 = _coerce_for_application_as_single_value(v2, type(v1))
+    return v1, v2
 
 
 class PathEvaluatorVisitor(XPath31GrammarVisitor):
@@ -153,11 +184,19 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             try:
                 inner_res = self.visit(ctx.expr())
                 if ctx.MINUS() is not None:
-                    inner_res = _coerce_list_to_numbers(inner_res)
-                    for v in inner_res:
-                        ret.append(-v)
-                else:
-                    ret += inner_res
+                    if type(inner_res) == list:
+                        ret = []
+                        for v in inner_res:
+                            v = _coerce_for_application_as_single_value(v, float)
+                            if v is not None:
+                                ret.append(-v)
+                        return ret
+                    else:
+                        inner_res = _coerce_for_application_as_single_value(inner_res, float)
+                        if inner_res is not None:
+                            ret.append(-inner_res)
+                elif ctx.PLUS() is not None:
+                    ret += inner_res  # Add as-is
             finally:
                 self.context.pop_state()
         return ret
@@ -165,101 +204,169 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def visitExprConcatenate(self, ctx: XPath31GrammarParser.ExprConcatenateContext):
         l_paths = self.visit(ctx.expr(0))
         r_paths = self.visit(ctx.expr(1))
-        return _to_list(l_paths) + _to_list(r_paths)
+        return coerce_to_list(l_paths) + coerce_to_list(r_paths)
 
     def visitExprSetIntersect(self, ctx: XPath31GrammarParser.ExprSetIntersectContext):
-        l_paths = _coerece_to_set(self.visit(ctx.expr(0)))
-        r_paths = _coerece_to_set(self.visit(ctx.expr(1)))
+        l_paths = _coerce_to_set(self.visit(ctx.expr(0)))
+        r_paths = _coerce_to_set(self.visit(ctx.expr(1)))
         intersected_paths = l_paths.keys() & r_paths.keys()
         return list(l_paths[p] for p in intersected_paths)
 
     def visitExprSetUnion(self, ctx: XPath31GrammarParser.ExprSetUnionContext):
-        l_paths = _coerece_to_set(self.visit(ctx.expr(0)))
-        r_paths = _coerece_to_set(self.visit(ctx.expr(1)))
+        l_paths = _coerce_to_set(self.visit(ctx.expr(0)))
+        r_paths = _coerce_to_set(self.visit(ctx.expr(1)))
         unioned = l_paths | r_paths
         return list(unioned.values())
 
-    def _apply_binary_op(
+    def _apply_binary_number_op(
             self,
-            l: int | float | str | list[Any],
-            r: int | float | str | list[Any],
+            l: int | float | str | bool | list[Any],
+            r: int | float | str | bool | list[Any],
             op: Callable[[Any, Any], Any]
     ):
-        if isinstance(l, (int, float, str)) and isinstance(r, (int, float, str)):
+        if isinstance(l, list) and isinstance(r, list):
+            l_paths = [_coerce_for_application_as_single_value(v, float) for v in l]
+            r_paths = [_coerce_for_application_as_single_value(v, float) for v in r]
+            return [op(l, r) for l, r in zip(l_paths, r_paths) if l is not None and r is not None]
+        elif isinstance(l, list):
+            l_paths = [_coerce_for_application_as_single_value(v, float) for v in l]
+            return [op(l, r) for l in l_paths if l is not None]
+        elif isinstance(r, list):
+            r_paths = [_coerce_for_application_as_single_value(v, float) for v in r]
+            return [op(l, r) for r in r_paths if r is not None]
+        else:
+            l = _coerce_for_application_as_single_value(l, float)
+            r = _coerce_for_application_as_single_value(r, float)
             return op(l, r)
-        elif isinstance(l, (int, float, str)) and isinstance(r, list):
-            r_paths = _coerce_list_to_numbers(r)
-            return [op(l, r) for r in r_paths]
-        elif isinstance(l, list) and isinstance(r, (int, float, str)):
-            l_paths = _coerce_list_to_numbers(l)
-            return [op(l, r) for l in l_paths]
-        elif isinstance(l, list) and isinstance(r, list):
-            l_paths = _coerce_list_to_numbers(l)
-            r_paths = _coerce_list_to_numbers(r)
-            return [op(l, r) for l, r in zip(l_paths, r_paths)]
-        raise ValueError('Unexpected data type')
 
     def visitExprMultiplicative(self, ctx: XPath31GrammarParser.ExprMultiplicativeContext):
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
         if ctx.STAR() is not None:
-            return self._apply_binary_op(l, r, lambda _l, _r: _l * _r)
+            return self._apply_binary_number_op(l, r, lambda _l, _r: _l * _r)
         elif ctx.KW_DIV() is not None:
-            return self._apply_binary_op(l, r, lambda _l, _r: _l / _r)
+            return self._apply_binary_number_op(l, r, lambda _l, _r: _l / _r)
         elif ctx.KW_IDIV() is not None:
-            return self._apply_binary_op(l, r, lambda _l, _r: _l // _r)
+            return self._apply_binary_number_op(l, r, lambda _l, _r: _l // _r)
         elif ctx.KW_MOD() is not None:
-            return self._apply_binary_op(l, r, lambda _l, _r: _l % _r)
+            return self._apply_binary_number_op(l, r, lambda _l, _r: _l % _r)
         raise ValueError('Unexpected')
 
     def visitExprAdditive(self, ctx: XPath31GrammarParser.ExprAdditiveContext):
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
         if ctx.PLUS() is not None:
-            return self._apply_binary_op(l, r, lambda _l, _r: _l + _r)
+            return self._apply_binary_number_op(l, r, lambda _l, _r: _l + _r)
         elif ctx.MINUS() is not None:
-            return self._apply_binary_op(l, r, lambda _l, _r: _l - _r)
+            return self._apply_binary_number_op(l, r, lambda _l, _r: _l - _r)
         raise ValueError('Unexpected')
 
     def visitExprRange(self, ctx: XPath31GrammarParser.ExprRangeContext):
-        l = _coerece_to_number(self.visit(ctx.expr(0)))
-        r = _coerece_to_number(self.visit(ctx.expr(1)))
-        if isinstance(l, float) and l.is_integer():
-            l = int(l)
-        if isinstance(r, float) and r.is_integer():
-            r = int(r)
-        if isinstance(l, int) and isinstance(r, int):
+        l = _coerce_for_application_as_single_value(self.visit(ctx.expr(0)), int)
+        r = _coerce_for_application_as_single_value(self.visit(ctx.expr(1)), int)
+        if type(l) == int and type(r) == int:
             return [v for v in range(l, r+1)]
         return []
 
+    def _apply_binary_boolean_op(
+            self,
+            l: int | float | str | bool | list[Any],
+            r: int | float | str | bool | list[Any],
+            mode: Literal['ANY', 'ALL'],
+            op: Callable[[Any, Any], Any]
+    ):
+        def _coerce_eval_add(ret, l_, r_):
+            l_, r_ = _coerce_for_single_value_comparison(l_, r_)
+            if l_ is not None and r_ is not None:
+                ret.append(op(l_, r_))
+
+        if isinstance(l, list) and isinstance(r, list):  # pairwise comparison
+            ret = []
+            for l_, r_ in zip(l, r):
+                _coerce_eval_add(ret, l_, r_)
+            return any(ret) if mode == 'ANY' else all(ret)
+        elif isinstance(l, list): # for each comparison
+            ret = []
+            for l_ in l:
+                _coerce_eval_add(ret, l_, r)
+            return any(ret) if mode == 'ANY' else all(ret)
+        elif isinstance(r, list):  # for each comparison
+            ret = []
+            for r_ in r:
+                _coerce_eval_add(ret, l, r_)
+            return any(ret) if mode == 'ANY' else all(ret)
+        else:  # single comparison
+            l_, r_ = _coerce_for_single_value_comparison(l, r)
+            return op(l_, r_)
+
     def visitExprComparison(self, ctx: XPath31GrammarParser.ExprComparisonContext):
-        FILL ME IN
-        FILL ME IN
-        FILL ME IN
-        FILL ME IN
-        FILL ME IN
+        l = self.visit(ctx.expr(0))
+        r = self.visit(ctx.expr(1))
+        if ctx.comp().EQ():
+            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l == _r)
+        elif ctx.comp().NE():
+            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l != _r)
+        elif ctx.comp().LT():
+            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l < _r)
+        elif ctx.comp().LE():
+            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l <= _r)
+        elif ctx.comp().GT():
+            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l > _r)
+        elif ctx.comp().GE():
+            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l >= _r)
+        elif ctx.comp().KW_EQ():
+            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l == _r)
+        elif ctx.comp().KW_NE():
+            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l != _r)
+        elif ctx.comp().KW_LT():
+            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l < _r)
+        elif ctx.comp().KW_LE():
+            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l <= _r)
+        elif ctx.comp().KW_GT():
+            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l > _r)
+        elif ctx.comp().KW_GE():
+            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l >= _r)
+        elif ctx.comp().LL():
+            raise ValueError('Test if node A is before node B - unimplemented')
+        elif ctx.comp().GG():
+            raise ValueError('Test if node A is after node B - unimplemented')
+        raise ValueError('Unexpected')
+
+    def visitExprAnd(self, ctx: XPath31GrammarParser.ExprAndContext):
+        l = _coerce_for_application_as_single_value(self.visit(ctx.expr(0)), bool)
+        r = _coerce_for_application_as_single_value(self.visit(ctx.expr(1)), bool)
+        if l is None or r is None:
+            return False
+        return l and r
+
+    def visitExprOr(self, ctx: XPath31GrammarParser.ExprOrContext):
+        l = _coerce_for_application_as_single_value(self.visit(ctx.expr(0)), bool)
+        r = _coerce_for_application_as_single_value(self.visit(ctx.expr(1)), bool)
+        if l is None or r is None:
+            return False
+        return l or r
 
     def visitExprWrap(self, ctx: XPath31GrammarParser.ExprWrapContext):
         return self.visit(ctx.expr())
 
     def visitExprWrapForceList(self, ctx: XPath31GrammarParser.ExprWrapForceListContext):
-        return _to_list(self.visit(ctx.expr()))
+        return coerce_to_list(self.visit(ctx.expr()))
 
-    def visitPathRootContext(self, ctx: XPath31GrammarParser.PathRootContextContext):
+    def visitPathFromRoot(self, ctx: XPath31GrammarParser.PathFromRootContext):
         try:
             self.context.push_state(new_paths=PrimeMode.PRIME_WITH_ROOT)
             return self.visit(ctx.relpath())
         finally:
             self.context.pop_state()
 
-    def visitPathRootExactContext(self, ctx: XPath31GrammarParser.PathRootExactContextContext):
+    def visitPathRootExact(self, ctx: XPath31GrammarParser.PathRootExactContext):
         try:
             self.context.push_state(new_paths=PrimeMode.PRIME_WITH_ROOT)
             return self.context.paths[:]
         finally:
             self.context.pop_state()
 
-    def visitPathAnyContext(self, ctx: XPath31GrammarParser.PathAnyContextContext):
+    def visitPathFromAny(self, ctx: XPath31GrammarParser.PathFromAnyContext):
         try:
             self.context.push_state(new_paths=PrimeMode.PRIME_WITH_ROOT)
             self.context.paths = self.context.paths[0].all_descendants()
@@ -267,12 +374,23 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         finally:
             self.context.pop_state()
 
-    def visitPathRelativeContext(self, ctx: XPath31GrammarParser.PathRelativeContextContext):
+    def visitPathFromRelative(self, ctx: XPath31GrammarParser.PathFromRelativeContext):
         try:
             self.context.push_state(new_paths=PrimeMode.PRIME_WITH_SELF)
             return self.visit(ctx.relpath())
         finally:
             self.context.pop_state()
+
+    def visitPathSelf(self, ctx: XPath31GrammarParser.PathSelfContext):
+        return self.context.paths[:]
+
+    def visitPathParent(self, ctx: XPath31GrammarParser.PathParentContext):
+        new_paths = []
+        for path in self.context:
+            parent_path = path.parent()
+            if parent_path is not None:
+                new_paths.append(parent_path)
+        return new_paths
 
     def visitRelPathChain(self, ctx: XPath31GrammarParser.RelPathChainContext):
         # TODO: Pushing / popping state not required?
@@ -304,14 +422,17 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         else:
             raise ValueError('Unexpected')
 
-        for p in ctx.predicate():
-            self.context.push_state(ret)
-            try:
-                ret = self.visit(p)
-            finally:
-                self.context.pop_state()
+        if len(ctx.predicate()) > 0:
+            new_ret = []
+            for p in ctx.predicate():
+                self.context.push_state(ret)
+                try:
+                    new_ret += self.visit(p)
+                finally:
+                    self.context.pop_state()
+            ret = new_ret
 
-        for p in ctx.argumentlist():
+        if len(ctx.argumentlist()) > 0:
             raise ValueError('IMPLEMENT ME')
 
         return ret
@@ -460,9 +581,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             for p in orig_paths:
                 self.context.reset_state([p])
                 result = self.visit(ctx.expr())
-                if (isinstance(result, bool) and result == True) \
-                        or (isinstance(result, int) and result == p.position_in_parent()) \
-                        or (isinstance(result, (list, str)) and len(result) > 0):
+                if (type(result) == bool and result == True) \
+                        or (type(result) in {int, float} and result == p.position_in_parent()) \
+                        or (type(result) in {list, str} and len(result) > 0):
                     ret.append(p)
             return ret
         finally:
@@ -503,7 +624,7 @@ def test(root, expr):
 
     if isinstance(ret, list):
         for v in ret:
-            if isinstance(v, Path):
+            if type(v) == Path:
                 print(f'  {v.last()}')
             else:
                 print(f'  {v}')
@@ -552,34 +673,35 @@ if __name__ == '__main__':
     # test(root, '/a/"b"/./d')   # Test dot in path
     # test(root, '/a/b/*[. = /ptrs/*]')  # Test looking up another path to walk forward
 
-    test(root, '-/a/b/*')
-    test(root, '-/*')
+    # test(root, '-/a/b/*')
+    # test(root, '-/*')
 
-    test(root, '/a/b/* , /a/b/*')
-    test(root, '/a/b/* , /y')
+    # test(root, '/a/b/* , /a/b/*')
+    # test(root, '/a/b/* , /y')
 
-    test(root, '/a/b/* intersect /a/b/*')
-    test(root, '/a/b/* intersect (/a/b/c, /a/b/e)')
-    test(root, '/a/b/* intersect /y')
+    # test(root, '/a/b/* intersect /a/b/*')
+    # test(root, '/a/b/* intersect (/a/b/c, /a/b/e)')
+    # test(root, '/a/b/* intersect /y')
 
-    test(root, '/a/b/* union /a/b/*')
-    test(root, '/a/b/* union (/a/b/c, /a/b/e)')
-    test(root, '/a/b/* union /y')
+    # test(root, '/a/b/* union /a/b/*')
+    # test(root, '/a/b/* union (/a/b/c, /a/b/e)')
+    # test(root, '/a/b/* union /y')
 
-    test(root, '/a/b/* + /a/b/*')
-    test(root, '/a/b/* + 1')
-    test(root, '/a/b/* + [1]')  # right is now a sequence - meaning only first elem is added
-    test(root, '/a/b/* + [1,2]')  # right is now a sequence - meaning only first elem is added
-    test(root, '5+4')
+    # test(root, '/a/b/* + /a/b/*')
+    # test(root, '/a/b/* + 1')
+    # test(root, '/a/b/* + [1]')  # right is now a sequence - meaning only first elem is added
+    # test(root, '/a/b/* + [1,2]')  # right is now a sequence - meaning only first elem is added
+    # test(root, '5+4')
 
-    test(root, '5 to 7')
-    test(root, '5.0 to 7')
-    test(root, '5 to 7.0')
-    test(root, '5.0 to 7.0')
-    test(root, '5 to 5')
-    test(root, '5 to 4')
+    # test(root, '5 to 7')
+    # test(root, '5.0 to 7')
+    # test(root, '5 to 7.0')
+    # test(root, '5.0 to 7.0')
+    # test(root, '5 to 5')
+    # test(root, '5 to 4')
 
-    # THESE DONT WORK YET
     # test(root, '/a/b[./d]')  # Predicate - check for child
-    # test(root, '/a/b[./x]')  # Predicate - check for child (missing)
-    # test(root, '/a/b/*[2]')  # Predicate - position test
+    # test(root, '/a/b[./z]')  # Predicate - check for child
+    # test(root, '/a/b/*[./self::d]')  # Predicate - check for child
+    test(root, '/a/b/*[2]')  # Predicate - position test
+    test(root, '/a/b/*[. = 2]')  # Predicate - position test

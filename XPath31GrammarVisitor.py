@@ -99,23 +99,33 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#PathRootContext.
-    def visitPathRootContext(self, ctx:XPath31GrammarParser.PathRootContextContext):
+    # Visit a parse tree produced by XPath31GrammarParser#PathFromRoot.
+    def visitPathFromRoot(self, ctx:XPath31GrammarParser.PathFromRootContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#PathRootExactContext.
-    def visitPathRootExactContext(self, ctx:XPath31GrammarParser.PathRootExactContextContext):
+    # Visit a parse tree produced by XPath31GrammarParser#PathRootExact.
+    def visitPathRootExact(self, ctx:XPath31GrammarParser.PathRootExactContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#PathAnyContext.
-    def visitPathAnyContext(self, ctx:XPath31GrammarParser.PathAnyContextContext):
+    # Visit a parse tree produced by XPath31GrammarParser#PathFromAny.
+    def visitPathFromAny(self, ctx:XPath31GrammarParser.PathFromAnyContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#PathRelativeContext.
-    def visitPathRelativeContext(self, ctx:XPath31GrammarParser.PathRelativeContextContext):
+    # Visit a parse tree produced by XPath31GrammarParser#PathFromRelative.
+    def visitPathFromRelative(self, ctx:XPath31GrammarParser.PathFromRelativeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#PathSelf.
+    def visitPathSelf(self, ctx:XPath31GrammarParser.PathSelfContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#PathParent.
+    def visitPathParent(self, ctx:XPath31GrammarParser.PathParentContext):
         return self.visitChildren(ctx)
 
 

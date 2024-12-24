@@ -77,7 +77,7 @@ class Path:
         p = self.parent()
         if p is None:
             raise ValueError('No parent')
-        return p.all_children().index(self)
+        return [c.last().label for c in p.all_children()].index(self.last().label)
 
     def all_ancestors(self) -> list[Path]:
         ret = []

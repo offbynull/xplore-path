@@ -198,10 +198,12 @@ comp
     ;
 
 path
-    : SLASH relpath    # PathRootContext
-    | SLASH            # PathRootExactContext
-    | SS relpath       # PathAnyContext
-    | D SLASH relpath  # PathRelativeContext
+    : SLASH relpath    # PathFromRoot
+    | SLASH            # PathRootExact
+    | SS relpath       # PathFromAny
+    | D SLASH relpath  # PathFromRelative
+    | D                # PathSelf
+    | DD               # PathParent
     ;
 
 relpath
