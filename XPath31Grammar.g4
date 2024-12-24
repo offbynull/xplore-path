@@ -9,7 +9,6 @@ grammar XPath31Grammar;
 BANG       : '!';
 CB         : ']';
 CC         : '}';
-CEQ        : ':=';
 COLON      : ':';
 COLONCOLON : '::';
 COMMA      : ',';
@@ -17,7 +16,6 @@ CP         : ')';
 D          : '.';
 DD         : '..';
 DOLLAR     : '$';
-EG         : '=>';
 EQ         : '=';
 GE         : '>=';
 GG         : '>>';
@@ -32,8 +30,6 @@ OC         : '{';
 OP         : '(';
 P          : '|';
 PLUS       : '+';
-POUND      : '#';
-PP         : '||';
 QM         : '?';
 SLASH      : '/';
 SS         : '//';
@@ -44,54 +40,28 @@ STAR       : '*';
 KW_ANCESTOR               : 'ancestor';
 KW_ANCESTOR_OR_SELF       : 'ancestor-or-self';
 KW_AND                    : 'and';
-KW_ARRAY                  : 'array';
-KW_AS                     : 'as';
-KW_CAST                   : 'cast';
-KW_CASTABLE               : 'castable';
 KW_CHILD                  : 'child';
-KW_COMMENT                : 'comment';
 KW_DESCENDANT             : 'descendant';
 KW_DESCENDANT_OR_SELF     : 'descendant-or-self';
 KW_DIV                    : 'div';
-KW_ELEMENT                : 'element';
-KW_ELSE                   : 'else';
-KW_EMPTY_SEQUENCE         : 'empty-sequence';
-KW_EQ                     : 'eq';
-KW_EVERY                  : 'every';
 KW_EXCEPT                 : 'except';
 KW_FOLLOWING              : 'following';
 KW_FOLLOWING_SIBLING      : 'following-sibling';
-KW_FOR                    : 'for';
-KW_FUNCTION               : 'function';
-KW_GE                     : 'ge';
-KW_GT                     : 'gt';
 KW_IDIV                   : 'idiv';
-KW_IF                     : 'if';
 KW_IN                     : 'in';
-KW_INSTANCE               : 'instance';
 KW_INTERSECT              : 'intersect';
-KW_IS                     : 'is';
-KW_ITEM                   : 'item';
-KW_LE                     : 'le';
-KW_LET                    : 'let';
-KW_LT                     : 'lt';
-KW_MAP                    : 'map';
 KW_MOD                    : 'mod';
-KW_NE                     : 'ne';
-KW_NODE                   : 'node';
-KW_OF                     : 'of';
 KW_OR                     : 'or';
 KW_PARENT                 : 'parent';
 KW_PRECEDING              : 'preceding';
 KW_PRECEDING_SIBLING      : 'preceding-sibling';
-KW_RETURN                 : 'return';
-KW_SATISFIES              : 'satisfies';
 KW_SELF                   : 'self';
-KW_SOME                   : 'some';
-KW_THEN                   : 'then';
 KW_TO                     : 'to';
-KW_TREAT                  : 'treat';
 KW_UNION                  : 'union';
+KW_ANY                    : 'any';
+KW_ALL                    : 'all';
+KW_ZIP                    : 'zip';
+KW_PRODUCT                : 'product';
 
 // A.2.1. TERMINAL SYMBOLS
 // This isn't a complete list of tokens in the language.
@@ -101,6 +71,7 @@ IntegerLiteral   : FragDigits;
 DecimalLiteral   : '.' FragDigits | FragDigits '.' [0-9]*;
 DoubleLiteral    : ('.' FragDigits | FragDigits ('.' [0-9]*)?) [eE] [+-]? FragDigits;
 StringLiteral    : '"' (~["] | FragEscapeQuot)* '"' | '\'' (~['] | FragEscapeApos)* '\'';
+BooleanLiteral   : 'true' | 'false';
 // Error in spec: EscapeQuot and EscapeApos are not terminals!
 fragment FragEscapeQuot : '""';
 fragment FragEscapeApos : '\'\'';
@@ -180,21 +151,8 @@ expr
     ;
 
 comp
-    : EQ  // This was under generalcomp
-    | NE  // This was under generalcomp
-    | LT  // This was under generalcomp
-    | LE  // This was under generalcomp
-    | GT  // This was under generalcomp
-    | GE  // This was under generalcomp
-    | KW_EQ  // This was under valuecomp
-    | KW_NE  // This was under valuecomp
-    | KW_LT  // This was under valuecomp
-    | KW_LE  // This was under valuecomp
-    | KW_GT  // This was under valuecomp
-    | KW_GE  // This was under valuecomp
-    | KW_IS  // This was under nodecomp
-    | LL  // This was under nodecomp
-    | GG  // This was under nodecomp
+    : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL)?  (EQ | NE | LT | LE | GT | GE | LL | GG)
+    | (KW_ANY | KW_ALL)? (KW_ZIP | KW_PRODUCT)? (EQ | NE | LT | LE | GT | GE | LL | GG)
     ;
 
 path
@@ -254,6 +212,7 @@ literal
     | DecimalLiteral
     | DoubleLiteral
     | StringLiteral
+    | BooleanLiteral
     ;
 
 varref

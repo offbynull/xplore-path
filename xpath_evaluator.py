@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from itertools import product
 from math import isnan
 from typing import Any, Hashable, Literal, Callable, TypeVar, Type
 
@@ -272,30 +273,36 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             self,
             l: int | float | str | bool | list[Any],
             r: int | float | str | bool | list[Any],
-            mode: Literal['ANY', 'ALL'],
+            mode: Literal['zip', 'product'],
             op: Callable[[Any, Any], Any]
     ):
-        def _coerce_eval_add(ret, l_, r_):
+        def _coerce_eval_insert(ret, l_, r_):
             l_, r_ = _coerce_for_single_value_comparison(l_, r_)
-            if l_ is not None and r_ is not None:
+            if l_ is None or r_ is None:
+                ret.append(False)
+            else:
                 ret.append(op(l_, r_))
 
-        if isinstance(l, list) and isinstance(r, list):  # pairwise comparison
+        if isinstance(l, list) and isinstance(r, list):  # list vs list - what happens depends on mode
+            if mode == 'zip':
+                combine_op = zip
+            elif mode == 'product':
+                combine_op = product
             ret = []
-            for l_, r_ in zip(l, r):
-                _coerce_eval_add(ret, l_, r_)
-            return any(ret) if mode == 'ANY' else all(ret)
-        elif isinstance(l, list): # for each comparison
+            for l_, r_ in combine_op(l, r):
+                _coerce_eval_insert(ret, l_, r_)
+            return ret
+        elif isinstance(l, list): # for each comparison regardless of mode
             ret = []
             for l_ in l:
-                _coerce_eval_add(ret, l_, r)
-            return any(ret) if mode == 'ANY' else all(ret)
-        elif isinstance(r, list):  # for each comparison
+                _coerce_eval_insert(ret, l_, r)
+            return ret
+        elif isinstance(r, list):  # for each comparison regardless of mode
             ret = []
             for r_ in r:
-                _coerce_eval_add(ret, l, r_)
-            return any(ret) if mode == 'ANY' else all(ret)
-        else:  # single comparison
+                _coerce_eval_insert(ret, l, r_)
+            return ret
+        else:  # single comparison regardless of mode
             l_, r_ = _coerce_for_single_value_comparison(l, r)
             return op(l_, r_)
 
@@ -303,34 +310,35 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
         if ctx.comp().EQ():
-            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l == _r)
+            op = lambda _l, _r: _l == _r
         elif ctx.comp().NE():
-            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l != _r)
+            op = lambda _l, _r: _l != _r
         elif ctx.comp().LT():
-            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l < _r)
+            op = lambda _l, _r: _l < _r
         elif ctx.comp().LE():
-            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l <= _r)
+            op = lambda _l, _r: _l <= _r
         elif ctx.comp().GT():
-            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l > _r)
+            op = lambda _l, _r: _l > _r
         elif ctx.comp().GE():
-            return self._apply_binary_boolean_op(l, r, 'ANY', lambda _l, _r: _l >= _r)
-        elif ctx.comp().KW_EQ():
-            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l == _r)
-        elif ctx.comp().KW_NE():
-            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l != _r)
-        elif ctx.comp().KW_LT():
-            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l < _r)
-        elif ctx.comp().KW_LE():
-            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l <= _r)
-        elif ctx.comp().KW_GT():
-            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l > _r)
-        elif ctx.comp().KW_GE():
-            return self._apply_binary_boolean_op(l, r, 'ALL', lambda _l, _r: _l >= _r)
+            op = lambda _l, _r: _l >= _r
         elif ctx.comp().LL():
             raise ValueError('Test if node A is before node B - unimplemented')
         elif ctx.comp().GG():
             raise ValueError('Test if node A is after node B - unimplemented')
-        raise ValueError('Unexpected')
+        else:
+            raise ValueError('Unexpected')
+        style = 'product'  # default is product, override if set
+        if ctx.comp().KW_ZIP():
+            style = 'zip'
+        elif ctx.comp().KW_PRODUCT():
+            style = 'product'
+        ret = self._apply_binary_boolean_op(l, r, style, op)  # noqa
+        # default don't do any aggregation
+        if ctx.comp().KW_ANY():
+            ret = any(ret)
+        elif ctx.comp().KW_ALL():
+            ret = all(ret)
+        return ret
 
     def visitExprAnd(self, ctx: XPath31GrammarParser.ExprAndContext):
         l = _coerce_for_application_as_single_value(self.visit(ctx.expr(0)), bool)
@@ -581,9 +589,14 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             for p in orig_paths:
                 self.context.reset_state([p])
                 result = self.visit(ctx.expr())
+                # /a/b[bool] - return if true
+                # /a/b[int]  - return if coerces to true (non-zero + not nan)
+                # /a/b[str]  - return if coerces to true (non-empty)
+                # /a/b[list] - return if any coerce to true? (in original xpath it returns true if non-empty)
                 if (type(result) == bool and result == True) \
                         or (type(result) in {int, float} and result == p.position_in_parent()) \
-                        or (type(result) in {list, str} and len(result) > 0):
+                        or (type(result) == str and len(result) > 0) \
+                        or (type(result) == list and any(_coerce_for_application_as_single_value(v, bool) for v in result)):
                     ret.append(p)
             return ret
         finally:
@@ -607,6 +620,8 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             else:
                 raise ValueError('Unexpected')
             return text_decoded
+        elif ctx.BooleanLiteral() is not None:
+            return ctx.getText() == 'true'
         raise ValueError('Unexpected')
 
 
@@ -700,8 +715,13 @@ if __name__ == '__main__':
     # test(root, '5 to 5')
     # test(root, '5 to 4')
 
-    # test(root, '/a/b[./d]')  # Predicate - check for child
-    # test(root, '/a/b[./z]')  # Predicate - check for child
-    # test(root, '/a/b/*[./self::d]')  # Predicate - check for child
-    test(root, '/a/b/*[2]')  # Predicate - position test
-    test(root, '/a/b/*[. = 2]')  # Predicate - position test
+    # test(root, '/a/b[./d]')  # Get all children, so long as one of the children is d
+    # test(root, '/a/b[./z]')  # Get all children, so long as one of the children is z
+    # test(root, '/a/b/*[./self::d]')  # Get child with path label d
+    # test(root, '/a/b/*[2]')  # Get child in 2nd position
+    # test(root, '/a/b/*[. = 2]')  # Get child with value of 2
+    test(root, '[1,2,3] zip = [1,"2","bad"]')
+    test(root, '[1,2,3] zip any = [1,"2","bad"]')
+    test(root, '[1,2,3] zip all = [1,"2","bad"]')
+    test(root, '[1,2,3] product = [1,"2","bad"]')
+    test(root, '[1,2,3] = [1,"2","bad"]')

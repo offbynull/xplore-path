@@ -10,73 +10,79 @@ else:
 
 def serializedATN():
     return [
-        4,1,90,185,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,61,199,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,1,0,1,0,
         1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,
         44,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,5,1,77,8,1,10,1,12,1,80,9,1,1,2,1,2,1,3,1,3,1,3,1,3,1,3,1,3,1,
-        3,1,3,1,3,1,3,3,3,94,8,3,1,4,1,4,1,4,3,4,99,8,4,1,4,1,4,5,4,103,
-        8,4,10,4,12,4,106,9,4,1,4,1,4,1,4,5,4,111,8,4,10,4,12,4,114,9,4,
-        1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,
-        1,5,1,5,1,5,1,5,3,5,136,8,5,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,
-        1,6,1,6,1,6,1,6,1,6,1,6,1,6,3,6,154,8,6,1,7,1,7,1,7,3,7,159,8,7,
-        1,8,1,8,1,8,1,8,5,8,165,8,8,10,8,12,8,168,9,8,3,8,170,8,8,1,8,1,
-        8,1,9,1,9,1,10,1,10,1,10,1,10,1,11,1,11,1,12,1,12,1,12,1,12,0,2,
-        2,8,13,0,2,4,6,8,10,12,14,16,18,20,22,24,0,7,2,0,20,20,26,26,2,0,
-        50,50,61,61,2,0,25,25,83,83,4,0,32,32,44,44,57,57,68,68,8,0,13,19,
-        21,21,48,48,55,56,62,62,64,64,66,66,69,69,1,0,30,31,1,0,84,87,211,
-        0,26,1,0,0,0,2,43,1,0,0,0,4,81,1,0,0,0,6,93,1,0,0,0,8,95,1,0,0,0,
-        10,135,1,0,0,0,12,153,1,0,0,0,14,158,1,0,0,0,16,160,1,0,0,0,18,173,
-        1,0,0,0,20,175,1,0,0,0,22,179,1,0,0,0,24,181,1,0,0,0,26,27,3,2,1,
-        0,27,28,5,0,0,1,28,1,1,0,0,0,29,30,6,1,-1,0,30,44,3,6,3,0,31,44,
-        3,22,11,0,32,44,3,24,12,0,33,34,7,0,0,0,34,44,3,2,1,12,35,36,5,24,
-        0,0,36,37,3,2,1,0,37,38,5,8,0,0,38,44,1,0,0,0,39,40,5,22,0,0,40,
-        41,3,2,1,0,41,42,5,2,0,0,42,44,1,0,0,0,43,29,1,0,0,0,43,31,1,0,0,
-        0,43,32,1,0,0,0,43,33,1,0,0,0,43,35,1,0,0,0,43,39,1,0,0,0,44,78,
-        1,0,0,0,45,46,10,13,0,0,46,47,5,1,0,0,47,77,3,2,1,14,48,49,10,11,
-        0,0,49,50,5,7,0,0,50,77,3,2,1,12,51,52,10,10,0,0,52,53,7,1,0,0,53,
-        77,3,2,1,11,54,55,10,9,0,0,55,56,7,2,0,0,56,77,3,2,1,10,57,58,10,
-        8,0,0,58,59,7,3,0,0,59,77,3,2,1,9,60,61,10,7,0,0,61,62,7,0,0,0,62,
-        77,3,2,1,8,63,64,10,6,0,0,64,65,5,81,0,0,65,77,3,2,1,7,66,67,10,
-        5,0,0,67,68,3,4,2,0,68,69,3,2,1,6,69,77,1,0,0,0,70,71,10,4,0,0,71,
-        72,5,35,0,0,72,77,3,2,1,5,73,74,10,3,0,0,74,75,5,72,0,0,75,77,3,
-        2,1,4,76,45,1,0,0,0,76,48,1,0,0,0,76,51,1,0,0,0,76,54,1,0,0,0,76,
-        57,1,0,0,0,76,60,1,0,0,0,76,63,1,0,0,0,76,66,1,0,0,0,76,70,1,0,0,
-        0,76,73,1,0,0,0,77,80,1,0,0,0,78,76,1,0,0,0,78,79,1,0,0,0,79,3,1,
-        0,0,0,80,78,1,0,0,0,81,82,7,4,0,0,82,5,1,0,0,0,83,84,5,30,0,0,84,
-        94,3,8,4,0,85,94,5,30,0,0,86,87,5,31,0,0,87,94,3,8,4,0,88,89,5,9,
-        0,0,89,90,5,30,0,0,90,94,3,8,4,0,91,94,5,9,0,0,92,94,5,10,0,0,93,
-        83,1,0,0,0,93,85,1,0,0,0,93,86,1,0,0,0,93,88,1,0,0,0,93,91,1,0,0,
-        0,93,92,1,0,0,0,94,7,1,0,0,0,95,98,6,4,-1,0,96,99,3,12,6,0,97,99,
-        3,10,5,0,98,96,1,0,0,0,98,97,1,0,0,0,99,104,1,0,0,0,100,103,3,20,
-        10,0,101,103,3,16,8,0,102,100,1,0,0,0,102,101,1,0,0,0,103,106,1,
-        0,0,0,104,102,1,0,0,0,104,105,1,0,0,0,105,112,1,0,0,0,106,104,1,
-        0,0,0,107,108,10,2,0,0,108,109,7,5,0,0,109,111,3,8,4,3,110,107,1,
-        0,0,0,111,114,1,0,0,0,112,110,1,0,0,0,112,113,1,0,0,0,113,9,1,0,
-        0,0,114,112,1,0,0,0,115,116,5,40,0,0,116,117,5,6,0,0,117,136,3,14,
-        7,0,118,119,5,42,0,0,119,120,5,6,0,0,120,136,3,14,7,0,121,122,5,
-        78,0,0,122,123,5,6,0,0,123,136,3,14,7,0,124,125,5,43,0,0,125,126,
-        5,6,0,0,126,136,3,14,7,0,127,128,5,52,0,0,128,129,5,6,0,0,129,136,
-        3,14,7,0,130,131,5,51,0,0,131,132,5,6,0,0,132,136,3,14,7,0,133,136,
-        3,14,7,0,134,136,5,9,0,0,135,115,1,0,0,0,135,118,1,0,0,0,135,121,
-        1,0,0,0,135,124,1,0,0,0,135,127,1,0,0,0,135,130,1,0,0,0,135,133,
-        1,0,0,0,135,134,1,0,0,0,136,11,1,0,0,0,137,138,5,73,0,0,138,139,
-        5,6,0,0,139,154,3,14,7,0,140,141,5,33,0,0,141,142,5,6,0,0,142,154,
-        3,14,7,0,143,144,5,75,0,0,144,145,5,6,0,0,145,154,3,14,7,0,146,147,
-        5,74,0,0,147,148,5,6,0,0,148,154,3,14,7,0,149,150,5,34,0,0,150,151,
-        5,6,0,0,151,154,3,14,7,0,152,154,5,10,0,0,153,137,1,0,0,0,153,140,
-        1,0,0,0,153,143,1,0,0,0,153,146,1,0,0,0,153,149,1,0,0,0,153,152,
-        1,0,0,0,154,13,1,0,0,0,155,159,5,89,0,0,156,159,5,32,0,0,157,159,
-        3,2,1,0,158,155,1,0,0,0,158,156,1,0,0,0,158,157,1,0,0,0,159,15,1,
-        0,0,0,160,169,5,24,0,0,161,166,3,18,9,0,162,163,5,7,0,0,163,165,
-        3,18,9,0,164,162,1,0,0,0,165,168,1,0,0,0,166,164,1,0,0,0,166,167,
-        1,0,0,0,167,170,1,0,0,0,168,166,1,0,0,0,169,161,1,0,0,0,169,170,
-        1,0,0,0,170,171,1,0,0,0,171,172,5,8,0,0,172,17,1,0,0,0,173,174,3,
-        2,1,0,174,19,1,0,0,0,175,176,5,22,0,0,176,177,3,2,1,0,177,178,5,
-        2,0,0,178,21,1,0,0,0,179,180,7,6,0,0,180,23,1,0,0,0,181,182,5,11,
-        0,0,182,183,5,89,0,0,183,25,1,0,0,0,13,43,76,78,93,98,102,104,112,
-        135,153,158,166,169
+        1,5,1,77,8,1,10,1,12,1,80,9,1,1,2,3,2,83,8,2,1,2,3,2,86,8,2,1,2,
+        1,2,3,2,90,8,2,1,2,3,2,93,8,2,1,2,3,2,96,8,2,1,3,1,3,1,3,1,3,1,3,
+        1,3,1,3,1,3,1,3,1,3,3,3,108,8,3,1,4,1,4,1,4,3,4,113,8,4,1,4,1,4,
+        5,4,117,8,4,10,4,12,4,120,9,4,1,4,1,4,1,4,5,4,125,8,4,10,4,12,4,
+        128,9,4,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,
+        1,5,1,5,1,5,1,5,1,5,1,5,3,5,150,8,5,1,6,1,6,1,6,1,6,1,6,1,6,1,6,
+        1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,3,6,168,8,6,1,7,1,7,1,7,3,7,
+        173,8,7,1,8,1,8,1,8,1,8,5,8,179,8,8,10,8,12,8,182,9,8,3,8,184,8,
+        8,1,8,1,8,1,9,1,9,1,10,1,10,1,10,1,10,1,11,1,11,1,12,1,12,1,12,1,
+        12,0,2,2,8,13,0,2,4,6,8,10,12,14,16,18,20,22,24,0,9,2,0,18,18,24,
+        24,2,0,36,36,41,41,2,0,23,23,49,49,4,0,28,28,35,35,39,39,42,42,1,
+        0,52,53,1,0,50,51,2,0,11,17,19,19,1,0,26,27,1,0,54,58,230,0,26,1,
+        0,0,0,2,43,1,0,0,0,4,95,1,0,0,0,6,107,1,0,0,0,8,109,1,0,0,0,10,149,
+        1,0,0,0,12,167,1,0,0,0,14,172,1,0,0,0,16,174,1,0,0,0,18,187,1,0,
+        0,0,20,189,1,0,0,0,22,193,1,0,0,0,24,195,1,0,0,0,26,27,3,2,1,0,27,
+        28,5,0,0,1,28,1,1,0,0,0,29,30,6,1,-1,0,30,44,3,6,3,0,31,44,3,22,
+        11,0,32,44,3,24,12,0,33,34,7,0,0,0,34,44,3,2,1,12,35,36,5,22,0,0,
+        36,37,3,2,1,0,37,38,5,7,0,0,38,44,1,0,0,0,39,40,5,20,0,0,40,41,3,
+        2,1,0,41,42,5,2,0,0,42,44,1,0,0,0,43,29,1,0,0,0,43,31,1,0,0,0,43,
+        32,1,0,0,0,43,33,1,0,0,0,43,35,1,0,0,0,43,39,1,0,0,0,44,78,1,0,0,
+        0,45,46,10,13,0,0,46,47,5,1,0,0,47,77,3,2,1,14,48,49,10,11,0,0,49,
+        50,5,6,0,0,50,77,3,2,1,12,51,52,10,10,0,0,52,53,7,1,0,0,53,77,3,
+        2,1,11,54,55,10,9,0,0,55,56,7,2,0,0,56,77,3,2,1,10,57,58,10,8,0,
+        0,58,59,7,3,0,0,59,77,3,2,1,9,60,61,10,7,0,0,61,62,7,0,0,0,62,77,
+        3,2,1,8,63,64,10,6,0,0,64,65,5,48,0,0,65,77,3,2,1,7,66,67,10,5,0,
+        0,67,68,3,4,2,0,68,69,3,2,1,6,69,77,1,0,0,0,70,71,10,4,0,0,71,72,
+        5,31,0,0,72,77,3,2,1,5,73,74,10,3,0,0,74,75,5,43,0,0,75,77,3,2,1,
+        4,76,45,1,0,0,0,76,48,1,0,0,0,76,51,1,0,0,0,76,54,1,0,0,0,76,57,
+        1,0,0,0,76,60,1,0,0,0,76,63,1,0,0,0,76,66,1,0,0,0,76,70,1,0,0,0,
+        76,73,1,0,0,0,77,80,1,0,0,0,78,76,1,0,0,0,78,79,1,0,0,0,79,3,1,0,
+        0,0,80,78,1,0,0,0,81,83,7,4,0,0,82,81,1,0,0,0,82,83,1,0,0,0,83,85,
+        1,0,0,0,84,86,7,5,0,0,85,84,1,0,0,0,85,86,1,0,0,0,86,87,1,0,0,0,
+        87,96,7,6,0,0,88,90,7,5,0,0,89,88,1,0,0,0,89,90,1,0,0,0,90,92,1,
+        0,0,0,91,93,7,4,0,0,92,91,1,0,0,0,92,93,1,0,0,0,93,94,1,0,0,0,94,
+        96,7,6,0,0,95,82,1,0,0,0,95,89,1,0,0,0,96,5,1,0,0,0,97,98,5,26,0,
+        0,98,108,3,8,4,0,99,108,5,26,0,0,100,101,5,27,0,0,101,108,3,8,4,
+        0,102,103,5,8,0,0,103,104,5,26,0,0,104,108,3,8,4,0,105,108,5,8,0,
+        0,106,108,5,9,0,0,107,97,1,0,0,0,107,99,1,0,0,0,107,100,1,0,0,0,
+        107,102,1,0,0,0,107,105,1,0,0,0,107,106,1,0,0,0,108,7,1,0,0,0,109,
+        112,6,4,-1,0,110,113,3,12,6,0,111,113,3,10,5,0,112,110,1,0,0,0,112,
+        111,1,0,0,0,113,118,1,0,0,0,114,117,3,20,10,0,115,117,3,16,8,0,116,
+        114,1,0,0,0,116,115,1,0,0,0,117,120,1,0,0,0,118,116,1,0,0,0,118,
+        119,1,0,0,0,119,126,1,0,0,0,120,118,1,0,0,0,121,122,10,2,0,0,122,
+        123,7,7,0,0,123,125,3,8,4,3,124,121,1,0,0,0,125,128,1,0,0,0,126,
+        124,1,0,0,0,126,127,1,0,0,0,127,9,1,0,0,0,128,126,1,0,0,0,129,130,
+        5,32,0,0,130,131,5,5,0,0,131,150,3,14,7,0,132,133,5,33,0,0,133,134,
+        5,5,0,0,134,150,3,14,7,0,135,136,5,47,0,0,136,137,5,5,0,0,137,150,
+        3,14,7,0,138,139,5,34,0,0,139,140,5,5,0,0,140,150,3,14,7,0,141,142,
+        5,38,0,0,142,143,5,5,0,0,143,150,3,14,7,0,144,145,5,37,0,0,145,146,
+        5,5,0,0,146,150,3,14,7,0,147,150,3,14,7,0,148,150,5,8,0,0,149,129,
+        1,0,0,0,149,132,1,0,0,0,149,135,1,0,0,0,149,138,1,0,0,0,149,141,
+        1,0,0,0,149,144,1,0,0,0,149,147,1,0,0,0,149,148,1,0,0,0,150,11,1,
+        0,0,0,151,152,5,44,0,0,152,153,5,5,0,0,153,168,3,14,7,0,154,155,
+        5,29,0,0,155,156,5,5,0,0,156,168,3,14,7,0,157,158,5,46,0,0,158,159,
+        5,5,0,0,159,168,3,14,7,0,160,161,5,45,0,0,161,162,5,5,0,0,162,168,
+        3,14,7,0,163,164,5,30,0,0,164,165,5,5,0,0,165,168,3,14,7,0,166,168,
+        5,9,0,0,167,151,1,0,0,0,167,154,1,0,0,0,167,157,1,0,0,0,167,160,
+        1,0,0,0,167,163,1,0,0,0,167,166,1,0,0,0,168,13,1,0,0,0,169,173,5,
+        60,0,0,170,173,5,28,0,0,171,173,3,2,1,0,172,169,1,0,0,0,172,170,
+        1,0,0,0,172,171,1,0,0,0,173,15,1,0,0,0,174,183,5,22,0,0,175,180,
+        3,18,9,0,176,177,5,6,0,0,177,179,3,18,9,0,178,176,1,0,0,0,179,182,
+        1,0,0,0,180,178,1,0,0,0,180,181,1,0,0,0,181,184,1,0,0,0,182,180,
+        1,0,0,0,183,175,1,0,0,0,183,184,1,0,0,0,184,185,1,0,0,0,185,186,
+        5,7,0,0,186,17,1,0,0,0,187,188,3,2,1,0,188,19,1,0,0,0,189,190,5,
+        20,0,0,190,191,3,2,1,0,191,192,5,2,0,0,192,21,1,0,0,0,193,194,7,
+        8,0,0,194,23,1,0,0,0,195,196,5,10,0,0,196,197,5,60,0,0,197,25,1,
+        0,0,0,18,43,76,78,82,85,89,92,95,107,112,116,118,126,149,167,172,
+        180,183
     ]
 
 class XPath31GrammarParser ( Parser ):
@@ -89,39 +95,28 @@ class XPath31GrammarParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'!'", "']'", "'}'", "':='", "':'", "'::'", 
-                     "','", "')'", "'.'", "'..'", "'$'", "'=>'", "'='", 
-                     "'>='", "'>>'", "'>'", "'<='", "'<<'", "'<'", "'-'", 
-                     "'!='", "'['", "'{'", "'('", "'|'", "'+'", "'#'", "'||'", 
-                     "'?'", "'/'", "'//'", "'*'", "'ancestor'", "'ancestor-or-self'", 
-                     "'and'", "'array'", "'as'", "'cast'", "'castable'", 
-                     "'child'", "'comment'", "'descendant'", "'descendant-or-self'", 
-                     "'div'", "'element'", "'else'", "'empty-sequence'", 
-                     "'eq'", "'every'", "'except'", "'following'", "'following-sibling'", 
-                     "'for'", "'function'", "'ge'", "'gt'", "'idiv'", "'if'", 
-                     "'in'", "'instance'", "'intersect'", "'is'", "'item'", 
-                     "'le'", "'let'", "'lt'", "'map'", "'mod'", "'ne'", 
-                     "'node'", "'of'", "'or'", "'parent'", "'preceding'", 
-                     "'preceding-sibling'", "'return'", "'satisfies'", "'self'", 
-                     "'some'", "'then'", "'to'", "'treat'", "'union'" ]
+    literalNames = [ "<INVALID>", "'!'", "']'", "'}'", "':'", "'::'", "','", 
+                     "')'", "'.'", "'..'", "'$'", "'='", "'>='", "'>>'", 
+                     "'>'", "'<='", "'<<'", "'<'", "'-'", "'!='", "'['", 
+                     "'{'", "'('", "'|'", "'+'", "'?'", "'/'", "'//'", "'*'", 
+                     "'ancestor'", "'ancestor-or-self'", "'and'", "'child'", 
+                     "'descendant'", "'descendant-or-self'", "'div'", "'except'", 
+                     "'following'", "'following-sibling'", "'idiv'", "'in'", 
+                     "'intersect'", "'mod'", "'or'", "'parent'", "'preceding'", 
+                     "'preceding-sibling'", "'self'", "'to'", "'union'", 
+                     "'any'", "'all'", "'zip'", "'product'" ]
 
-    symbolicNames = [ "<INVALID>", "BANG", "CB", "CC", "CEQ", "COLON", "COLONCOLON", 
-                      "COMMA", "CP", "D", "DD", "DOLLAR", "EG", "EQ", "GE", 
-                      "GG", "GT", "LE", "LL", "LT", "MINUS", "NE", "OB", 
-                      "OC", "OP", "P", "PLUS", "POUND", "PP", "QM", "SLASH", 
-                      "SS", "STAR", "KW_ANCESTOR", "KW_ANCESTOR_OR_SELF", 
-                      "KW_AND", "KW_ARRAY", "KW_AS", "KW_CAST", "KW_CASTABLE", 
-                      "KW_CHILD", "KW_COMMENT", "KW_DESCENDANT", "KW_DESCENDANT_OR_SELF", 
-                      "KW_DIV", "KW_ELEMENT", "KW_ELSE", "KW_EMPTY_SEQUENCE", 
-                      "KW_EQ", "KW_EVERY", "KW_EXCEPT", "KW_FOLLOWING", 
-                      "KW_FOLLOWING_SIBLING", "KW_FOR", "KW_FUNCTION", "KW_GE", 
-                      "KW_GT", "KW_IDIV", "KW_IF", "KW_IN", "KW_INSTANCE", 
-                      "KW_INTERSECT", "KW_IS", "KW_ITEM", "KW_LE", "KW_LET", 
-                      "KW_LT", "KW_MAP", "KW_MOD", "KW_NE", "KW_NODE", "KW_OF", 
-                      "KW_OR", "KW_PARENT", "KW_PRECEDING", "KW_PRECEDING_SIBLING", 
-                      "KW_RETURN", "KW_SATISFIES", "KW_SELF", "KW_SOME", 
-                      "KW_THEN", "KW_TO", "KW_TREAT", "KW_UNION", "IntegerLiteral", 
-                      "DecimalLiteral", "DoubleLiteral", "StringLiteral", 
+    symbolicNames = [ "<INVALID>", "BANG", "CB", "CC", "COLON", "COLONCOLON", 
+                      "COMMA", "CP", "D", "DD", "DOLLAR", "EQ", "GE", "GG", 
+                      "GT", "LE", "LL", "LT", "MINUS", "NE", "OB", "OC", 
+                      "OP", "P", "PLUS", "QM", "SLASH", "SS", "STAR", "KW_ANCESTOR", 
+                      "KW_ANCESTOR_OR_SELF", "KW_AND", "KW_CHILD", "KW_DESCENDANT", 
+                      "KW_DESCENDANT_OR_SELF", "KW_DIV", "KW_EXCEPT", "KW_FOLLOWING", 
+                      "KW_FOLLOWING_SIBLING", "KW_IDIV", "KW_IN", "KW_INTERSECT", 
+                      "KW_MOD", "KW_OR", "KW_PARENT", "KW_PRECEDING", "KW_PRECEDING_SIBLING", 
+                      "KW_SELF", "KW_TO", "KW_UNION", "KW_ANY", "KW_ALL", 
+                      "KW_ZIP", "KW_PRODUCT", "IntegerLiteral", "DecimalLiteral", 
+                      "DoubleLiteral", "StringLiteral", "BooleanLiteral", 
                       "Comment", "Name", "Whitespace" ]
 
     RULE_xpath = 0
@@ -146,93 +141,64 @@ class XPath31GrammarParser ( Parser ):
     BANG=1
     CB=2
     CC=3
-    CEQ=4
-    COLON=5
-    COLONCOLON=6
-    COMMA=7
-    CP=8
-    D=9
-    DD=10
-    DOLLAR=11
-    EG=12
-    EQ=13
-    GE=14
-    GG=15
-    GT=16
-    LE=17
-    LL=18
-    LT=19
-    MINUS=20
-    NE=21
-    OB=22
-    OC=23
-    OP=24
-    P=25
-    PLUS=26
-    POUND=27
-    PP=28
-    QM=29
-    SLASH=30
-    SS=31
-    STAR=32
-    KW_ANCESTOR=33
-    KW_ANCESTOR_OR_SELF=34
-    KW_AND=35
-    KW_ARRAY=36
-    KW_AS=37
-    KW_CAST=38
-    KW_CASTABLE=39
-    KW_CHILD=40
-    KW_COMMENT=41
-    KW_DESCENDANT=42
-    KW_DESCENDANT_OR_SELF=43
-    KW_DIV=44
-    KW_ELEMENT=45
-    KW_ELSE=46
-    KW_EMPTY_SEQUENCE=47
-    KW_EQ=48
-    KW_EVERY=49
-    KW_EXCEPT=50
-    KW_FOLLOWING=51
-    KW_FOLLOWING_SIBLING=52
-    KW_FOR=53
-    KW_FUNCTION=54
-    KW_GE=55
-    KW_GT=56
-    KW_IDIV=57
-    KW_IF=58
-    KW_IN=59
-    KW_INSTANCE=60
-    KW_INTERSECT=61
-    KW_IS=62
-    KW_ITEM=63
-    KW_LE=64
-    KW_LET=65
-    KW_LT=66
-    KW_MAP=67
-    KW_MOD=68
-    KW_NE=69
-    KW_NODE=70
-    KW_OF=71
-    KW_OR=72
-    KW_PARENT=73
-    KW_PRECEDING=74
-    KW_PRECEDING_SIBLING=75
-    KW_RETURN=76
-    KW_SATISFIES=77
-    KW_SELF=78
-    KW_SOME=79
-    KW_THEN=80
-    KW_TO=81
-    KW_TREAT=82
-    KW_UNION=83
-    IntegerLiteral=84
-    DecimalLiteral=85
-    DoubleLiteral=86
-    StringLiteral=87
-    Comment=88
-    Name=89
-    Whitespace=90
+    COLON=4
+    COLONCOLON=5
+    COMMA=6
+    CP=7
+    D=8
+    DD=9
+    DOLLAR=10
+    EQ=11
+    GE=12
+    GG=13
+    GT=14
+    LE=15
+    LL=16
+    LT=17
+    MINUS=18
+    NE=19
+    OB=20
+    OC=21
+    OP=22
+    P=23
+    PLUS=24
+    QM=25
+    SLASH=26
+    SS=27
+    STAR=28
+    KW_ANCESTOR=29
+    KW_ANCESTOR_OR_SELF=30
+    KW_AND=31
+    KW_CHILD=32
+    KW_DESCENDANT=33
+    KW_DESCENDANT_OR_SELF=34
+    KW_DIV=35
+    KW_EXCEPT=36
+    KW_FOLLOWING=37
+    KW_FOLLOWING_SIBLING=38
+    KW_IDIV=39
+    KW_IN=40
+    KW_INTERSECT=41
+    KW_MOD=42
+    KW_OR=43
+    KW_PARENT=44
+    KW_PRECEDING=45
+    KW_PRECEDING_SIBLING=46
+    KW_SELF=47
+    KW_TO=48
+    KW_UNION=49
+    KW_ANY=50
+    KW_ALL=51
+    KW_ZIP=52
+    KW_PRODUCT=53
+    IntegerLiteral=54
+    DecimalLiteral=55
+    DoubleLiteral=56
+    StringLiteral=57
+    BooleanLiteral=58
+    Comment=59
+    Name=60
+    Whitespace=61
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -801,7 +767,7 @@ class XPath31GrammarParser ( Parser ):
             self.state = 43
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [9, 10, 30, 31]:
+            if token in [8, 9, 26, 27]:
                 localctx = XPath31GrammarParser.ExprPathContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
@@ -809,27 +775,27 @@ class XPath31GrammarParser ( Parser ):
                 self.state = 30
                 self.path()
                 pass
-            elif token in [84, 85, 86, 87]:
+            elif token in [54, 55, 56, 57, 58]:
                 localctx = XPath31GrammarParser.ExprLiteralContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 31
                 self.literal()
                 pass
-            elif token in [11]:
+            elif token in [10]:
                 localctx = XPath31GrammarParser.ExprVariableContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 32
                 self.varref()
                 pass
-            elif token in [20, 26]:
+            elif token in [18, 24]:
                 localctx = XPath31GrammarParser.ExprUnaryContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 33
                 _la = self._input.LA(1)
-                if not(_la==20 or _la==26):
+                if not(_la==18 or _la==24):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -837,7 +803,7 @@ class XPath31GrammarParser ( Parser ):
                 self.state = 34
                 self.expr(12)
                 pass
-            elif token in [24]:
+            elif token in [22]:
                 localctx = XPath31GrammarParser.ExprWrapContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
@@ -848,7 +814,7 @@ class XPath31GrammarParser ( Parser ):
                 self.state = 37
                 self.match(XPath31GrammarParser.CP)
                 pass
-            elif token in [22]:
+            elif token in [20]:
                 localctx = XPath31GrammarParser.ExprWrapForceListContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
@@ -910,7 +876,7 @@ class XPath31GrammarParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 10)")
                         self.state = 52
                         _la = self._input.LA(1)
-                        if not(_la==50 or _la==61):
+                        if not(_la==36 or _la==41):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -928,7 +894,7 @@ class XPath31GrammarParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 9)")
                         self.state = 55
                         _la = self._input.LA(1)
-                        if not(_la==25 or _la==83):
+                        if not(_la==23 or _la==49):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -946,7 +912,7 @@ class XPath31GrammarParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 8)")
                         self.state = 58
                         _la = self._input.LA(1)
-                        if not(((((_la - 32)) & ~0x3f) == 0 and ((1 << (_la - 32)) & 68753035265) != 0)):
+                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 4982430498816) != 0)):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -964,7 +930,7 @@ class XPath31GrammarParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 7)")
                         self.state = 61
                         _la = self._input.LA(1)
-                        if not(_la==20 or _la==26):
+                        if not(_la==18 or _la==24):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1064,32 +1030,23 @@ class XPath31GrammarParser ( Parser ):
         def GE(self):
             return self.getToken(XPath31GrammarParser.GE, 0)
 
-        def KW_EQ(self):
-            return self.getToken(XPath31GrammarParser.KW_EQ, 0)
-
-        def KW_NE(self):
-            return self.getToken(XPath31GrammarParser.KW_NE, 0)
-
-        def KW_LT(self):
-            return self.getToken(XPath31GrammarParser.KW_LT, 0)
-
-        def KW_LE(self):
-            return self.getToken(XPath31GrammarParser.KW_LE, 0)
-
-        def KW_GT(self):
-            return self.getToken(XPath31GrammarParser.KW_GT, 0)
-
-        def KW_GE(self):
-            return self.getToken(XPath31GrammarParser.KW_GE, 0)
-
-        def KW_IS(self):
-            return self.getToken(XPath31GrammarParser.KW_IS, 0)
-
         def LL(self):
             return self.getToken(XPath31GrammarParser.LL, 0)
 
         def GG(self):
             return self.getToken(XPath31GrammarParser.GG, 0)
+
+        def KW_ZIP(self):
+            return self.getToken(XPath31GrammarParser.KW_ZIP, 0)
+
+        def KW_PRODUCT(self):
+            return self.getToken(XPath31GrammarParser.KW_PRODUCT, 0)
+
+        def KW_ANY(self):
+            return self.getToken(XPath31GrammarParser.KW_ANY, 0)
+
+        def KW_ALL(self):
+            return self.getToken(XPath31GrammarParser.KW_ALL, 0)
 
         def getRuleIndex(self):
             return XPath31GrammarParser.RULE_comp
@@ -1117,14 +1074,84 @@ class XPath31GrammarParser ( Parser ):
         self.enterRule(localctx, 4, self.RULE_comp)
         self._la = 0 # Token type
         try:
-            self.enterOuterAlt(localctx, 1)
-            self.state = 81
-            _la = self._input.LA(1)
-            if not(((((_la - 13)) & ~0x3f) == 0 and ((1 << (_la - 13)) & 83892771559047551) != 0)):
-                self._errHandler.recoverInline(self)
-            else:
-                self._errHandler.reportMatch(self)
-                self.consume()
+            self.state = 95
+            self._errHandler.sync(self)
+            la_ = self._interp.adaptivePredict(self._input,7,self._ctx)
+            if la_ == 1:
+                self.enterOuterAlt(localctx, 1)
+                self.state = 82
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                if _la==52 or _la==53:
+                    self.state = 81
+                    _la = self._input.LA(1)
+                    if not(_la==52 or _la==53):
+                        self._errHandler.recoverInline(self)
+                    else:
+                        self._errHandler.reportMatch(self)
+                        self.consume()
+
+
+                self.state = 85
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                if _la==50 or _la==51:
+                    self.state = 84
+                    _la = self._input.LA(1)
+                    if not(_la==50 or _la==51):
+                        self._errHandler.recoverInline(self)
+                    else:
+                        self._errHandler.reportMatch(self)
+                        self.consume()
+
+
+                self.state = 87
+                _la = self._input.LA(1)
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 784384) != 0)):
+                    self._errHandler.recoverInline(self)
+                else:
+                    self._errHandler.reportMatch(self)
+                    self.consume()
+                pass
+
+            elif la_ == 2:
+                self.enterOuterAlt(localctx, 2)
+                self.state = 89
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                if _la==50 or _la==51:
+                    self.state = 88
+                    _la = self._input.LA(1)
+                    if not(_la==50 or _la==51):
+                        self._errHandler.recoverInline(self)
+                    else:
+                        self._errHandler.reportMatch(self)
+                        self.consume()
+
+
+                self.state = 92
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                if _la==52 or _la==53:
+                    self.state = 91
+                    _la = self._input.LA(1)
+                    if not(_la==52 or _la==53):
+                        self._errHandler.recoverInline(self)
+                    else:
+                        self._errHandler.reportMatch(self)
+                        self.consume()
+
+
+                self.state = 94
+                _la = self._input.LA(1)
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 784384) != 0)):
+                    self._errHandler.recoverInline(self)
+                else:
+                    self._errHandler.reportMatch(self)
+                    self.consume()
+                pass
+
+
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1312,56 +1339,56 @@ class XPath31GrammarParser ( Parser ):
         localctx = XPath31GrammarParser.PathContext(self, self._ctx, self.state)
         self.enterRule(localctx, 6, self.RULE_path)
         try:
-            self.state = 93
+            self.state = 107
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,3,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
             if la_ == 1:
                 localctx = XPath31GrammarParser.PathFromRootContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 83
+                self.state = 97
                 self.match(XPath31GrammarParser.SLASH)
-                self.state = 84
+                self.state = 98
                 self.relpath(0)
                 pass
 
             elif la_ == 2:
                 localctx = XPath31GrammarParser.PathRootExactContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 85
+                self.state = 99
                 self.match(XPath31GrammarParser.SLASH)
                 pass
 
             elif la_ == 3:
                 localctx = XPath31GrammarParser.PathFromAnyContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 86
+                self.state = 100
                 self.match(XPath31GrammarParser.SS)
-                self.state = 87
+                self.state = 101
                 self.relpath(0)
                 pass
 
             elif la_ == 4:
                 localctx = XPath31GrammarParser.PathFromRelativeContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 88
+                self.state = 102
                 self.match(XPath31GrammarParser.D)
-                self.state = 89
+                self.state = 103
                 self.match(XPath31GrammarParser.SLASH)
-                self.state = 90
+                self.state = 104
                 self.relpath(0)
                 pass
 
             elif la_ == 5:
                 localctx = XPath31GrammarParser.PathSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
-                self.state = 91
+                self.state = 105
                 self.match(XPath31GrammarParser.D)
                 pass
 
             elif la_ == 6:
                 localctx = XPath31GrammarParser.PathParentContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
-                self.state = 92
+                self.state = 106
                 self.match(XPath31GrammarParser.DD)
                 pass
 
@@ -1478,47 +1505,47 @@ class XPath31GrammarParser ( Parser ):
             self._ctx = localctx
             _prevctx = localctx
 
-            self.state = 98
+            self.state = 112
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,4,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,9,self._ctx)
             if la_ == 1:
-                self.state = 96
+                self.state = 110
                 self.reversestep()
                 pass
 
             elif la_ == 2:
-                self.state = 97
+                self.state = 111
                 self.forwardstep()
                 pass
 
 
-            self.state = 104
+            self.state = 118
             self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,6,self._ctx)
+            _alt = self._interp.adaptivePredict(self._input,11,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 102
+                    self.state = 116
                     self._errHandler.sync(self)
                     token = self._input.LA(1)
-                    if token in [22]:
-                        self.state = 100
+                    if token in [20]:
+                        self.state = 114
                         self.predicate()
                         pass
-                    elif token in [24]:
-                        self.state = 101
+                    elif token in [22]:
+                        self.state = 115
                         self.argumentlist()
                         pass
                     else:
                         raise NoViableAltException(self)
              
-                self.state = 106
+                self.state = 120
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,6,self._ctx)
+                _alt = self._interp.adaptivePredict(self._input,11,self._ctx)
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 112
+            self.state = 126
             self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,7,self._ctx)
+            _alt = self._interp.adaptivePredict(self._input,12,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
                     if self._parseListeners is not None:
@@ -1526,22 +1553,22 @@ class XPath31GrammarParser ( Parser ):
                     _prevctx = localctx
                     localctx = XPath31GrammarParser.RelPathChainContext(self, XPath31GrammarParser.RelpathContext(self, _parentctx, _parentState))
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_relpath)
-                    self.state = 107
+                    self.state = 121
                     if not self.precpred(self._ctx, 2):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                    self.state = 108
+                    self.state = 122
                     _la = self._input.LA(1)
-                    if not(_la==30 or _la==31):
+                    if not(_la==26 or _la==27):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-                    self.state = 109
+                    self.state = 123
                     self.relpath(3) 
-                self.state = 114
+                self.state = 128
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,7,self._ctx)
+                _alt = self._interp.adaptivePredict(self._input,12,self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re
@@ -1798,86 +1825,86 @@ class XPath31GrammarParser ( Parser ):
         localctx = XPath31GrammarParser.ForwardstepContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_forwardstep)
         try:
-            self.state = 135
+            self.state = 149
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,13,self._ctx)
             if la_ == 1:
                 localctx = XPath31GrammarParser.ForwardStepChildContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 115
+                self.state = 129
                 self.match(XPath31GrammarParser.KW_CHILD)
-                self.state = 116
+                self.state = 130
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 117
+                self.state = 131
                 self.nodetest()
                 pass
 
             elif la_ == 2:
                 localctx = XPath31GrammarParser.ForwardStepDescendantContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 118
+                self.state = 132
                 self.match(XPath31GrammarParser.KW_DESCENDANT)
-                self.state = 119
+                self.state = 133
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 120
+                self.state = 134
                 self.nodetest()
                 pass
 
             elif la_ == 3:
                 localctx = XPath31GrammarParser.ForwardStepSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 121
+                self.state = 135
                 self.match(XPath31GrammarParser.KW_SELF)
-                self.state = 122
+                self.state = 136
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 123
+                self.state = 137
                 self.nodetest()
                 pass
 
             elif la_ == 4:
                 localctx = XPath31GrammarParser.ForwardStepDescendantOrSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 124
+                self.state = 138
                 self.match(XPath31GrammarParser.KW_DESCENDANT_OR_SELF)
-                self.state = 125
+                self.state = 139
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 126
+                self.state = 140
                 self.nodetest()
                 pass
 
             elif la_ == 5:
                 localctx = XPath31GrammarParser.ForwardStepFollowingSiblingContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
-                self.state = 127
+                self.state = 141
                 self.match(XPath31GrammarParser.KW_FOLLOWING_SIBLING)
-                self.state = 128
+                self.state = 142
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 129
+                self.state = 143
                 self.nodetest()
                 pass
 
             elif la_ == 6:
                 localctx = XPath31GrammarParser.ForwardStepFollowingContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
-                self.state = 130
+                self.state = 144
                 self.match(XPath31GrammarParser.KW_FOLLOWING)
-                self.state = 131
+                self.state = 145
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 132
+                self.state = 146
                 self.nodetest()
                 pass
 
             elif la_ == 7:
                 localctx = XPath31GrammarParser.ForwardStepValueContext(self, localctx)
                 self.enterOuterAlt(localctx, 7)
-                self.state = 133
+                self.state = 147
                 self.nodetest()
                 pass
 
             elif la_ == 8:
                 localctx = XPath31GrammarParser.ForwardStepDirectSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 8)
-                self.state = 134
+                self.state = 148
                 self.match(XPath31GrammarParser.D)
                 pass
 
@@ -2083,63 +2110,63 @@ class XPath31GrammarParser ( Parser ):
         localctx = XPath31GrammarParser.ReversestepContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_reversestep)
         try:
-            self.state = 153
+            self.state = 167
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [73]:
+            if token in [44]:
                 localctx = XPath31GrammarParser.ReverseStepParentContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 137
+                self.state = 151
                 self.match(XPath31GrammarParser.KW_PARENT)
-                self.state = 138
+                self.state = 152
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 139
+                self.state = 153
                 self.nodetest()
                 pass
-            elif token in [33]:
+            elif token in [29]:
                 localctx = XPath31GrammarParser.ReverseStepAncestorContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 140
+                self.state = 154
                 self.match(XPath31GrammarParser.KW_ANCESTOR)
-                self.state = 141
+                self.state = 155
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 142
+                self.state = 156
                 self.nodetest()
                 pass
-            elif token in [75]:
+            elif token in [46]:
                 localctx = XPath31GrammarParser.ReverseStepPrecedingSiblingContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 143
+                self.state = 157
                 self.match(XPath31GrammarParser.KW_PRECEDING_SIBLING)
-                self.state = 144
+                self.state = 158
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 145
+                self.state = 159
                 self.nodetest()
                 pass
-            elif token in [74]:
+            elif token in [45]:
                 localctx = XPath31GrammarParser.ReverseStepPrecedingContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 146
+                self.state = 160
                 self.match(XPath31GrammarParser.KW_PRECEDING)
-                self.state = 147
+                self.state = 161
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 148
+                self.state = 162
                 self.nodetest()
                 pass
-            elif token in [34]:
+            elif token in [30]:
                 localctx = XPath31GrammarParser.ReverseStepAncestorOrSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
-                self.state = 149
+                self.state = 163
                 self.match(XPath31GrammarParser.KW_ANCESTOR_OR_SELF)
-                self.state = 150
+                self.state = 164
                 self.match(XPath31GrammarParser.COLONCOLON)
-                self.state = 151
+                self.state = 165
                 self.nodetest()
                 pass
-            elif token in [10]:
+            elif token in [9]:
                 localctx = XPath31GrammarParser.ReverseStepDirectParentContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
-                self.state = 152
+                self.state = 166
                 self.match(XPath31GrammarParser.DD)
                 pass
             else:
@@ -2250,25 +2277,25 @@ class XPath31GrammarParser ( Parser ):
         localctx = XPath31GrammarParser.NodetestContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_nodetest)
         try:
-            self.state = 158
+            self.state = 172
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [89]:
+            if token in [60]:
                 localctx = XPath31GrammarParser.NodeTestExactContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 155
+                self.state = 169
                 self.match(XPath31GrammarParser.Name)
                 pass
-            elif token in [32]:
+            elif token in [28]:
                 localctx = XPath31GrammarParser.NodeTestWildcardContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 156
+                self.state = 170
                 self.match(XPath31GrammarParser.STAR)
                 pass
-            elif token in [9, 10, 11, 20, 22, 24, 26, 30, 31, 84, 85, 86, 87]:
+            elif token in [8, 9, 10, 18, 20, 22, 24, 26, 27, 54, 55, 56, 57, 58]:
                 localctx = XPath31GrammarParser.NodeTestExprContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 157
+                self.state = 171
                 self.expr(0)
                 pass
             else:
@@ -2336,29 +2363,29 @@ class XPath31GrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 160
+            self.state = 174
             self.match(XPath31GrammarParser.OP)
-            self.state = 169
+            self.state = 183
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & 3310358016) != 0) or ((((_la - 84)) & ~0x3f) == 0 and ((1 << (_la - 84)) & 15) != 0):
-                self.state = 161
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & 558446354017552128) != 0):
+                self.state = 175
                 self.argument()
-                self.state = 166
+                self.state = 180
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==7:
-                    self.state = 162
+                while _la==6:
+                    self.state = 176
                     self.match(XPath31GrammarParser.COMMA)
-                    self.state = 163
+                    self.state = 177
                     self.argument()
-                    self.state = 168
+                    self.state = 182
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
 
 
 
-            self.state = 171
+            self.state = 185
             self.match(XPath31GrammarParser.CP)
         except RecognitionException as re:
             localctx.exception = re
@@ -2406,7 +2433,7 @@ class XPath31GrammarParser ( Parser ):
         self.enterRule(localctx, 18, self.RULE_argument)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 173
+            self.state = 187
             self.expr(0)
         except RecognitionException as re:
             localctx.exception = re
@@ -2460,11 +2487,11 @@ class XPath31GrammarParser ( Parser ):
         self.enterRule(localctx, 20, self.RULE_predicate)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 175
+            self.state = 189
             self.match(XPath31GrammarParser.OB)
-            self.state = 176
+            self.state = 190
             self.expr(0)
-            self.state = 177
+            self.state = 191
             self.match(XPath31GrammarParser.CB)
         except RecognitionException as re:
             localctx.exception = re
@@ -2494,6 +2521,9 @@ class XPath31GrammarParser ( Parser ):
         def StringLiteral(self):
             return self.getToken(XPath31GrammarParser.StringLiteral, 0)
 
+        def BooleanLiteral(self):
+            return self.getToken(XPath31GrammarParser.BooleanLiteral, 0)
+
         def getRuleIndex(self):
             return XPath31GrammarParser.RULE_literal
 
@@ -2521,9 +2551,9 @@ class XPath31GrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 179
+            self.state = 193
             _la = self._input.LA(1)
-            if not(((((_la - 84)) & ~0x3f) == 0 and ((1 << (_la - 84)) & 15) != 0)):
+            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 558446353793941504) != 0)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -2576,9 +2606,9 @@ class XPath31GrammarParser ( Parser ):
         self.enterRule(localctx, 24, self.RULE_varref)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 181
+            self.state = 195
             self.match(XPath31GrammarParser.DOLLAR)
-            self.state = 182
+            self.state = 196
             self.match(XPath31GrammarParser.Name)
         except RecognitionException as re:
             localctx.exception = re
