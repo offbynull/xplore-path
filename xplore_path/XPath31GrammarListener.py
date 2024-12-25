@@ -44,6 +44,15 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XPath31GrammarParser#ExprMatcher.
+    def enterExprMatcher(self, ctx:XPath31GrammarParser.ExprMatcherContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#ExprMatcher.
+    def exitExprMatcher(self, ctx:XPath31GrammarParser.ExprMatcherContext):
+        pass
+
+
     # Enter a parse tree produced by XPath31GrammarParser#ExprConcatenate.
     def enterExprConcatenate(self, ctx:XPath31GrammarParser.ExprConcatenateContext):
         pass
@@ -383,33 +392,6 @@ class XPath31GrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XPath31GrammarParser#ReverseStepDirectParent.
     def exitReverseStepDirectParent(self, ctx:XPath31GrammarParser.ReverseStepDirectParentContext):
-        pass
-
-
-    # Enter a parse tree produced by XPath31GrammarParser#NodeTestExact.
-    def enterNodeTestExact(self, ctx:XPath31GrammarParser.NodeTestExactContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#NodeTestExact.
-    def exitNodeTestExact(self, ctx:XPath31GrammarParser.NodeTestExactContext):
-        pass
-
-
-    # Enter a parse tree produced by XPath31GrammarParser#NodeTestMatcher.
-    def enterNodeTestMatcher(self, ctx:XPath31GrammarParser.NodeTestMatcherContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#NodeTestMatcher.
-    def exitNodeTestMatcher(self, ctx:XPath31GrammarParser.NodeTestMatcherContext):
-        pass
-
-
-    # Enter a parse tree produced by XPath31GrammarParser#NodeTestExpr.
-    def enterNodeTestExpr(self, ctx:XPath31GrammarParser.NodeTestExprContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#NodeTestExpr.
-    def exitNodeTestExpr(self, ctx:XPath31GrammarParser.NodeTestExprContext):
         pass
 
 

@@ -140,6 +140,8 @@ xpath
     : expr EOF
     ;
 
+// TODO: add join syntax - inner, left, right
+
 expr
     : (KW_ANY | KW_ALL) expr coerecefallback?             # ExprBoolAggregate
     | expr COMMA expr                                     # ExprConcatenate
@@ -154,15 +156,11 @@ expr
     | <assoc=right> (MINUS | PLUS) expr coerecefallback?  # ExprUnary
     | OP expr CP                                          # ExprWrap
     | OB expr? CB                                         # ExprWrapForceList
+    | matcher                                             # ExprMatcher
     | varref                                              # ExprVariable
     | literal                                             # ExprLiteral
     | path                                                # ExprPath
     ;
-//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL
-//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL
-//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL
-//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL
-//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL    ;
 
 relop
     : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? (EQ | NE | LT | LE | GT | GE | LL | GG)
@@ -196,29 +194,23 @@ relpath
     ;
 
 forwardstep
-    : KW_CHILD COLONCOLON nodetest               # ForwardStepChild
-    | KW_DESCENDANT COLONCOLON nodetest          # ForwardStepDescendant
-    | KW_SELF COLONCOLON nodetest                # ForwardStepSelf
-    | KW_DESCENDANT_OR_SELF COLONCOLON nodetest  # ForwardStepDescendantOrSelf
-    | KW_FOLLOWING_SIBLING COLONCOLON nodetest   # ForwardStepFollowingSibling
-    | KW_FOLLOWING COLONCOLON nodetest           # ForwardStepFollowing
-    | nodetest                                   # ForwardStepValue
-    | D                                          # ForwardStepDirectSelf
+    : KW_CHILD COLONCOLON expr               # ForwardStepChild
+    | KW_DESCENDANT COLONCOLON expr          # ForwardStepDescendant
+    | KW_SELF COLONCOLON expr                # ForwardStepSelf
+    | KW_DESCENDANT_OR_SELF COLONCOLON expr  # ForwardStepDescendantOrSelf
+    | KW_FOLLOWING_SIBLING COLONCOLON expr   # ForwardStepFollowingSibling
+    | KW_FOLLOWING COLONCOLON expr           # ForwardStepFollowing
+    | expr                                   # ForwardStepValue
+    | D                                      # ForwardStepDirectSelf
     ;
 
 reversestep
-    : KW_PARENT COLONCOLON nodetest             # ReverseStepParent
-    | KW_ANCESTOR COLONCOLON nodetest           # ReverseStepAncestor
-    | KW_PRECEDING_SIBLING COLONCOLON nodetest  # ReverseStepPrecedingSibling
-    | KW_PRECEDING COLONCOLON nodetest          # ReverseStepPreceding
-    | KW_ANCESTOR_OR_SELF COLONCOLON nodetest   # ReverseStepAncestorOrSelf
-    | DD                                        # ReverseStepDirectParent
-    ;
-
-nodetest
-    : Name           # NodeTestExact
-    | matcher        # NodeTestMatcher
-    | expr           # NodeTestExpr
+    : KW_PARENT COLONCOLON expr             # ReverseStepParent
+    | KW_ANCESTOR COLONCOLON expr           # ReverseStepAncestor
+    | KW_PRECEDING_SIBLING COLONCOLON expr  # ReverseStepPrecedingSibling
+    | KW_PRECEDING COLONCOLON expr          # ReverseStepPreceding
+    | KW_ANCESTOR_OR_SELF COLONCOLON expr   # ReverseStepAncestorOrSelf
+    | DD                                    # ReverseStepDirectParent
     ;
 
 argumentlist

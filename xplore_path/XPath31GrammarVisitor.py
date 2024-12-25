@@ -29,6 +29,11 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XPath31GrammarParser#ExprMatcher.
+    def visitExprMatcher(self, ctx:XPath31GrammarParser.ExprMatcherContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XPath31GrammarParser#ExprConcatenate.
     def visitExprConcatenate(self, ctx:XPath31GrammarParser.ExprConcatenateContext):
         return self.visitChildren(ctx)
@@ -216,21 +221,6 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XPath31GrammarParser#ReverseStepDirectParent.
     def visitReverseStepDirectParent(self, ctx:XPath31GrammarParser.ReverseStepDirectParentContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#NodeTestExact.
-    def visitNodeTestExact(self, ctx:XPath31GrammarParser.NodeTestExactContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#NodeTestMatcher.
-    def visitNodeTestMatcher(self, ctx:XPath31GrammarParser.NodeTestMatcherContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#NodeTestExpr.
-    def visitNodeTestExpr(self, ctx:XPath31GrammarParser.NodeTestExprContext):
         return self.visitChildren(ctx)
 
 

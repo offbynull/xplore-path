@@ -488,28 +488,28 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if parent_path is not None:
                 new_paths.append(parent_path)
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepAncestor(self, ctx: XPath31GrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
         for path in self.context:
             new_paths += path.all_ancestors()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepPreceding(self, ctx: XPath31GrammarParser.ReverseStepPrecedingContext):
         new_paths = []
         for path in self.context:
             new_paths += path.preceding()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepPrecedingSibling(self, ctx: XPath31GrammarParser.ReverseStepPrecedingContext):
         new_paths = []
         for path in self.context:
             new_paths += path.preceding_sibling()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepAncestorOrSelf(self, ctx: XPath31GrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
@@ -517,7 +517,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             new_paths.append(path)
             new_paths += path.all_ancestors()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepDirectParent(self, ctx: XPath31GrammarParser.ReverseStepDirectParentContext):
         new_paths = []
@@ -532,17 +532,17 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         for path in self.context:
             new_paths += path.all_children()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepDescendant(self, ctx: XPath31GrammarParser.ForwardStepDescendantContext):
         new_paths = []
         for path in self.context:
             new_paths += path.all_descendants()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepSelf(self, ctx: XPath31GrammarParser.ForwardStepSelfContext):
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepDescendantOrSelf(self, ctx: XPath31GrammarParser.ForwardStepDescendantOrSelfContext):
         new_paths = []
@@ -550,64 +550,50 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             new_paths.append(path)
             new_paths += path.all_descendants()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepFollowingSibling(self, ctx: XPath31GrammarParser.ForwardStepFollowingSiblingContext):
         new_paths = []
         for path in self.context:
             new_paths += path.following_sibling()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepFollowing(self, ctx: XPath31GrammarParser.ForwardStepFollowingContext):
         new_paths = []
         for path in self.context:
             new_paths += path.following()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepValue(self, ctx: XPath31GrammarParser.ForwardStepValueContext):
         new_paths = []
         for p in self.context.paths:
             new_paths += p.all_children()
         self.context.reset_state(new_paths)
-        return self.visit(ctx.nodetest())
+        return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepDirectSelf(self, ctx: XPath31GrammarParser.ForwardStepDirectSelfContext):
         return self.context.paths[:]  # Return existing
 
-    def visitNodeTestMatcher(self, ctx: XPath31GrammarParser.NodeTestMatcherContext):
-        matcher = self.visit(ctx.matcher())
-        return self._label_test(matcher)
-
-    def visitNodeTestExact(self, ctx: XPath31GrammarParser.NodeTestExactContext):
-        name = ctx.Name().getText()
-        return self._label_test(StrictLabelMatcher(name))
-
-    def _label_test(self, matcher: LabelMatcher) -> list[Path]:
+    def _walk_down(self, result: Any):
+        to_matcher = lambda v: v if isinstance(v, LabelMatcher) else StrictLabelMatcher(v)
+        matchers = []
+        if isinstance(result, list):
+            for v in result:
+                if type(v) == Path:
+                    v = v.last().value
+                matchers.append(to_matcher(v))
+        else:
+            matchers.append(to_matcher(result))
+        # test
+        combined_matcher = CombinedLabelMatcher(matchers)
         ret = []
         for path in self.context:
             label = path.last().label
-            if matcher.match(label):
+            if combined_matcher.match(label):
                 ret.append(path)
         return ret
-
-    def visitNodeTestExpr(self, ctx: XPath31GrammarParser.NodeTestExprContext):
-        self.context.push_state(PrimeMode.PRIME_WITH_SELF)
-        try:
-            result = self.visit(ctx.expr())
-            matchers = []
-            if isinstance(result, list):
-                for p in result:
-                    if type(p) == Path:
-                        matchers.append(StrictLabelMatcher(p.last().value))  # match against value of the path
-                    else:
-                        matchers.append(StrictLabelMatcher(p))  # match against item
-            else:
-                matchers.append(StrictLabelMatcher(result))  # match against item
-            return self._label_test(CombinedLabelMatcher(matchers))
-        finally:
-            self.context.pop_state()
 
     def visitPredicate(self, ctx: XPath31GrammarParser.PredicateContext):
         orig_paths = self.context.paths
@@ -658,6 +644,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         elif ctx.Name():
             return ctx.Name().getText()
         raise ValueError('Unexpected')
+
+    def visitExprMatcher(self, ctx: XPath31GrammarParser.ExprMatcherContext):
+        return self.visit(ctx.matcher())
 
     def visitMatcherStrict(self, ctx: XPath31GrammarParser.MatcherStrictContext):
         pattern = self._decode_str(ctx.getText()[1:])
@@ -720,14 +709,14 @@ def test(root, expr):
 if __name__ == '__main__':
     root = { 'a': { 'b': { 'c': 1, 'd': 2, 'e': -1, 'f': -2 } }, 'y': 3, 'z': 4, 'ptrs': { 'd_ptr': 'd', 'f_ptr': 'f' } }
 
-    # test(root, '/')
-    # test(root, '/*')
+    test(root, '/')
+    test(root, '/*')
     # test(root, '/a')
     # test(root, '/a/b')
     # test(root, '/a/*')
     # test(root, '/a/b/c')
     # test(root, '/a/b/d')
-    # test(root, '/a/b/*')
+    test(root, '/a/b/*')
     # test(root, '/a/b/following::*')
     # test(root, '/a/b/following::z')
     # test(root, '/a/b/d/following-sibling::*')
