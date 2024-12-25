@@ -148,7 +148,7 @@ expr
     | expr KW_TO expr                                     # ExprRange
     | expr KW_OR expr coerecefallback?                    # ExprOr
     | expr KW_AND expr coerecefallback?                   # ExprAnd
-    | expr relop expr                                     # ExprComparison
+    | expr relop expr coerecefallback?                    # ExprComparison
     | expr addop expr coerecefallback?                    # ExprAdditive
     | expr mulop expr coerecefallback?                    # ExprMultiplicative
     | <assoc=right> (MINUS | PLUS) expr coerecefallback?  # ExprUnary
@@ -158,18 +158,27 @@ expr
     | literal                                             # ExprLiteral
     | path                                                # ExprPath
     ;
+//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL
+//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL
+//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL
+//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL
+//    : MOVE NODETESTS HERE - LITERAL SHOULD HAVE Name IN IT - ADD MATCHERS HERE AS WELL    ;
 
 relop
     : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? (EQ | NE | LT | LE | GT | GE | LL | GG)
     | (KW_SEQUENCE | KW_ANY | KW_ALL)? (KW_ZIP | KW_PRODUCT)? (EQ | NE | LT | LE | GT | GE | LL | GG)
+    | (EQ | NE | LT | LE | GT | GE | LL | GG) (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)?
+    | (EQ | NE | LT | LE | GT | GE | LL | GG) (KW_SEQUENCE | KW_ANY | KW_ALL)? (KW_ZIP | KW_PRODUCT)?
     ;
 
 mulop
     : (KW_ZIP | KW_PRODUCT)? (STAR | KW_DIV | KW_IDIV | KW_MOD)
+    | (STAR | KW_DIV | KW_IDIV | KW_MOD) (KW_ZIP | KW_PRODUCT)?
     ;
 
 addop
     : (KW_ZIP | KW_PRODUCT)? (PLUS | MINUS)
+    | (PLUS | MINUS) (KW_ZIP | KW_PRODUCT)?
     ;
 
 path

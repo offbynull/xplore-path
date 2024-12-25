@@ -2,7 +2,7 @@ import math
 from dataclasses import dataclass
 from enum import Enum
 from itertools import product
-from typing import Any, Literal, Callable
+from typing import Any, Callable
 
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
@@ -85,25 +85,6 @@ class Context:
 
 
 
-
-
-def _coerce_for_single_value_comparison(
-        v1: bool | int | float | str | Path | list,
-        v2: bool | int | float | str | Path | list
-) -> tuple[Any, Any]:
-    # prime v1
-    if type(v1) == list and len(v1) > 0:
-        v1 = v1[0]
-    if type(v1) == Path:
-        v1 = v1.last().value
-    # prime v2
-    if type(v2) == list and len(v2) > 0:
-        v2 = v2[0]
-    if type(v2) == Path:
-        v2 = v2.last().value
-    # coerce and return
-    v2 = coerce_single_value(v2, type(v1))
-    return v1, v2
 
 
 class PathEvaluatorVisitor(XPath31GrammarVisitor):
@@ -269,12 +250,25 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             l: int | float | str | bool | list[Any],
             r: int | float | str | bool | list[Any],
             combine_op: Callable[[Any, Any], Any],
-            test_op: Callable[[Any, Any], Any]
+            test_op: Callable[[Any, Any], Any],
+            coercer_fallback: CoercerFallback
     ):
         def _coerce_eval_insert(ret, l_, r_):
-            l_, r_ = _coerce_for_single_value_comparison(l_, r_)
+            # Paths to values
+            if type(l_) == Path:
+                l_ = l_.last().value
+            if type(r_) == Path:
+                r_ = r_.last().value
+            # Coerce to comparable types
+            new_r_ = coerce_single_value(r_, type(l_))
+            if new_r_ is None:
+                new_l_ = coerce_single_value(l_, type(r_))
+                l_ = new_l_
+            else:
+                r_ = new_r_
+            # Append
             if l_ is None or r_ is None:
-                ret.append(False)
+                ret.append(None)
             else:
                 ret.append(test_op(l_, r_))
 
@@ -282,22 +276,28 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             ret = []
             for l_, r_ in combine_op(l, r):
                 _coerce_eval_insert(ret, l_, r_)
-            return ret
+            return coercer_fallback.coerce(ret)
         elif isinstance(l, list): # for each comparison regardless of mode
             ret = []
             for l_ in l:
                 _coerce_eval_insert(ret, l_, r)
-            return ret
+            return coercer_fallback.coerce(ret)
         elif isinstance(r, list):  # for each comparison regardless of mode
             ret = []
             for r_ in r:
                 _coerce_eval_insert(ret, l, r_)
-            return ret
+            return coercer_fallback.coerce(ret)
         else:  # single comparison regardless of mode
-            l_, r_ = _coerce_for_single_value_comparison(l, r)
-            return test_op(l_, r_)
+            ret = []
+            _coerce_eval_insert(ret, l, r)
+            ret = coercer_fallback.coerce(ret)
+            return ret[0] if ret else []
 
     def visitExprComparison(self, ctx: XPath31GrammarParser.ExprComparisonContext):
+        if ctx.coerecefallback():
+            coercer_fallback = self.visit(ctx.coerecefallback())
+        else:
+            coercer_fallback = DefaultCoercerFallback(False)
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
         if ctx.relop().EQ():
@@ -324,7 +324,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             combine_op = zip
         elif ctx.relop().KW_PRODUCT():
             combine_op = product
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op)  # noqa
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op, coercer_fallback)  # noqa
         # default don't do any aggregation
         agg_op = any
         if ctx.relop().KW_ALL():
@@ -350,7 +350,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             combine_op = zip
         elif ctx.relop().KW_PRODUCT():
             combine_op = product
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op)  # noqa
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op, coercer_fallback)  # noqa
         # default don't do any aggregation
         agg_op = any
         if ctx.relop().KW_ALL():
@@ -376,7 +376,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             combine_op = zip
         elif ctx.relop().KW_PRODUCT():
             combine_op = product
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op)  # noqa
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op, coercer_fallback)  # noqa
         # default don't do any aggregation
         agg_op = any
         if ctx.relop().KW_ALL():
