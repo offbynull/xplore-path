@@ -197,6 +197,24 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XPath31GrammarParser#andop.
+    def enterAndop(self, ctx:XPath31GrammarParser.AndopContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#andop.
+    def exitAndop(self, ctx:XPath31GrammarParser.AndopContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#orop.
+    def enterOrop(self, ctx:XPath31GrammarParser.OropContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#orop.
+    def exitOrop(self, ctx:XPath31GrammarParser.OropContext):
+        pass
+
+
     # Enter a parse tree produced by XPath31GrammarParser#PathFromRoot.
     def enterPathFromRoot(self, ctx:XPath31GrammarParser.PathFromRootContext):
         pass

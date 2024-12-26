@@ -114,6 +114,16 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XPath31GrammarParser#andop.
+    def visitAndop(self, ctx:XPath31GrammarParser.AndopContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#orop.
+    def visitOrop(self, ctx:XPath31GrammarParser.OropContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XPath31GrammarParser#PathFromRoot.
     def visitPathFromRoot(self, ctx:XPath31GrammarParser.PathFromRootContext):
         return self.visitChildren(ctx)

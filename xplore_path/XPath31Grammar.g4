@@ -141,6 +141,8 @@ xpath
     ;
 
 // TODO: add join syntax - inner, left, right
+// TODO: add string concat operator back in
+// TODO: new matcher to test if a number is "close to" - floating point check
 
 expr
     : (KW_ANY | KW_ALL) expr coerecefallback?             # ExprBoolAggregate
@@ -148,8 +150,8 @@ expr
     | expr (KW_INTERSECT | KW_EXCEPT) expr                # ExprSetIntersect
     | expr (KW_UNION | P) expr                            # ExprSetUnion
     | expr KW_TO expr                                     # ExprRange
-    | expr KW_OR expr coerecefallback?                    # ExprOr
-    | expr KW_AND expr coerecefallback?                   # ExprAnd
+    | expr orop expr coerecefallback?                     # ExprOr
+    | expr andop expr coerecefallback?                    # ExprAnd
     | expr relop expr coerecefallback?                    # ExprComparison
     | expr addop expr coerecefallback?                    # ExprAdditive
     | expr mulop expr coerecefallback?                    # ExprMultiplicative
@@ -177,6 +179,16 @@ mulop
 addop
     : (KW_ZIP | KW_PRODUCT)? (PLUS | MINUS)
     | (PLUS | MINUS) (KW_ZIP | KW_PRODUCT)?
+    ;
+
+andop
+    :(KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_AND
+    | KW_AND (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)?
+    ;
+
+orop
+    : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_OR
+    | KW_OR (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)?
     ;
 
 path

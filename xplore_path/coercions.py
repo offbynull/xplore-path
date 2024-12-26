@@ -21,7 +21,8 @@ T = TypeVar('T', bool, int, float, str)
 
 
 
-def coerce_for_set_operation(value: list[Any]) -> dict[tuple[Literal['PATH', 'RAW'], Hashable], Any]:
+def coerce_for_set_operation(value: Any) -> dict[tuple[Literal['PATH', 'RAW'], Hashable], Any]:
+    value = coerce_to_list(value)
     ret = {}
     for v in value:
         if isinstance(v, Path):
@@ -40,6 +41,7 @@ def coerce_to_list(value: Any) -> list[Any]:
         return value
     return [value]
 
+
 def coerce_to_single(value: Any) -> Any:
     if isinstance(value, list):
         if len(value) > 0:
@@ -48,12 +50,15 @@ def coerce_to_single(value: Any) -> Any:
             return None
     return value
 
+
 def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T | None:
     if type(v) == new_t:
         return v
     elif new_t == bool:
         if type(v) == Path:
             return coerce_single_value(v.last().value, new_t)
+        elif type(v) == bool:
+            return v
         elif type(v) == str:
             return len(v) > 0
         elif type(v) == float:
@@ -63,6 +68,8 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
     elif new_t == int:
         if type(v) == Path:
             return coerce_single_value(v.last().value, new_t)
+        elif type(v) == bool:
+            return int(v)
         elif type(v) == str:
             try:
                 return int(v)
@@ -70,19 +77,21 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
                 ...
         elif type(v) == float and v.is_integer():
             return int(v)
-        elif type(v) == bool:
-            return int(v)
+        elif type(v) == int:
+            return v
     elif new_t == float:
         if type(v) == Path:
             return coerce_single_value(v.last().value, new_t)
+        elif type(v) == bool:
+            return float(v)
         elif type(v) == str:
             try:
                 return float(v)
             except (ValueError, TypeError):
                 ...
+        elif type(v) == float:
+            return v
         elif type(v) == int:
-            return float(v)
-        elif type(v) == bool:
             return float(v)
     elif new_t == str:
         if type(v) == Path:

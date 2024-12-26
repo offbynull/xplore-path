@@ -2,7 +2,7 @@ import math
 from dataclasses import dataclass
 from enum import Enum
 from itertools import product
-from typing import Any, Callable
+from typing import Any, Callable, Type
 
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
@@ -23,6 +23,7 @@ from xplore_path.label_matchers.glob_label_matcher import GlobLabelMatcher
 from xplore_path.label_matchers.regex_label_matcher import RegexLabelMatcher
 from xplore_path.label_matchers.strict_label_matcher import StrictLabelMatcher
 from xplore_path.label_matchers.wildcard_label_matcher import WildcardLabelMatcher
+from xplore_path.raise_parse_error_listener import RaiseParseErrorListener
 
 
 class PrimeMode(Enum):
@@ -107,26 +108,23 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             coercer_fallback = self.visit(ctx.coerecefallback())
         else:
             coercer_fallback = DiscardCoercerFallback()
-        ret = []
-        for p in self.context.paths:
-            self.context.push_state([p])
-            try:
-                inner = self.visit(ctx.expr())
-                if ctx.MINUS() is not None:
-                    if type(inner) == list:
-                        inner = [-coerce_single_value(v, float) for v in inner]
-                        inner = coercer_fallback.coerce(inner)
-                        ret += inner
-                    else:
-                        inner = [-coerce_single_value(inner, float)]
-                        inner = coercer_fallback.coerce(inner)
-                        if inner:
-                            ret.append(inner[0])
-                elif ctx.PLUS() is not None:
-                    ret += inner  # Keep it as-is -- not required to do any manipulation here
-            finally:
-                self.context.pop_state()
-        return ret
+        inner = self.visit(ctx.expr())
+        if ctx.MINUS() is not None:
+            if type(inner) == list:
+                inner = [coerce_single_value(v, float) for v in inner]
+                inner = coercer_fallback.coerce(inner)
+                inner = [-v for v in inner]
+                return inner
+            else:
+                inner = [coerce_single_value(inner, float)]
+                inner = coercer_fallback.coerce(inner)
+                inner = [-v for v in inner]
+                if inner:
+                    return inner[0]
+                else:
+                    return []
+        elif ctx.PLUS() is not None:
+            return inner  # Keep it as-is -- not required to do any manipulation here
 
     def visitExprConcatenate(self, ctx: XPath31GrammarParser.ExprConcatenateContext):
         l = self.visit(ctx.expr(0))
@@ -180,10 +178,12 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             return [op(l_, r_) for l_, r_ in combine_op(l, r)]
         elif isinstance(l, list):
             l = coercer_fallback.coerce([coerce_single_value(v, float) for v in l])
-            return [op(l_, r) for l_, r_ in combine_op(l, [r])]
+            r = coercer_fallback.coerce([coerce_single_value(r, float)])
+            return [op(l_, r_) for l_, r_ in combine_op(l, r)]
         elif isinstance(r, list):
+            l = coercer_fallback.coerce([coerce_single_value(l, float)])
             r = coercer_fallback.coerce([coerce_single_value(v, float) for v in r])
-            return [op(l, r_) for l_, r_ in combine_op([l], r)]
+            return [op(l_, r_) for l_, r_ in combine_op(l, r)]
         else:
             l = coercer_fallback.coerce([coerce_single_value(l, float)])
             r = coercer_fallback.coerce([coerce_single_value(r, float)])
@@ -251,6 +251,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             r: int | float | str | bool | list[Any],
             combine_op: Callable[[Any, Any], Any],
             test_op: Callable[[Any, Any], Any],
+            required_type: Type | None,
             coercer_fallback: CoercerFallback
     ):
         def _coerce_eval_insert(ret, l_, r_):
@@ -260,12 +261,16 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if type(r_) == Path:
                 r_ = r_.last().value
             # Coerce to comparable types
-            new_r_ = coerce_single_value(r_, type(l_))
-            if new_r_ is None:
-                new_l_ = coerce_single_value(l_, type(r_))
-                l_ = new_l_
+            if required_type is not None:
+                l_ = coerce_single_value(l_, required_type)  # noqa
+                r_ = coerce_single_value(r_, required_type)  # noqa
             else:
-                r_ = new_r_
+                new_r_ = coerce_single_value(r_, type(l_))
+                if new_r_ is None:
+                    new_l_ = coerce_single_value(l_, type(r_))
+                    l_ = new_l_
+                else:
+                    r_ = new_r_
             # Append
             if l_ is None or r_ is None:
                 ret.append(None)
@@ -302,37 +307,31 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         r = self.visit(ctx.expr(1))
         if ctx.relop().EQ():
             op = lambda _l, _r: _l == _r
+            numerics_required = None
         elif ctx.relop().NE():
             op = lambda _l, _r: _l != _r
+            numerics_required = None
         elif ctx.relop().LT():
             op = lambda _l, _r: _l < _r
+            numerics_required = float
         elif ctx.relop().LE():
             op = lambda _l, _r: _l <= _r
+            numerics_required = float
         elif ctx.relop().GT():
             op = lambda _l, _r: _l > _r
+            numerics_required = float
         elif ctx.relop().GE():
             op = lambda _l, _r: _l >= _r
+            numerics_required = float
         elif ctx.relop().LL():
             raise ValueError('Test if node A is before node B - unimplemented')
         elif ctx.relop().GG():
             raise ValueError('Test if node A is after node B - unimplemented')
         else:
             raise ValueError('Unexpected')
-        # default is product, override if set - product is default in xpath
-        combine_op = product
-        if ctx.relop().KW_ZIP():
-            combine_op = zip
-        elif ctx.relop().KW_PRODUCT():
-            combine_op = product
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op, coercer_fallback)  # noqa
-        # default don't do any aggregation
-        agg_op = any
-        if ctx.relop().KW_ALL():
-            agg_op = all
-        elif ctx.relop().KW_SEQUENCE():  # keep as-is
-            agg_op = lambda x: x
-        elif ctx.relop().KW_ANY:
-             agg_op = any
+        combine_op = self._boolean_op_combiner(ctx.relop())
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op, numerics_required, coercer_fallback)  # noqa
+        agg_op, ret = self._boolean_op_aggregator(ctx.relop(), ret)
         ret = agg_op(ret)
         return ret
 
@@ -344,21 +343,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
         op = lambda _l, _r: _l or _r
-        # default is product, override if set - product is default in xpath
-        combine_op = product
-        if ctx.relop().KW_ZIP():
-            combine_op = zip
-        elif ctx.relop().KW_PRODUCT():
-            combine_op = product
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op, coercer_fallback)  # noqa
-        # default don't do any aggregation
-        agg_op = any
-        if ctx.relop().KW_ALL():
-            agg_op = all
-        elif ctx.relop().KW_SEQUENCE():  # keep as-is
-            agg_op = lambda x: x
-        elif ctx.relop().KW_ANY:
-             agg_op = any
+        combine_op = self._boolean_op_combiner(ctx.orop())
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op, bool, coercer_fallback)  # noqa
+        agg_op, ret = self._boolean_op_aggregator(ctx.orop(), ret)
         ret = agg_op(ret)
         return ret
 
@@ -370,30 +357,37 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
         op = lambda _l, _r: _l and _r
-        # default is product, override if set - product is default in xpath
-        combine_op = product
-        if ctx.relop().KW_ZIP():
-            combine_op = zip
-        elif ctx.relop().KW_PRODUCT():
-            combine_op = product
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op, coercer_fallback)  # noqa
-        # default don't do any aggregation
-        agg_op = any
-        if ctx.relop().KW_ALL():
-            agg_op = all
-        elif ctx.relop().KW_SEQUENCE():  # keep as-is
-            agg_op = lambda x: x
-        elif ctx.relop().KW_ANY:
-             agg_op = any
+        combine_op = self._boolean_op_combiner(ctx.andop())
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op, bool, coercer_fallback)  # noqa
+        agg_op, ret = self._boolean_op_aggregator(ctx.andop(), ret)
         ret = agg_op(ret)
         return ret
+
+    def _boolean_op_combiner(self, ctx):
+        combine_op = product  # default is product, override if set - product is default in xpath
+        if ctx.KW_ZIP():
+            combine_op = zip
+        elif ctx.KW_PRODUCT():
+            combine_op = product
+        return combine_op
+
+    def _boolean_op_aggregator(self, ctx, ret):
+        if ctx.KW_ALL():
+            ret = coerce_to_list(ret)
+            agg_op = all
+        elif ctx.KW_SEQUENCE():  # keep as-is
+            agg_op = lambda x: x
+        else:  # if ctx.KW_ANY or no agg was explicitly specified (in which case it should default to ANY)
+            ret = coerce_to_list(ret)
+            agg_op = any
+        return agg_op, ret
 
     def visitExprWrap(self, ctx: XPath31GrammarParser.ExprWrapContext):
         return self.visit(ctx.expr())
 
     def visitExprWrapForceList(self, ctx: XPath31GrammarParser.ExprWrapForceListContext):
         if ctx.expr():
-            return self.visit(ctx.expr())
+            return coerce_to_list(self.visit(ctx.expr()))
         return []
 
     def visitPathFromRoot(self, ctx: XPath31GrammarParser.PathFromRootContext):
@@ -683,18 +677,23 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         raise ValueError('Unexpected')
 
 
-def test(root, expr):
-    print(f'---- res for {expr}')
+def evaluate(root, expr):
     input_stream = InputStream(expr)
     lexer = XPath31GrammarLexer(input_stream)
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(RaiseParseErrorListener())
     token_stream = CommonTokenStream(lexer)
     parser = XPath31GrammarParser(token_stream)
-
+    parser.removeErrorListeners()
+    parser.addErrorListener(RaiseParseErrorListener())
     tree = parser.expr()
-
     visitor = PathEvaluatorVisitor(root)
-    ret = tree.accept(visitor)
+    return tree.accept(visitor)
 
+
+def _test(root, expr):
+    print(f'---- res for {expr}')
+    ret = evaluate(root, expr)
     if isinstance(ret, list):
         for v in ret:
             if type(v) == Path:
@@ -709,14 +708,14 @@ def test(root, expr):
 if __name__ == '__main__':
     root = { 'a': { 'b': { 'c': 1, 'd': 2, 'e': -1, 'f': -2 } }, 'y': 3, 'z': 4, 'ptrs': { 'd_ptr': 'd', 'f_ptr': 'f' } }
 
-    test(root, '/')
-    test(root, '/*')
+    # evaluate(root, '/')
+    # evaluate(root, '/*')
     # test(root, '/a')
     # test(root, '/a/b')
     # test(root, '/a/*')
     # test(root, '/a/b/c')
     # test(root, '/a/b/d')
-    test(root, '/a/b/*')
+    # evaluate(root, '/a/b/*')
     # test(root, '/a/b/following::*')
     # test(root, '/a/b/following::z')
     # test(root, '/a/b/d/following-sibling::*')
@@ -745,7 +744,7 @@ if __name__ == '__main__':
     # test(root, '/a/"b"')  # Test literal in path
     # test(root, '/a/"b"/./d')   # Test dot in path
     # test(root, '/a/b/*')  # Test looking up another path to walk forward
-    test(root, '/a/b/*[. = /ptrs/*]')  # Test looking up another path to walk forward
+    # test(root, '/a/b/*[. = /ptrs/*]')  # Test looking up another path to walk forward
 
     # test(root, '-/a/b/*')
     # test(root, '-/*')
@@ -784,3 +783,8 @@ if __name__ == '__main__':
     # test(root, '[1,2,3] zip all = [1,"2","bad"]')
     # test(root, '[1,2,3] product = [1,"2","bad"]')
     # test(root, '[1,2,3] = [1,"2","bad"]')
+
+    # _test({}, '[] product all > 5')
+    # _test({}, '5 product all > []')
+    _test({}, '-1 and true')
+    _test({}, '-1 and false')
