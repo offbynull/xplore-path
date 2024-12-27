@@ -143,6 +143,9 @@ xpath
 // TODO: add join syntax - inner, left, right
 // TODO: add string concat operator back in
 // TODO: new matcher to test if a number is "close to" - floating point check
+// TODO: new matcher to test for a number range
+// TODO: add invocations into atomicorencapsulation
+// TODO: add operator "keys" that'll return labels of the current paths (if not path, return self)
 
 expr
     : (KW_ANY | KW_ALL) expr coerecefallback?             # ExprBoolAggregate
@@ -150,6 +153,7 @@ expr
     | expr (KW_INTERSECT | KW_EXCEPT) expr                # ExprSetIntersect
     | expr (KW_UNION | P) expr                            # ExprSetUnion
     | expr KW_TO expr                                     # ExprRange
+    | expr OB expr CB                                     # ExprFilter
     | expr orop expr coerecefallback?                     # ExprOr
     | expr andop expr coerecefallback?                    # ExprAnd
     | expr relop expr coerecefallback?                    # ExprComparison
@@ -209,8 +213,8 @@ path
     ;
 
 relpath
-    : relpath (SLASH | SS) relpath                             # RelPathChain
-    | (reversestep | forwardstep) (predicate | argumentlist)*  # RelPathStep
+    : relpath (SLASH | SS) relpath                 # RelPathChain
+    | (reversestep | forwardstep) (argumentlist)*  # RelPathStep
     ;
 
 forwardstep
@@ -220,8 +224,8 @@ forwardstep
     | KW_DESCENDANT_OR_SELF COLONCOLON expr  # ForwardStepDescendantOrSelf
     | KW_FOLLOWING_SIBLING COLONCOLON expr   # ForwardStepFollowingSibling
     | KW_FOLLOWING COLONCOLON expr           # ForwardStepFollowing
-    | expr                                   # ForwardStepValue
     | D                                      # ForwardStepDirectSelf
+    | expr                                   # ForwardStepValue
     ;
 
 reversestep
@@ -239,10 +243,6 @@ argumentlist
 
 argument
     : expr
-    ;
-
-predicate
-    : OB expr CB
     ;
 
 literal

@@ -1,8 +1,7 @@
-from abc import ABC
 from math import isnan
 from typing import ForwardRef, TypeVar, Type, Any, Literal, Hashable
 
-from xplore_path.path import Path
+from xplore_path.path.path import Path
 
 LABEL_TYPE = str | int | float | bool
 SINGLE_ENTRY_TYPE = str | int | float | bool | ForwardRef('label_matcher.label_matcher.Matcher')
@@ -26,7 +25,7 @@ def coerce_for_set_operation(value: Any) -> dict[tuple[Literal['PATH', 'RAW'], H
     ret = {}
     for v in value:
         if isinstance(v, Path):
-            k = 'PATH', tuple(v.label())
+            k = 'PATH', tuple(v.full_label())
         else:
             k = 'RAW', v
         try:
@@ -56,7 +55,7 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
         return v
     elif new_t == bool:
         if type(v) == Path:
-            return coerce_single_value(v.last().value, new_t)
+            return coerce_single_value(v.value(), new_t)
         elif type(v) == bool:
             return v
         elif type(v) == str:
@@ -67,7 +66,7 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
             return v != 0
     elif new_t == int:
         if type(v) == Path:
-            return coerce_single_value(v.last().value, new_t)
+            return coerce_single_value(v.value(), new_t)
         elif type(v) == bool:
             return int(v)
         elif type(v) == str:
@@ -81,7 +80,7 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
             return v
     elif new_t == float:
         if type(v) == Path:
-            return coerce_single_value(v.last().value, new_t)
+            return coerce_single_value(v.value(), new_t)
         elif type(v) == bool:
             return float(v)
         elif type(v) == str:
@@ -95,7 +94,7 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
             return float(v)
     elif new_t == str:
         if type(v) == Path:
-            return coerce_single_value(v.last().value, new_t)
+            return coerce_single_value(v.value(), new_t)
         elif type(v) == float and v.is_integer():
             return str(int(v))
         else:

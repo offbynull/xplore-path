@@ -10,7 +10,9 @@ from antlr4.InputStream import InputStream
 from XPath31GrammarLexer import XPath31GrammarLexer
 from XPath31GrammarParser import XPath31GrammarParser
 from XPath31GrammarVisitor import XPath31GrammarVisitor
-from path import Path, PathElement
+from paths.filesystem_path import FileSystemPath
+from xplore_path.path.path import Path
+from xplore_path.paths.python_object_path import PythonObjectPath
 from xplore_path.coercer_fallback.coercer_fallback import CoercerFallback
 from xplore_path.coercer_fallbacks.default_coercer_fallback import DefaultCoercerFallback
 from xplore_path.coercer_fallbacks.discard_coercer_fallback import DiscardCoercerFallback
@@ -31,55 +33,60 @@ class PrimeMode(Enum):
     PRIME_WITH_SELF = 'PRIME_WITH_SELF'
     PRIME_WITH_EMPTY = 'PRIME_WITH_EMPTY'
 
+EntityType = Path | int | float | str | bool | LabelMatcher
 
 @dataclass
 class Context:
-    original_root: Any
-    paths: list[Path]
-    state_stack: list[list[Path]]
+    original_root: Path
+    entities: list[EntityType]
+    entities_save_stack: list[list[EntityType]]
+
+    def __post_init__(self):
+        if self.original_root.full_label() != [None]:
+            raise ValueError('Root path in context not root path')
 
     def __add__(self, other):
-        return Context(self.original_root, self.paths + other.paths, [])
+        return Context(self.original_root, self.entities + other.entities, [])
 
     def __contains__(self, item):
-        return item in self.paths
+        return item in self.entities
 
     def __iter__(self):
-        return iter(self.paths)
+        return iter(self.entities)
 
     def __getitem__(self, index):
-        return self.paths[index]
+        return self.entities[index]
 
-    def reset_state(self, new_paths: PrimeMode | list[Path]):
-        if isinstance(new_paths, list):
-            self.paths = new_paths
-        elif new_paths == PrimeMode.PRIME_WITH_ROOT:
-            self.paths = [Path([PathElement(None, self.original_root)])]
-        elif new_paths == PrimeMode.PRIME_WITH_SELF:
-            self.paths = self.state_stack[-1][:]  # copy
-        elif new_paths == PrimeMode.PRIME_WITH_EMPTY:
-            self.paths = []
+    def reset_entities(self, new_entities: PrimeMode | list[EntityType]):
+        if isinstance(new_entities, list):
+            self.entities = new_entities
+        elif new_entities == PrimeMode.PRIME_WITH_ROOT:
+            self.entities = [self.original_root]
+        elif new_entities == PrimeMode.PRIME_WITH_SELF:
+            self.entities = self.entities_save_stack[-1][:]  # copy
+        elif new_entities == PrimeMode.PRIME_WITH_EMPTY:
+            self.entities = []
         else:
             raise ValueError('This should never happen')
 
-    def push_state(self, new_paths: PrimeMode | list[Path]):
-        self.state_stack.append(self.paths)
-        self.reset_state(new_paths)
+    def save_entities(self, new_paths: PrimeMode | list[EntityType]):
+        self.entities_save_stack.append(self.entities)
+        self.reset_entities(new_paths)
 
-    def pop_state(self) -> list[Path]:
-        current_paths = self.paths
-        self.paths = self.state_stack.pop()
+    def restore_entities(self) -> list[EntityType]:
+        current_paths = self.entities
+        self.entities = self.entities_save_stack.pop()
         return current_paths
 
-    def add_path(self, path: Path):
-        self.paths.append(path)
+    def add_entity(self, entity: EntityType):
+        self.entities.append(entity)
 
     @staticmethod
-    def prime(root_: Any):
+    def prime(root_: EntityType):
         return Context(
             original_root=root_,
-            paths=[Path([PathElement(None, root_)])],
-            state_stack=[]
+            entities=[root_],
+            entities_save_stack=[]
         )
 
 
@@ -395,65 +402,74 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
 
     def visitPathFromRoot(self, ctx: XPath31GrammarParser.PathFromRootContext):
         try:
-            self.context.push_state(new_paths=PrimeMode.PRIME_WITH_ROOT)
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
             return self.visit(ctx.relpath())
         finally:
-            self.context.pop_state()
+            self.context.restore_entities()
 
     def visitPathRootExact(self, ctx: XPath31GrammarParser.PathRootExactContext):
         try:
-            self.context.push_state(new_paths=PrimeMode.PRIME_WITH_ROOT)
-            return self.context.paths[:]
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
+            return self.context.entities[:]
         finally:
-            self.context.pop_state()
+            self.context.restore_entities()
 
     def visitPathFromAny(self, ctx: XPath31GrammarParser.PathFromAnyContext):
         try:
-            self.context.push_state(new_paths=PrimeMode.PRIME_WITH_ROOT)
-            self.context.paths = self.context.paths[0].all_descendants()
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
+            self.context.entities = self.context.entities[0].all_descendants()
             return self.visit(ctx.relpath())
         finally:
-            self.context.pop_state()
+            self.context.restore_entities()
 
     def visitPathFromRelative(self, ctx: XPath31GrammarParser.PathFromRelativeContext):
         try:
-            self.context.push_state(new_paths=PrimeMode.PRIME_WITH_SELF)
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
             return self.visit(ctx.relpath())
         finally:
-            self.context.pop_state()
+            self.context.restore_entities()
 
     def visitPathSelf(self, ctx: XPath31GrammarParser.PathSelfContext):
-        return self.context.paths[:]
+        return self.context.entities[:]
 
     def visitPathParent(self, ctx: XPath31GrammarParser.PathParentContext):
         new_paths = []
-        for path in self.context:
-            parent_path = path.parent()
-            if parent_path is not None:
-                new_paths.append(parent_path)
+        for e in self.context:
+            if isinstance(e, Path):
+                parent_path = e.parent()
+                if parent_path is not None:
+                    new_paths.append(parent_path)
         return new_paths
 
     def visitRelPathChain(self, ctx: XPath31GrammarParser.RelPathChainContext):
         # TODO: Pushing / popping state not required?
         try:
-            self.context.push_state(PrimeMode.PRIME_WITH_SELF)
+            self.context.save_entities(PrimeMode.PRIME_WITH_SELF)
             new_paths = []
             if ctx.SLASH() is not None:
                 left_contexts = self.visit(ctx.relpath(0))
                 for left_path in left_contexts:
-                    self.context.push_state(PrimeMode.PRIME_WITH_EMPTY)
-                    self.context.add_path(left_path)
+                    self.context.save_entities([left_path])
                     right_contexts = self.visit(ctx.relpath(1))
                     for right_path in right_contexts:
                         new_paths.append(right_path)
-                    self.context.pop_state()
+                    self.context.restore_entities()
             elif ctx.SS() is not None:
-                raise ValueError('IMPLEMENT ME')
+                left_contexts = []
+                for e in self.visit(ctx.relpath(0)):
+                    left_contexts.append(e)
+                    left_contexts += e.all_descendants()
+                for left_path in left_contexts:
+                    self.context.save_entities([left_path])
+                    right_contexts = self.visit(ctx.relpath(1))
+                    for right_path in right_contexts:
+                        new_paths.append(right_path)
+                    self.context.restore_entities()
             else:
                 raise ValueError('Unexpected')
             return new_paths
         finally:
-            self.context.pop_state()
+            self.context.restore_entities()
 
     def visitRelPathStep(self, ctx: XPath31GrammarParser.RelPathStepContext):
         if ctx.forwardstep() is not None:
@@ -462,80 +478,76 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             ret = self.visit(ctx.reversestep())
         else:
             raise ValueError('Unexpected')
-
-        if len(ctx.predicate()) > 0:
-            new_ret = []
-            for p in ctx.predicate():
-                self.context.push_state(ret)
-                try:
-                    new_ret += self.visit(p)
-                finally:
-                    self.context.pop_state()
-            ret = new_ret
-
         if len(ctx.argumentlist()) > 0:
             raise ValueError('IMPLEMENT ME')
-
         return ret
 
     def visitReverseStepParent(self, ctx: XPath31GrammarParser.ReverseStepParentContext):
         new_paths = []
-        for path in self.context:
-            parent_path = path.parent()
-            if parent_path is not None:
-                new_paths.append(parent_path)
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                parent_path = e.parent()
+                if parent_path is not None:
+                    new_paths.append(parent_path)
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepAncestor(self, ctx: XPath31GrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
-        for path in self.context:
-            new_paths += path.all_ancestors()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths += e.all_ancestors()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepPreceding(self, ctx: XPath31GrammarParser.ReverseStepPrecedingContext):
         new_paths = []
-        for path in self.context:
-            new_paths += path.preceding()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths += e.preceding()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepPrecedingSibling(self, ctx: XPath31GrammarParser.ReverseStepPrecedingContext):
         new_paths = []
-        for path in self.context:
-            new_paths += path.preceding_sibling()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths += e.preceding_sibling()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepAncestorOrSelf(self, ctx: XPath31GrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
-        for path in self.context:
-            new_paths.append(path)
-            new_paths += path.all_ancestors()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths.append(e)
+                new_paths += e.all_ancestors()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitReverseStepDirectParent(self, ctx: XPath31GrammarParser.ReverseStepDirectParentContext):
         new_paths = []
-        for path in self.context:
-            parent_path = path.parent()
-            if parent_path is not None:
-                new_paths.append(parent_path)
+        for e in self.context:
+            if isinstance(e, Path):
+                parent_path = e.parent()
+                if parent_path is not None:
+                    new_paths.append(parent_path)
         return new_paths
 
     def visitForwardStepChild(self, ctx: XPath31GrammarParser.ForwardStepChildContext):
         new_paths = []
-        for path in self.context:
-            new_paths += path.all_children()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths += e.all_children()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepDescendant(self, ctx: XPath31GrammarParser.ForwardStepDescendantContext):
         new_paths = []
-        for path in self.context:
-            new_paths += path.all_descendants()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths += e.all_descendants()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepSelf(self, ctx: XPath31GrammarParser.ForwardStepSelfContext):
@@ -543,35 +555,39 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
 
     def visitForwardStepDescendantOrSelf(self, ctx: XPath31GrammarParser.ForwardStepDescendantOrSelfContext):
         new_paths = []
-        for path in self.context:
-            new_paths.append(path)
-            new_paths += path.all_descendants()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths.append(e)
+                new_paths += e.all_descendants()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepFollowingSibling(self, ctx: XPath31GrammarParser.ForwardStepFollowingSiblingContext):
         new_paths = []
-        for path in self.context:
-            new_paths += path.following_sibling()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths += e.following_sibling()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepFollowing(self, ctx: XPath31GrammarParser.ForwardStepFollowingContext):
         new_paths = []
-        for path in self.context:
-            new_paths += path.following()
-        self.context.reset_state(new_paths)
+        for e in self.context:
+            if isinstance(e, Path):
+                new_paths += e.following()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepValue(self, ctx: XPath31GrammarParser.ForwardStepValueContext):
         new_paths = []
-        for p in self.context.paths:
-            new_paths += p.all_children()
-        self.context.reset_state(new_paths)
+        for e in self.context.entities:
+            if isinstance(e, Path):
+                new_paths += e.all_children()
+        self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.expr()))
 
     def visitForwardStepDirectSelf(self, ctx: XPath31GrammarParser.ForwardStepDirectSelfContext):
-        return self.context.paths[:]  # Return existing
+        return self.context.entities[:]  # Return existing
 
     def _walk_down(self, result: Any):
         to_matcher = lambda v: v if isinstance(v, LabelMatcher) else StrictLabelMatcher(v)
@@ -586,32 +602,35 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         # test
         combined_matcher = CombinedLabelMatcher(matchers)
         ret = []
-        for path in self.context:
-            label = path.last().label
+        for e in self.context:
+            if isinstance(e, Path):
+                label = e.label()
+            else:
+                label = e
             if combined_matcher.match(label):
-                ret.append(path)
+                ret.append(e)
         return ret
 
-    def visitPredicate(self, ctx: XPath31GrammarParser.PredicateContext):
-        orig_paths = self.context.paths
-        self.context.push_state(PrimeMode.PRIME_WITH_EMPTY)
+    def visitExprFilter(self, ctx: XPath31GrammarParser.ExprFilterContext):
+        orig_paths = self.visit(ctx.expr(0))
+        self.context.save_entities(PrimeMode.PRIME_WITH_EMPTY)
         try:
             ret = []
-            for p in orig_paths:
-                self.context.reset_state([p])
-                result = self.visit(ctx.expr())
+            for idx, p in enumerate(orig_paths):
+                self.context.reset_entities([p])
+                result = self.visit(ctx.expr(1))
                 # /a/b[bool] - return if true
                 # /a/b[int]  - return if coerces to true (non-zero + not nan)
                 # /a/b[str]  - return if coerces to true (non-empty)
                 # /a/b[list] - return if any coerce to true? (in original xpath it returns true if non-empty)
                 if (type(result) == bool and result == True) \
-                        or (type(result) in {int, float} and result == p.position_in_parent()) \
-                        or (type(result) == str and len(result) > 0) \
-                        or (type(result) == list and any(coerce_single_value(v, bool) for v in result)):
+                        or (type(result) == list and any(coerce_single_value(v, bool) for v in result)) \
+                        or (type(result) in {float, int} and result == idx) \
+                        or (type(result) == str and result == coerce_single_value(p, str)):
                     ret.append(p)
             return ret
         finally:
-            self.context.pop_state()
+            self.context.restore_entities()
 
     def _decode_str(self, text: str) -> str:
         mode = text[0]
@@ -680,7 +699,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         raise ValueError('Unexpected')
 
 
-def evaluate(root, expr):
+def evaluate(root: EntityType, expr: str):
     input_stream = InputStream(expr)
     lexer = XPath31GrammarLexer(input_stream)
     lexer.removeErrorListeners()
@@ -694,9 +713,13 @@ def evaluate(root, expr):
     return tree.accept(visitor)
 
 
-def _test(root, expr):
+def _test(root_obj, expr):
+    ret = _test_with_path(PythonObjectPath.create_root_path(root_obj), expr)
+
+
+def _test_with_path(p, expr):
     print(f'---- res for {expr}')
-    ret = evaluate(root, expr)
+    ret = evaluate(p, expr)
     if isinstance(ret, list):
         for v in ret:
             if type(v) == Path:
@@ -709,8 +732,7 @@ def _test(root, expr):
 
 
 if __name__ == '__main__':
-    root = { 'a': { 'b': { 'c': 1, 'd': 2, 'e': -1, 'f': -2 } }, 'y': 3, 'z': 4, 'ptrs': { 'd_ptr': 'd', 'f_ptr': 'f' } }
-
+    root = {'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}}
     # evaluate(root, '/')
     # evaluate(root, '/*')
     # test(root, '/a')
@@ -789,5 +811,14 @@ if __name__ == '__main__':
 
     # _test({}, '[] product all > 5')
     # _test({}, '5 product all > []')
-    _test({}, '-1 and true')
-    _test({}, '-1 and false')
+    # _test({}, '-1 and true')
+    # _test({}, '-1 and false')
+    # _test(root, '[5,7,9][1]')
+    # _test(root, '[5,7,9][. = 7]')
+    # _test(root, '.')
+    # _test(root, '/a')
+
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/*')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json//*')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json/address/city')
+    _test_with_path(FileSystemPath.create_root_path('~'), '/test.xml//*')

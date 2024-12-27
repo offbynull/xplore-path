@@ -107,6 +107,15 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XPath31GrammarParser#ExprFilter.
+    def enterExprFilter(self, ctx:XPath31GrammarParser.ExprFilterContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#ExprFilter.
+    def exitExprFilter(self, ctx:XPath31GrammarParser.ExprFilterContext):
+        pass
+
+
     # Enter a parse tree produced by XPath31GrammarParser#ExprAdditive.
     def enterExprAdditive(self, ctx:XPath31GrammarParser.ExprAdditiveContext):
         pass
@@ -350,21 +359,21 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#ForwardStepValue.
-    def enterForwardStepValue(self, ctx:XPath31GrammarParser.ForwardStepValueContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#ForwardStepValue.
-    def exitForwardStepValue(self, ctx:XPath31GrammarParser.ForwardStepValueContext):
-        pass
-
-
     # Enter a parse tree produced by XPath31GrammarParser#ForwardStepDirectSelf.
     def enterForwardStepDirectSelf(self, ctx:XPath31GrammarParser.ForwardStepDirectSelfContext):
         pass
 
     # Exit a parse tree produced by XPath31GrammarParser#ForwardStepDirectSelf.
     def exitForwardStepDirectSelf(self, ctx:XPath31GrammarParser.ForwardStepDirectSelfContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#ForwardStepValue.
+    def enterForwardStepValue(self, ctx:XPath31GrammarParser.ForwardStepValueContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#ForwardStepValue.
+    def exitForwardStepValue(self, ctx:XPath31GrammarParser.ForwardStepValueContext):
         pass
 
 
@@ -437,15 +446,6 @@ class XPath31GrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XPath31GrammarParser#argument.
     def exitArgument(self, ctx:XPath31GrammarParser.ArgumentContext):
-        pass
-
-
-    # Enter a parse tree produced by XPath31GrammarParser#predicate.
-    def enterPredicate(self, ctx:XPath31GrammarParser.PredicateContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#predicate.
-    def exitPredicate(self, ctx:XPath31GrammarParser.PredicateContext):
         pass
 
 

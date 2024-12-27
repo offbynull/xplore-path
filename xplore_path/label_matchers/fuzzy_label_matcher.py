@@ -12,4 +12,4 @@ class FuzzyLabelMatcher(LabelMatcher):
         value = coerce_single_value(value, str)
         if value is None:
             return False
-        return SequenceMatcher(None, self.pattern, ).ratio() >= 0.8
+        return SequenceMatcher(None, self.pattern, value).ratio() >= 0.8
