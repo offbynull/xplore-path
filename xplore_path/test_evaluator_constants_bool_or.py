@@ -36,8 +36,8 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(root, 'true or 1'), True)  # non-0 coerces to true
         self.assertEqual(evaluate(root, 'false or 1'), True)  # non-0 coerces to true
 
-        self.assertEqual(evaluate(root, '(-1) or true'), True)  # non-0 coerces to true (even if its negative)
-        self.assertEqual(evaluate(root, '(-1) or false'), True)  # non-0 coerces to true (even if its negative)
+        self.assertEqual(evaluate(root, '-1 or true'), True)  # non-0 coerces to true (even if its negative)
+        self.assertEqual(evaluate(root, '-1 or false'), True)  # non-0 coerces to true (even if its negative)
         self.assertEqual(evaluate(root, 'true or -1'), True)  # non-0 coerces to true (even if its negative)
         self.assertEqual(evaluate(root, 'false or -1'), True)  # non-0 coerces to true (even if its negative)
 

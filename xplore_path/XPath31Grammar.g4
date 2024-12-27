@@ -155,7 +155,15 @@ expr
     | expr relop expr coerecefallback?                    # ExprComparison
     | expr addop expr coerecefallback?                    # ExprAdditive
     | expr mulop expr coerecefallback?                    # ExprMultiplicative
-    | <assoc=right> (MINUS | PLUS) expr coerecefallback?  # ExprUnary
+    | atomicorencapsulate                                 # ExprAtomicOrEncapsulate
+    ;
+
+// Why isn't atomicorencapsulate directly tied embedded within expr? It was, and the ExprUnary alternative was defined
+// as "(MINUS | PLUS) expr". This worked fine except that when you did something like -1-1, it evaluated as -(1-1)
+// instead of (-1)-1. The later evaluation is the correct evaluation order, and that's what happens now with this
+// current grammar.
+atomicorencapsulate
+    : (MINUS | PLUS) atomicorencapsulate coerecefallback? # ExprUnary
     | OP expr CP                                          # ExprWrap
     | OB expr? CB                                         # ExprWrapForceList
     | matcher                                             # ExprMatcher

@@ -108,7 +108,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             coercer_fallback = self.visit(ctx.coerecefallback())
         else:
             coercer_fallback = DiscardCoercerFallback()
-        inner = self.visit(ctx.expr())
+        inner = self.visit(ctx.atomicorencapsulate())
         if ctx.MINUS() is not None:
             if type(inner) == list:
                 inner = [coerce_single_value(v, float) for v in inner]
@@ -125,6 +125,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                     return []
         elif ctx.PLUS() is not None:
             return inner  # Keep it as-is -- not required to do any manipulation here
+
+    def visitExprAtomicOrEncapsulate(self, ctx: XPath31GrammarParser.ExprAtomicOrEncapsulateContext):
+        return self.visit(ctx.atomicorencapsulate())
 
     def visitExprConcatenate(self, ctx: XPath31GrammarParser.ExprConcatenateContext):
         l = self.visit(ctx.expr(0))
@@ -241,7 +244,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             r = r[0]
         l = coerce_single_value(l, int)
         r = coerce_single_value(r, int)
-        if l is None and r is None:
+        if l is None or r is None:
             return []
         return [v for v in range(l, r+1)]
 
