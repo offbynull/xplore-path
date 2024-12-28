@@ -1,61 +1,58 @@
 import argparse
-import re
 import sys
 from pathlib import Path
+from typing import Any
 
 from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import Completer, Completion, ThreadedCompleter
-from prompt_toolkit.document import Document
+from prompt_toolkit.completion import ThreadedCompleter
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 
 import xplore_path.path.path
+from xplore_path.repl.utils import print_line
 from xplore_path.evaluator import evaluate
 from xplore_path.paths.filesystem_path import FileSystemPath
 from xplore_path.raise_parse_error_listener import ParseException
-
-tokens_text = (Path(__file__).parent / 'XPath31GrammarLexer.tokens').read_text()
-tokens = [re.search(r"'(.*?)'", line).group(1) for line in tokens_text.splitlines() if '\'' in line]
-tokens = sorted(tokens, reverse=True)
+from xplore_path.repl.path_completer import PathCompleter, TOKENS
 
 
-class CustomCompleter(Completer):
-    def __init__(self, p: FileSystemPath):
-        self.p = p
-
-    def get_completions(self, document: Document, complete_event):
-        if document.text == '':
-            yield Completion('/', start_position=0)
-            yield Completion('/*', start_position=0)
-            yield Completion('//*', start_position=0)
+def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
+    ret = []
+    if isinstance(v, xplore_path.path.path.Path):
+        if not full_labels:
+            ret += [('fg:ansiwhite bold', f'{v.label()}')]
         else:
-            text_before = document.text[:document.cursor_position+1]
-            end_idx = max(text_before.rfind('//'), text_before.rfind('/'))
-            if end_idx != -1:
-                partial_query = text_before[:end_idx+1]
-                unfinished_token = text_before[end_idx+1:]
-                inject_offset = end_idx - document.cursor_position
-                try:
-                    res = evaluate(self.p, partial_query)
-                    for p in res:
-                        for child_p in p.all_children():
-                            if isinstance(child_p, xplore_path.path.path.Path) and type(child_p.label()) == str and child_p.label().startswith(unfinished_token):
-                                yield Completion(f'/{child_p.label()}', start_position=inject_offset, style='bg:ansiyellow fg:ansiblack')
-                    yield Completion('/*', start_position=inject_offset)
-                    yield Completion('//*', start_position=inject_offset)
-                    for p in res:
-                        for child_p in p.all_children():
-                            if isinstance(child_p, xplore_path.path.path.Path):
-                                yield Completion(f'/{child_p.label()}', start_position=inject_offset)
-                except Exception:
-                    ... # do nothing
-        for token in tokens:
-            yield Completion(token, start_position=0, style='bg:ansigray fg:ansiblack')
+            for l in v.full_label()[1:]:
+                if l in TOKENS:
+                    l = l.replace('\'', '\'\'')
+                    l = f'\'{l}\''
+                ret.append(('fg:ansigray', '/'))
+                ret.append(('fg:ansiwhite bold', f'{l}'))
+
+        highlight = ''
+        cnt = len(v.all_children())
+        if cnt > 0:
+            highlight = 'fg:ansiwhite bold'
+        ret += [
+            ('', ' child_count='),
+            (highlight, f'{cnt}')
+        ]
+        data = v.value()
+    else:
+        ret += [('', '<NO_LABEL> ')]
+        data = v
+
+    ret += [('', ' value=')]
+    if type(data) in {int, float, bool, str}:
+        ret += [('fg:ansiwhite bold', f'({type(data).__name__}) {data}')]
+    else:
+        ret += [('', f'({type(data).__name__}) {data}')]
+
+    return ret
 
 
-
-style = Style.from_dict({
+_STYLES = Style.from_dict({
     'completion-menu.completion': 'bg:#008888 #ffffff',
     'completion-menu.completion.current': 'bg:#00aaaa #000000',
     'scrollbar.background': 'bg:#88aaaa',
@@ -106,11 +103,11 @@ def main(active_dir_path: Path):
 
 
     p = FileSystemPath.create_root_path(active_dir_path)
-    completer = ThreadedCompleter(CustomCompleter(p))  # Wrap in ThreadedCompleter because completions can take a while
+    completer = ThreadedCompleter(PathCompleter(p))  # Wrap in ThreadedCompleter because completions can take a while
     session = PromptSession(
         completer=completer,
         complete_while_typing=True,
-        style=style,
+        style=_STYLES,
         history=FileHistory(Path('~/.xplore_path_history').expanduser()),
         key_bindings=bindings
     )
@@ -137,28 +134,6 @@ def main(active_dir_path: Path):
         ('           ', '\n')
     ])
 
-    def print_output_line(line):
-        nonlocal session
-        if not truncate_long_lines:
-            session.app.print_text(line + [('', '\n')])
-            return
-        max_width = session.app.output.get_size().columns
-        next_line = []
-        curr_width = 0
-        for style, text in line:
-            next_curr_width = curr_width + len(text)
-            if next_curr_width >= max_width:
-                text = text[:max_width-curr_width]  # truncate to match max_width
-                text = text[:-1]  # remove last char as well
-                next_line.append((style, text)) # add
-                next_line.append(('bg:ansired', '>')) # replace last char with a red > to indicate spillover
-            else:
-                next_line.append((style, text))
-            curr_width = next_curr_width
-        next_line.append(('', '\n'))
-        session.app.print_text(next_line)
-
-
     default_prompt = ''
     while True:
         try:
@@ -169,22 +144,10 @@ def main(active_dir_path: Path):
             break
         try:
             query_res = evaluate(p, expr)
-            if isinstance(query_res, list):
-                for v in query_res:
-                    # trim root node's label when printing
-                    if isinstance(v, xplore_path.path.path.Path):
-                        label = v.full_label() if full_labels else v.label()
-                        print_output_line([
-                            ('', '  '), ('fg:ansiwhite bold', f'{label}'), ('fg:ansigray', f': {v.value()}')
-                        ])
-                    else:
-                        print_output_line([
-                            ('', '  '), ('fg:ansigray', f'{v}')
-                        ])
-            else:
-                print_output_line([
-                    ('', '  '), ('fg:ansigray', f'{query_res}')
-                ])
+            if not isinstance(query_res, list):
+                query_res = [query_res]
+            for v in query_res:
+                print_line(session, _single_result_to_line(v, full_labels), truncate_long_lines)
         except ParseException as e:
             query_res = None
             print(f'Unable to parse expression: {e}')

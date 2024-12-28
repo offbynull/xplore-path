@@ -133,7 +133,7 @@ class CombinedFileLoader(FileLoader):
                     return l.load(p)
                 except Exception:
                     ...
-        raise ValueError('Not loadable')
+        return []
 
 
 
