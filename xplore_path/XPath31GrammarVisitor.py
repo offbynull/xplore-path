@@ -284,8 +284,38 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XPath31GrammarParser#MatcherCaseInsensitive.
+    def visitMatcherCaseInsensitive(self, ctx:XPath31GrammarParser.MatcherCaseInsensitiveContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#MatcherNumericRange.
+    def visitMatcherNumericRange(self, ctx:XPath31GrammarParser.MatcherNumericRangeContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XPath31GrammarParser#MatcherWildcard.
     def visitMatcherWildcard(self, ctx:XPath31GrammarParser.MatcherWildcardContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#NumericRangeMatcherInclusive.
+    def visitNumericRangeMatcherInclusive(self, ctx:XPath31GrammarParser.NumericRangeMatcherInclusiveContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#NumericRangeMatcherBounded.
+    def visitNumericRangeMatcherBounded(self, ctx:XPath31GrammarParser.NumericRangeMatcherBoundedContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#NumericRangeMatcherTolerance.
+    def visitNumericRangeMatcherTolerance(self, ctx:XPath31GrammarParser.NumericRangeMatcherToleranceContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#numericRangeMatcherLiteral.
+    def visitNumericRangeMatcherLiteral(self, ctx:XPath31GrammarParser.NumericRangeMatcherLiteralContext):
         return self.visitChildren(ctx)
 
 

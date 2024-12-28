@@ -1,6 +1,8 @@
 import math
 import unittest
 
+from label_matchers.ignore_case_label_matcher import IgnoreCaseLabelMatcher
+from label_matchers.numeric_range_label_matcher import NumericRangeLabelMatcher
 from paths.dummy_path import DummyPath
 from xplore_path.evaluator import evaluate
 from xplore_path.label_matchers.fuzzy_label_matcher import FuzzyLabelMatcher
@@ -34,6 +36,15 @@ class EvaluatorTest(unittest.TestCase):
         self.assertIsInstance(evaluate(DummyPath(), 'f\'hello\''), FuzzyLabelMatcher)
         self.assertIsInstance(evaluate(DummyPath(), 'g"hello"'), GlobLabelMatcher)
         self.assertIsInstance(evaluate(DummyPath(), 'g\'hello\''), GlobLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), 'i"hello"'), IgnoreCaseLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), 'i\'hello\''), IgnoreCaseLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), '~1:5'), NumericRangeLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), '~[1:5]'), NumericRangeLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), '~[1:5)'), NumericRangeLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), '~(1:5]'), NumericRangeLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), '~(1:5)'), NumericRangeLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), '~1'), NumericRangeLabelMatcher)
+        self.assertIsInstance(evaluate(DummyPath(), '~1@0.001'), NumericRangeLabelMatcher)
 
     def test_must_wrap_literals_as_list_when_using_square_brackets(self):
         self.assertEqual(evaluate(DummyPath(), '[]'), [])

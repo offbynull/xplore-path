@@ -6,7 +6,9 @@ grammar XPath31Grammar;
 
 
 //LEXER
+TILDE      : '~';
 BANG       : '!';
+AT         : '@';
 CB         : ']';
 CC         : '}';
 COLON      : ':';
@@ -75,15 +77,16 @@ KW_LABEL                  : 'label';
 // This isn't a complete list of tokens in the language.
 // Keywords and symbols are terminals.
 
-RegexMatcher     : 'r' FragStringLiteral;
-GlobMatcher      : 'g' FragStringLiteral;
-StrictMatcher    : 's' FragStringLiteral;
-FuzzyMatcher     : 'f' FragStringLiteral;
-IntegerLiteral   : FragDigits;
-DecimalLiteral   : '.' FragDigits | FragDigits '.' [0-9]*;
-DoubleLiteral    : ('.' FragDigits | FragDigits ('.' [0-9]*)?) [eE] [+-]? FragDigits;
-StringLiteral    : FragStringLiteral;
-BooleanLiteral   : 'true' | 'false';
+RegexMatcher      : 'r' FragStringLiteral;
+GlobMatcher       : 'g' FragStringLiteral;
+StrictMatcher     : 's' FragStringLiteral;
+FuzzyMatcher      : 'f' FragStringLiteral;
+IgnoreCaseMatcher : 'i' FragStringLiteral;
+IntegerLiteral    : FragDigits;
+DecimalLiteral    : '.' FragDigits | FragDigits '.' [0-9]*;
+DoubleLiteral     : ('.' FragDigits | FragDigits ('.' [0-9]*)?) [eE] [+-]? FragDigits;
+StringLiteral     : FragStringLiteral;
+BooleanLiteral    : 'true' | 'false';
 fragment FragStringLiteral : '"' (~["] | FragEscapeQuot)* '"' | '\'' (~['] | FragEscapeApos)* '\'';
 fragment FragEscapeQuot : '""';
 fragment FragEscapeApos : '\'\'';
@@ -262,11 +265,23 @@ literal
     ;
 
 matcher
-    : StrictMatcher  # MatcherStrict
-    | RegexMatcher   # MatcherRegex
-    | GlobMatcher    # MatcherGlob
-    | FuzzyMatcher   # MatcherFuzzy
-    | STAR           # MatcherWildcard
+    : StrictMatcher        # MatcherStrict
+    | RegexMatcher         # MatcherRegex
+    | GlobMatcher          # MatcherGlob
+    | FuzzyMatcher         # MatcherFuzzy
+    | IgnoreCaseMatcher    # MatcherCaseInsensitive
+    | numericRangeMatcher  # MatcherNumericRange
+    | STAR                 # MatcherWildcard
+    ;
+
+numericRangeMatcher
+    : TILDE numericRangeMatcherLiteral COLON numericRangeMatcherLiteral                      # NumericRangeMatcherInclusive
+    | TILDE (OP | OB) numericRangeMatcherLiteral COLON numericRangeMatcherLiteral (CP | CB)  # NumericRangeMatcherBounded
+    | TILDE numericRangeMatcherLiteral (AT numericRangeMatcherLiteral)?                      # NumericRangeMatcherTolerance
+    ;
+
+numericRangeMatcherLiteral
+    : MINUS? (IntegerLiteral | DecimalLiteral | DoubleLiteral | KW_INF)
     ;
 
 coerecefallback

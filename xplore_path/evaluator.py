@@ -7,6 +7,8 @@ from typing import Any, Callable, Type
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
 
+from xplore_path.label_matchers.ignore_case_label_matcher import IgnoreCaseLabelMatcher
+from xplore_path.label_matchers.numeric_range_label_matcher import NumericRangeLabelMatcher
 from xplore_path.XPath31GrammarLexer import XPath31GrammarLexer
 from xplore_path.XPath31GrammarParser import XPath31GrammarParser
 from xplore_path.XPath31GrammarVisitor import XPath31GrammarVisitor
@@ -288,6 +290,8 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if required_type is not None:
                 l_ = coerce_single_value(l_, required_type)  # noqa
                 r_ = coerce_single_value(r_, required_type)  # noqa
+            elif isinstance(l_, LabelMatcher) or isinstance(r_, LabelMatcher):
+                ...  # skip cohersion if either is a label matcher
             else:
                 new_r_ = coerce_single_value(r_, type(l_))
                 if new_r_ is None:
@@ -329,11 +333,20 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             coercer_fallback = DefaultCoercerFallback(False)
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
+
+        def eq_op(_l, _r):
+            if isinstance(_l, LabelMatcher):
+                return _l.match(_r)
+            elif isinstance(_r, LabelMatcher):
+                return _r.match(_l)
+            # WHAT IF THEY'RE BOTH LABEL MATCHERS? ALWAYS RETURN FALSE?
+            return _l == _r
+
         if ctx.relop().EQ():
-            op = lambda _l, _r: _l == _r
+            op = eq_op
             numerics_required = None
         elif ctx.relop().NE():
-            op = lambda _l, _r: _l != _r
+            op = lambda _l, _r: not eq_op(_l, _r)
             numerics_required = None
         elif ctx.relop().LT():
             op = lambda _l, _r: _l < _r
@@ -699,8 +712,52 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         pattern = self._decode_str(ctx.getText()[1:])
         return FuzzyLabelMatcher(pattern)
 
+    def visitMatcherCaseInsensitive(self, ctx: XPath31GrammarParser.MatcherCaseInsensitiveContext):
+        pattern = self._decode_str(ctx.getText()[1:])
+        return IgnoreCaseLabelMatcher(pattern)
+
+    def visitMatcherNumericRange(self, ctx: XPath31GrammarParser.MatcherNumericRangeContext):
+        return self.visit(ctx.numericRangeMatcher())
+
     def visitMatcherWildcard(self, ctx: XPath31GrammarParser.MatcherWildcardContext):
         return WildcardLabelMatcher()
+
+    def visitNumericRangeMatcherTolerance(self, ctx: XPath31GrammarParser.NumericRangeMatcherToleranceContext):
+        value = self.visit(ctx.numericRangeMatcherLiteral(0))
+        if ctx.numericRangeMatcherLiteral(1):
+            tolerance = self.visit(ctx.numericRangeMatcherLiteral(1))
+        else:
+            tolerance = 0.001
+        min_ = value - tolerance
+        max_ = value + tolerance
+        return NumericRangeLabelMatcher(min_, True, max_, True)
+
+    def visitNumericRangeMatcherBounded(self, ctx: XPath31GrammarParser.NumericRangeMatcherBoundedContext):
+        min_ = self.visit(ctx.numericRangeMatcherLiteral(0))
+        min_inclusive = bool(ctx.OB())
+        max_ = self.visit(ctx.numericRangeMatcherLiteral(1))
+        max_inclusive = bool(ctx.CB())
+        return NumericRangeLabelMatcher(min_, min_inclusive, max_, max_inclusive)
+
+    def visitNumericRangeMatcherInclusive(self, ctx: XPath31GrammarParser.NumericRangeMatcherInclusiveContext):
+        min_ = self.visit(ctx.numericRangeMatcherLiteral(0))
+        max_ = self.visit(ctx.numericRangeMatcherLiteral(1))
+        return NumericRangeLabelMatcher(min_, True, max_, True)
+
+    def visitNumericRangeMatcherLiteral(self, ctx: XPath31GrammarParser.NumericRangeMatcherLiteralContext):
+        if ctx.IntegerLiteral():
+            v = int(ctx.IntegerLiteral().getText())
+        elif ctx.DecimalLiteral():
+            v = float(ctx.DecimalLiteral().getText())
+        elif ctx.DoubleLiteral():
+            v = float(ctx.DoubleLiteral().getText())
+        elif ctx.KW_INF():
+            v = math.inf
+        else:
+            raise ValueError('Unexpected')
+        if ctx.MINUS():
+            v = -v
+        return v
 
     def visitCoerecefallback(self, ctx: XPath31GrammarParser.CoerecefallbackContext):
         if ctx.KW_DISCARD():
@@ -842,5 +899,7 @@ if __name__ == '__main__':
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name[. = "John Doe"]')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*')
-    _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*[./Name = "John Doe"]')
+    _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*[./Name = f"John Do"]')
+    _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*[f"John Do" = ./Name]')
+    _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*[r"J.*" = ./Name]')
     # _test_with_path(FileSystemPath.create_root_path('~'), '(/test.csv/*)[./Name/r"J.*"]')

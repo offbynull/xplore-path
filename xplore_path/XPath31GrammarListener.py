@@ -503,12 +503,66 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XPath31GrammarParser#MatcherCaseInsensitive.
+    def enterMatcherCaseInsensitive(self, ctx:XPath31GrammarParser.MatcherCaseInsensitiveContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#MatcherCaseInsensitive.
+    def exitMatcherCaseInsensitive(self, ctx:XPath31GrammarParser.MatcherCaseInsensitiveContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#MatcherNumericRange.
+    def enterMatcherNumericRange(self, ctx:XPath31GrammarParser.MatcherNumericRangeContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#MatcherNumericRange.
+    def exitMatcherNumericRange(self, ctx:XPath31GrammarParser.MatcherNumericRangeContext):
+        pass
+
+
     # Enter a parse tree produced by XPath31GrammarParser#MatcherWildcard.
     def enterMatcherWildcard(self, ctx:XPath31GrammarParser.MatcherWildcardContext):
         pass
 
     # Exit a parse tree produced by XPath31GrammarParser#MatcherWildcard.
     def exitMatcherWildcard(self, ctx:XPath31GrammarParser.MatcherWildcardContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#NumericRangeMatcherInclusive.
+    def enterNumericRangeMatcherInclusive(self, ctx:XPath31GrammarParser.NumericRangeMatcherInclusiveContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#NumericRangeMatcherInclusive.
+    def exitNumericRangeMatcherInclusive(self, ctx:XPath31GrammarParser.NumericRangeMatcherInclusiveContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#NumericRangeMatcherBounded.
+    def enterNumericRangeMatcherBounded(self, ctx:XPath31GrammarParser.NumericRangeMatcherBoundedContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#NumericRangeMatcherBounded.
+    def exitNumericRangeMatcherBounded(self, ctx:XPath31GrammarParser.NumericRangeMatcherBoundedContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#NumericRangeMatcherTolerance.
+    def enterNumericRangeMatcherTolerance(self, ctx:XPath31GrammarParser.NumericRangeMatcherToleranceContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#NumericRangeMatcherTolerance.
+    def exitNumericRangeMatcherTolerance(self, ctx:XPath31GrammarParser.NumericRangeMatcherToleranceContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#numericRangeMatcherLiteral.
+    def enterNumericRangeMatcherLiteral(self, ctx:XPath31GrammarParser.NumericRangeMatcherLiteralContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#numericRangeMatcherLiteral.
+    def exitNumericRangeMatcherLiteral(self, ctx:XPath31GrammarParser.NumericRangeMatcherLiteralContext):
         pass
 
 
