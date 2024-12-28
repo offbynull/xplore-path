@@ -48,7 +48,7 @@ class CustomCompleter(Completer):
                         for child_p in p.all_children():
                             if isinstance(child_p, xplore_path.path.path.Path):
                                 yield Completion(f'/{child_p.label()}', start_position=inject_offset)
-                except ParseException:
+                except Exception:
                     ... # do nothing
         for token in tokens:
             yield Completion(token, start_position=0, style='bg:ansigray fg:ansiblack')
@@ -72,6 +72,7 @@ __  __     _               ___      _   _
      |_|                                     
 '''.strip()
 
+
 def main(active_dir_path: Path):
     bindings = KeyBindings()
 
@@ -81,10 +82,17 @@ def main(active_dir_path: Path):
         nonlocal full_labels
         full_labels = not full_labels
 
+    truncate_long_lines = True
+    @bindings.add('c-t')
+    def _(event):
+        nonlocal truncate_long_lines
+        truncate_long_lines = not truncate_long_lines
+
     query_res = None
     def get_toolbar_text():
         nonlocal query_res
         nonlocal full_labels
+        nonlocal truncate_long_lines
         if query_res is None:
             toolbar_text = 'Type query and hit enter'
         else:
@@ -93,6 +101,7 @@ def main(active_dir_path: Path):
             else:
                 toolbar_text = f'1 result'
         toolbar_text += '  ' + ('[FULL LABELS]' if full_labels else '[LOCAL LABELS]')
+        toolbar_text += ' ' + ('[TRUNC]' if truncate_long_lines else '[NO TRUNC]')
         return toolbar_text
 
 
@@ -115,8 +124,10 @@ def main(active_dir_path: Path):
         ('           ', '\n'),
         ('           ', 'Keys:\n'),
         ('fg:ansiblue', '  Enter'), ('', ' to execute\n'),
-        ('fg:ansiblue', '  TAB'), ('', ' for autocomplete\n'),
-        ('fg:ansiblue', '  ↑↓'), ('', 'to navigate history\n'),
+        ('fg:ansiblue', '  Tab'), ('', ' for autocomplete\n'),
+        ('fg:ansiblue', '  ↑↓'), ('', ' to navigate history\n'),
+        ('fg:ansiblue', '  Ctrl-L'), ('', ' to turn on/off full labels in outputs\n'),
+        ('fg:ansiblue', '  Ctrl-T'), ('', ' to turn on/off truncating outputs\n'),
         ('fg:ansiblue', '  Ctrl-C'), ('', ' to exit\n'),
         ('           ', '\n'),
         ('           ', 'Examples:\n'),
@@ -125,6 +136,28 @@ def main(active_dir_path: Path):
         ('fg:ansiblue', '  /apple/*[./cherry]'), ('', ' - get all children of apple who have a child named cherry\n'),
         ('           ', '\n')
     ])
+
+    def print_output_line(line):
+        nonlocal session
+        if not truncate_long_lines:
+            session.app.print_text(line + [('', '\n')])
+            return
+        max_width = session.app.output.get_size().columns
+        next_line = []
+        curr_width = 0
+        for style, text in line:
+            next_curr_width = curr_width + len(text)
+            if next_curr_width >= max_width:
+                text = text[:max_width-curr_width]  # truncate to match max_width
+                text = text[:-1]  # remove last char as well
+                next_line.append((style, text)) # add
+                next_line.append(('bg:ansired', '>')) # replace last char with a red > to indicate spillover
+            else:
+                next_line.append((style, text))
+            curr_width = next_curr_width
+        next_line.append(('', '\n'))
+        session.app.print_text(next_line)
+
 
     default_prompt = ''
     while True:
@@ -139,12 +172,19 @@ def main(active_dir_path: Path):
             if isinstance(query_res, list):
                 for v in query_res:
                     # trim root node's label when printing
-                    label = v.full_label() if full_labels else v.label()
-                    session.app.print_text([
-                        ('', '  '), ('fg:ansiwhite bold', f'{label}'), ('fg:ansigray', f': {v.value()}\n')
-                    ])
+                    if isinstance(v, xplore_path.path.path.Path):
+                        label = v.full_label() if full_labels else v.label()
+                        print_output_line([
+                            ('', '  '), ('fg:ansiwhite bold', f'{label}'), ('fg:ansigray', f': {v.value()}')
+                        ])
+                    else:
+                        print_output_line([
+                            ('', '  '), ('fg:ansigray', f'{v}')
+                        ])
             else:
-                print(f'  {query_res}')
+                print_output_line([
+                    ('', '  '), ('fg:ansigray', f'{query_res}')
+                ])
         except ParseException as e:
             query_res = None
             print(f'Unable to parse expression: {e}')

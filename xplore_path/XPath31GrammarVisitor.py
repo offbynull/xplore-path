@@ -9,8 +9,8 @@ else:
 
 class XPath31GrammarVisitor(ParseTreeVisitor):
 
-    # Visit a parse tree produced by XPath31GrammarParser#xpath.
-    def visitXpath(self, ctx:XPath31GrammarParser.XpathContext):
+    # Visit a parse tree produced by XPath31GrammarParser#xplorepath.
+    def visitXplorepath(self, ctx:XPath31GrammarParser.XplorepathContext):
         return self.visitChildren(ctx)
 
 
@@ -36,6 +36,11 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XPath31GrammarParser#ExprComparison.
     def visitExprComparison(self, ctx:XPath31GrammarParser.ExprComparisonContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#ExprExtractLabel.
+    def visitExprExtractLabel(self, ctx:XPath31GrammarParser.ExprExtractLabelContext):
         return self.visitChildren(ctx)
 
 

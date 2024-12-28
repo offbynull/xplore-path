@@ -69,6 +69,7 @@ KW_DISCARD                : 'discard';
 KW_FAIL                   : 'fail';
 KW_NAN                    : 'nan';
 KW_INF                    : 'inf';
+KW_LABEL                  : 'label';
 
 // A.2.1. TERMINAL SYMBOLS
 // This isn't a complete list of tokens in the language.
@@ -136,7 +137,7 @@ Whitespace: ('\u000d' | '\u000a' | '\u0020' | '\u0009')+ -> skip;
 
 
 //PARSER
-xpath
+xplorepath
     : expr EOF
     ;
 
@@ -153,6 +154,7 @@ expr
     | expr (KW_INTERSECT | KW_EXCEPT) expr                # ExprSetIntersect
     | expr (KW_UNION | P) expr                            # ExprSetUnion
     | expr KW_TO expr                                     # ExprRange
+    | KW_LABEL expr                                       # ExprExtractLabel
     | expr orop expr coerecefallback?                     # ExprOr
     | expr andop expr coerecefallback?                    # ExprAnd
     | expr relop expr coerecefallback?                    # ExprComparison

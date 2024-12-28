@@ -101,6 +101,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         self.context = Context.prime(root)
         self.context_save_stack = []
 
+    def visitXplorepath(self, ctx: XPath31GrammarParser.XplorepathContext):
+        return self.visit(ctx.expr())
+
     def visitExprPath(self, ctx: XPath31GrammarParser.ExprPathContext):
         entities = self.visit(ctx.path())
         if ctx.filter_():
@@ -257,6 +260,14 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         if l is None or r is None:
             return []
         return [v for v in range(l, r+1)]
+
+    def visitExprExtractLabel(self, ctx: XPath31GrammarParser.ExprExtractLabelContext):
+        l = self.visit(ctx.expr())
+        if type(l) is list:
+            return [l_.label() for l_ in l if isinstance(l_, Path)]
+        elif isinstance(l, Path):
+            return l.label()
+        return []
 
     def _apply_binary_boolean_op(
             self,
@@ -716,13 +727,13 @@ def evaluate(root: EntityType, expr: str):
     parser = XPath31GrammarParser(token_stream)
     parser.removeErrorListeners()
     parser.addErrorListener(RaiseParseErrorListener())
-    tree = parser.expr()
+    tree = parser.xplorepath()
     visitor = PathEvaluatorVisitor(root)
     return tree.accept(visitor)
 
 
 def _test(root_obj, expr):
-    ret = _test_with_path(PythonObjectPath.create_root_path(root_obj), expr)
+    return _test_with_path(PythonObjectPath.create_root_path(root_obj), expr)
 
 
 def _test_with_path(p, expr):

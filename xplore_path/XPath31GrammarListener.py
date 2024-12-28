@@ -8,12 +8,12 @@ else:
 # This class defines a complete listener for a parse tree produced by XPath31GrammarParser.
 class XPath31GrammarListener(ParseTreeListener):
 
-    # Enter a parse tree produced by XPath31GrammarParser#xpath.
-    def enterXpath(self, ctx:XPath31GrammarParser.XpathContext):
+    # Enter a parse tree produced by XPath31GrammarParser#xplorepath.
+    def enterXplorepath(self, ctx:XPath31GrammarParser.XplorepathContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#xpath.
-    def exitXpath(self, ctx:XPath31GrammarParser.XpathContext):
+    # Exit a parse tree produced by XPath31GrammarParser#xplorepath.
+    def exitXplorepath(self, ctx:XPath31GrammarParser.XplorepathContext):
         pass
 
 
@@ -59,6 +59,15 @@ class XPath31GrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XPath31GrammarParser#ExprComparison.
     def exitExprComparison(self, ctx:XPath31GrammarParser.ExprComparisonContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#ExprExtractLabel.
+    def enterExprExtractLabel(self, ctx:XPath31GrammarParser.ExprExtractLabelContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#ExprExtractLabel.
+    def exitExprExtractLabel(self, ctx:XPath31GrammarParser.ExprExtractLabelContext):
         pass
 
 
