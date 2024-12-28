@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
+import tarfile
+import tempfile
+import zipfile
 from abc import ABC, abstractmethod
+from tempfile import TemporaryDirectory
 from typing import Hashable, Any
 from xml.etree import ElementTree
 
@@ -151,12 +156,16 @@ class FileSystemPath(Path):
             parent: Path | None,
             label: Hashable | None,  # None for root - None is also a hashable type
             value: pathlib.Path,
-            file_loader: FileLoader | None
+            file_loader: FileLoader | None,
+            workspace: pathlib.Path | None = None
     ):
         super().__init__(parent, label, value)
         if file_loader is None:
             file_loader = _DEFAULT_FILE_LOADER
         self.file_loader = file_loader
+        if workspace is None:
+            workspace = pathlib.Path(TemporaryDirectory(prefix='filesystem_path_workspace', delete=False).name)
+        self.workspace = workspace
 
     def all_children(self) -> list[Path]:
         ret = []
@@ -165,10 +174,31 @@ class FileSystemPath(Path):
             if c.is_file():
                 if self.file_loader.is_loadable(c):
                     ret.append(PythonObjectPath(self, c.name, self.file_loader.load(c)))
+                elif c.suffix == '.zip':
+                    hash = hashlib.sha256(str(c.absolute()).encode()).hexdigest()
+                    out_dir = self.workspace / hash
+                    if not out_dir.exists():
+                        with zipfile.ZipFile(c, 'r') as f:
+                            f.extractall(out_dir)
+                    ret.append(FileSystemPath(self, c.name, out_dir, self.file_loader, self.workspace))
+                elif c.suffix == '.tar':
+                    hash = hashlib.sha256(str(c.absolute()).encode()).hexdigest()
+                    out_dir = self.workspace / hash
+                    if not out_dir.exists():
+                        with tarfile.open(c, 'r') as f:
+                            f.extractall(out_dir)
+                    ret.append(FileSystemPath(self, c.name, out_dir, self.file_loader, self.workspace))
+                elif c.suffixes == ['.tar', '.gz']:
+                    hash = hashlib.sha256(str(c.absolute()).encode()).hexdigest()
+                    out_dir = self.workspace / hash
+                    if not out_dir.exists():
+                        with tarfile.open(c, 'r:gz') as f:
+                            f.extractall(out_dir)
+                    ret.append(FileSystemPath(self, c.name, out_dir, self.file_loader, self.workspace))
                 else:
                     ret.append(PythonObjectPath(self, c.name, []))
             elif c.is_dir():
-                ret.append(FileSystemPath(self, c.name, c, self.file_loader))
+                ret.append(FileSystemPath(self, c.name, c, self.file_loader, self.workspace))
         return ret
 
     @staticmethod
