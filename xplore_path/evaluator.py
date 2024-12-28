@@ -7,10 +7,10 @@ from typing import Any, Callable, Type
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
 
-from XPath31GrammarLexer import XPath31GrammarLexer
-from XPath31GrammarParser import XPath31GrammarParser
-from XPath31GrammarVisitor import XPath31GrammarVisitor
-from paths.filesystem_path import FileSystemPath
+from xplore_path.XPath31GrammarLexer import XPath31GrammarLexer
+from xplore_path.XPath31GrammarParser import XPath31GrammarParser
+from xplore_path.XPath31GrammarVisitor import XPath31GrammarVisitor
+from xplore_path.paths.filesystem_path import FileSystemPath
 from xplore_path.path.path import Path
 from xplore_path.paths.python_object_path import PythonObjectPath
 from xplore_path.coercer_fallback.coercer_fallback import CoercerFallback

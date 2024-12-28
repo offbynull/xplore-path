@@ -11,7 +11,7 @@ import yaml
 from PyPDF2 import PdfReader
 from docx import Document
 
-from paths.python_object_path import PythonObjectPath
+from xplore_path.paths.python_object_path import PythonObjectPath
 from xplore_path.path.path import Path
 
 
@@ -166,7 +166,7 @@ class FileSystemPath(Path):
                 if self.file_loader.is_loadable(c):
                     ret.append(PythonObjectPath(self, c.name, self.file_loader.load(c)))
                 else:
-                    ret.append(PythonObjectPath(self, c.name, None))
+                    ret.append(PythonObjectPath(self, c.name, []))
             elif c.is_dir():
                 ret.append(FileSystemPath(self, c.name, c, self.file_loader))
         return ret
