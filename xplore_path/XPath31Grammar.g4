@@ -153,7 +153,6 @@ expr
     | expr (KW_INTERSECT | KW_EXCEPT) expr                # ExprSetIntersect
     | expr (KW_UNION | P) expr                            # ExprSetUnion
     | expr KW_TO expr                                     # ExprRange
-    | expr OB expr CB                                     # ExprFilter
     | expr orop expr coerecefallback?                     # ExprOr
     | expr andop expr coerecefallback?                    # ExprAnd
     | expr relop expr coerecefallback?                    # ExprComparison
@@ -168,12 +167,16 @@ expr
 // current grammar.
 atomicorencapsulate
     : (MINUS | PLUS) atomicorencapsulate coerecefallback? # ExprUnary
-    | OP expr CP                                          # ExprWrap
-    | OB expr? CB                                         # ExprWrapForceList
+    | OP expr CP filter?                                  # ExprWrap
+    | OB expr? CB filter?                                 # ExprWrapForceList
     | matcher                                             # ExprMatcher
     | varref                                              # ExprVariable
     | literal                                             # ExprLiteral
-    | path                                                # ExprPath
+    | path filter?                                        # ExprPath
+    ;
+
+filter
+    : OB expr CB
     ;
 
 relop
@@ -218,23 +221,23 @@ relpath
     ;
 
 forwardstep
-    : KW_CHILD COLONCOLON expr               # ForwardStepChild
-    | KW_DESCENDANT COLONCOLON expr          # ForwardStepDescendant
-    | KW_SELF COLONCOLON expr                # ForwardStepSelf
-    | KW_DESCENDANT_OR_SELF COLONCOLON expr  # ForwardStepDescendantOrSelf
-    | KW_FOLLOWING_SIBLING COLONCOLON expr   # ForwardStepFollowingSibling
-    | KW_FOLLOWING COLONCOLON expr           # ForwardStepFollowing
-    | D                                      # ForwardStepDirectSelf
-    | expr                                   # ForwardStepValue
+    : KW_CHILD COLONCOLON atomicorencapsulate               # ForwardStepChild
+    | KW_DESCENDANT COLONCOLON atomicorencapsulate          # ForwardStepDescendant
+    | KW_SELF COLONCOLON atomicorencapsulate                # ForwardStepSelf
+    | KW_DESCENDANT_OR_SELF COLONCOLON atomicorencapsulate  # ForwardStepDescendantOrSelf
+    | KW_FOLLOWING_SIBLING COLONCOLON atomicorencapsulate   # ForwardStepFollowingSibling
+    | KW_FOLLOWING COLONCOLON atomicorencapsulate           # ForwardStepFollowing
+    | D                                                     # ForwardStepDirectSelf
+    | atomicorencapsulate                                   # ForwardStepValue
     ;
 
 reversestep
-    : KW_PARENT COLONCOLON expr             # ReverseStepParent
-    | KW_ANCESTOR COLONCOLON expr           # ReverseStepAncestor
-    | KW_PRECEDING_SIBLING COLONCOLON expr  # ReverseStepPrecedingSibling
-    | KW_PRECEDING COLONCOLON expr          # ReverseStepPreceding
-    | KW_ANCESTOR_OR_SELF COLONCOLON expr   # ReverseStepAncestorOrSelf
-    | DD                                    # ReverseStepDirectParent
+    : KW_PARENT COLONCOLON atomicorencapsulate             # ReverseStepParent
+    | KW_ANCESTOR COLONCOLON atomicorencapsulate           # ReverseStepAncestor
+    | KW_PRECEDING_SIBLING COLONCOLON atomicorencapsulate  # ReverseStepPrecedingSibling
+    | KW_PRECEDING COLONCOLON atomicorencapsulate          # ReverseStepPreceding
+    | KW_ANCESTOR_OR_SELF COLONCOLON atomicorencapsulate   # ReverseStepAncestorOrSelf
+    | DD                                                   # ReverseStepDirectParent
     ;
 
 argumentlist

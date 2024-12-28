@@ -102,7 +102,10 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         self.context_save_stack = []
 
     def visitExprPath(self, ctx: XPath31GrammarParser.ExprPathContext):
-        return self.visit(ctx.path())
+        entities = self.visit(ctx.path())
+        if ctx.filter_():
+            entities = self._apply_filter(entities, ctx.filter_())
+        return entities
 
     def visitExprLiteral(self, ctx: XPath31GrammarParser.ExprLiteralContext):
         return self.visit(ctx.literal())
@@ -266,10 +269,10 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     ):
         def _coerce_eval_insert(ret, l_, r_):
             # Paths to values
-            if type(l_) == Path:
-                l_ = l_.last().value
-            if type(r_) == Path:
-                r_ = r_.last().value
+            if isinstance(l_, Path):
+                l_ = l_.value()
+            if isinstance(r_, Path):
+                r_ = r_.value()
             # Coerce to comparable types
             if required_type is not None:
                 l_ = coerce_single_value(l_, required_type)  # noqa
@@ -393,12 +396,18 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         return agg_op, ret
 
     def visitExprWrap(self, ctx: XPath31GrammarParser.ExprWrapContext):
-        return self.visit(ctx.expr())
+        entities = self.visit(ctx.expr())
+        if ctx.filter_():
+            entities = self._apply_filter(entities, ctx.filter_())
+        return entities
 
     def visitExprWrapForceList(self, ctx: XPath31GrammarParser.ExprWrapForceListContext):
+        entities = []
         if ctx.expr():
-            return coerce_to_list(self.visit(ctx.expr()))
-        return []
+            entities = coerce_to_list(self.visit(ctx.expr()))
+            if ctx.filter_():
+                entities = self._apply_filter(entities, ctx.filter_())
+        return entities
 
     def visitPathFromRoot(self, ctx: XPath31GrammarParser.PathFromRootContext):
         try:
@@ -490,7 +499,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                 if parent_path is not None:
                     new_paths.append(parent_path)
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitReverseStepAncestor(self, ctx: XPath31GrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
@@ -498,7 +507,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if isinstance(e, Path):
                 new_paths += e.all_ancestors()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitReverseStepPreceding(self, ctx: XPath31GrammarParser.ReverseStepPrecedingContext):
         new_paths = []
@@ -506,7 +515,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if isinstance(e, Path):
                 new_paths += e.preceding()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitReverseStepPrecedingSibling(self, ctx: XPath31GrammarParser.ReverseStepPrecedingContext):
         new_paths = []
@@ -514,7 +523,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if isinstance(e, Path):
                 new_paths += e.preceding_sibling()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitReverseStepAncestorOrSelf(self, ctx: XPath31GrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
@@ -523,7 +532,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                 new_paths.append(e)
                 new_paths += e.all_ancestors()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitReverseStepDirectParent(self, ctx: XPath31GrammarParser.ReverseStepDirectParentContext):
         new_paths = []
@@ -540,7 +549,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if isinstance(e, Path):
                 new_paths += e.all_children()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitForwardStepDescendant(self, ctx: XPath31GrammarParser.ForwardStepDescendantContext):
         new_paths = []
@@ -548,10 +557,10 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if isinstance(e, Path):
                 new_paths += e.all_descendants()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitForwardStepSelf(self, ctx: XPath31GrammarParser.ForwardStepSelfContext):
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitForwardStepDescendantOrSelf(self, ctx: XPath31GrammarParser.ForwardStepDescendantOrSelfContext):
         new_paths = []
@@ -560,7 +569,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                 new_paths.append(e)
                 new_paths += e.all_descendants()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitForwardStepFollowingSibling(self, ctx: XPath31GrammarParser.ForwardStepFollowingSiblingContext):
         new_paths = []
@@ -568,7 +577,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if isinstance(e, Path):
                 new_paths += e.following_sibling()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitForwardStepFollowing(self, ctx: XPath31GrammarParser.ForwardStepFollowingContext):
         new_paths = []
@@ -576,7 +585,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if isinstance(e, Path):
                 new_paths += e.following()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitForwardStepValue(self, ctx: XPath31GrammarParser.ForwardStepValueContext):
         new_paths = []
@@ -584,7 +593,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if isinstance(e, Path):
                 new_paths += e.all_children()
         self.context.reset_entities(new_paths)
-        return self._walk_down(self.visit(ctx.expr()))
+        return self._walk_down(self.visit(ctx.atomicorencapsulate()))
 
     def visitForwardStepDirectSelf(self, ctx: XPath31GrammarParser.ForwardStepDirectSelfContext):
         return self.context.entities[:]  # Return existing
@@ -594,8 +603,8 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         matchers = []
         if isinstance(result, list):
             for v in result:
-                if type(v) == Path:
-                    v = v.last().value
+                if isinstance(v, Path):
+                    v = v.value()
                 matchers.append(to_matcher(v))
         else:
             matchers.append(to_matcher(result))
@@ -611,14 +620,13 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                 ret.append(e)
         return ret
 
-    def visitExprFilter(self, ctx: XPath31GrammarParser.ExprFilterContext):
-        orig_paths = self.visit(ctx.expr(0))
+    def _apply_filter(self, entities: list[EntityType], ctx: XPath31GrammarParser.FilterContext):
         self.context.save_entities(PrimeMode.PRIME_WITH_EMPTY)
         try:
             ret = []
-            for idx, p in enumerate(orig_paths):
-                self.context.reset_entities([p])
-                result = self.visit(ctx.expr(1))
+            for idx, e in enumerate(entities):
+                self.context.reset_entities([e])
+                result = self.visit(ctx.expr())
                 # /a/b[bool] - return if true
                 # /a/b[int]  - return if coerces to true (non-zero + not nan)
                 # /a/b[str]  - return if coerces to true (non-empty)
@@ -626,8 +634,8 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                 if (type(result) == bool and result == True) \
                         or (type(result) == list and any(coerce_single_value(v, bool) for v in result)) \
                         or (type(result) in {float, int} and result == idx) \
-                        or (type(result) == str and result == coerce_single_value(p, str)):
-                    ret.append(p)
+                        or (type(result) == str and result == coerce_single_value(e, str)):
+                    ret.append(e)
             return ret
         finally:
             self.context.restore_entities()
@@ -722,10 +730,7 @@ def _test_with_path(p, expr):
     ret = evaluate(p, expr)
     if isinstance(ret, list):
         for v in ret:
-            if type(v) == Path:
-                print(f'  {v.last()}')
-            else:
-                print(f'  {v}')
+            print(f'  {v}')
         return ret
     else:
         print(f'  {ret}')
@@ -821,4 +826,10 @@ if __name__ == '__main__':
     # _test_with_path(FileSystemPath.create_root_path('~'), '/*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json//*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json/address/city')
-    _test_with_path(FileSystemPath.create_root_path('~'), '/test.xml//*')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.xml//*')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.yaml//*')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name[. = "John Doe"]')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*')
+    _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*[./Name = "John Doe"]')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '(/test.csv/*)[./Name/r"J.*"]')

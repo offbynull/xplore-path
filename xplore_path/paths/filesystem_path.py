@@ -91,12 +91,12 @@ class XmlFileLoader(FileLoader):
     def load(self, p: pathlib.Path) -> Any:
         def xml_to_dict_with_attributes(element):
             node = {}
-            if element.attrib:
-                node['@attributes'] = element.attrib
+            for k, v in element.attrib.items():
+                node[f'@{k}'] = v
             if list(element):
-                node['@children'] = {child.tag: xml_to_dict_with_attributes(child) for child in element}
+                node |= {i: {child.tag: xml_to_dict_with_attributes(child)} for i, child in enumerate(element)}
             elif element.text and element.text.strip():
-                node['@text'] = element.text.strip()
+                node['.text'] = element.text.strip()
             return node
 
         root = ElementTree.parse(p).getroot()

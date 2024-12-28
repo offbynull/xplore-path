@@ -107,15 +107,6 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#ExprFilter.
-    def enterExprFilter(self, ctx:XPath31GrammarParser.ExprFilterContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#ExprFilter.
-    def exitExprFilter(self, ctx:XPath31GrammarParser.ExprFilterContext):
-        pass
-
-
     # Enter a parse tree produced by XPath31GrammarParser#ExprAdditive.
     def enterExprAdditive(self, ctx:XPath31GrammarParser.ExprAdditiveContext):
         pass
@@ -185,6 +176,15 @@ class XPath31GrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XPath31GrammarParser#ExprPath.
     def exitExprPath(self, ctx:XPath31GrammarParser.ExprPathContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#filter.
+    def enterFilter(self, ctx:XPath31GrammarParser.FilterContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#filter.
+    def exitFilter(self, ctx:XPath31GrammarParser.FilterContext):
         pass
 
 
