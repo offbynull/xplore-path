@@ -4,7 +4,6 @@ import hashlib
 import json
 import pathlib
 import tarfile
-import tempfile
 import zipfile
 from abc import ABC, abstractmethod
 from tempfile import TemporaryDirectory
@@ -16,8 +15,8 @@ import yaml
 from PyPDF2 import PdfReader
 from docx import Document
 
-from xplore_path.paths.python_object_path import PythonObjectPath
 from xplore_path.path.path import Path
+from xplore_path.paths.python_object_path import PythonObjectPath
 
 
 class FileLoader(ABC):

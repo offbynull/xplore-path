@@ -17,14 +17,15 @@ def print_line(
     next_line = []
     curr_width = 0
     for style, text in line:
-        next_curr_width = curr_width + len(text)
         text = text.replace('\r', '')     # new line to space - everything expected on 1 line
         text = text.replace('\n', ' ')    # new line to space - everything expected on 1 line
+        next_curr_width = curr_width + len(text)
         if next_curr_width >= max_width:
             text = text[:max_width - curr_width]  # truncate to match max_width
             text = text[:-1]  # remove last char as well
             next_line.append((style, text))  # add
             next_line.append(('bg:ansired', '>'))  # replace last char with a red > to indicate spillover
+            break
         else:
             next_line.append((style, text))
         curr_width = next_curr_width

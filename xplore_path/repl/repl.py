@@ -24,7 +24,8 @@ def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
             ret += [('fg:ansiwhite bold', f'{v.label()}')]
         else:
             for l in v.full_label()[1:]:
-                if l in TOKENS:
+                l = str(l)
+                if any(l.startswith(t) for t in TOKENS):
                     l = l.replace('\'', '\'\'')
                     l = f'\'{l}\''
                 ret.append(('fg:ansigray', '/'))
