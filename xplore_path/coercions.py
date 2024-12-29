@@ -4,7 +4,7 @@ from typing import ForwardRef, TypeVar, Type, Any, Literal, Hashable
 from xplore_path.path.path import Path
 
 LABEL_TYPE = str | int | float | bool
-SINGLE_ENTRY_TYPE = str | int | float | bool | ForwardRef('label_matcher.label_matcher.Matcher')
+SINGLE_ENTRY_TYPE = str | int | float | bool | ForwardRef('matcher.matcher.Matcher')
 ENTRY_TYPE = SINGLE_ENTRY_TYPE | list[SINGLE_ENTRY_TYPE]
 
 

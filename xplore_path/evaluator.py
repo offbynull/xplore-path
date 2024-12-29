@@ -7,26 +7,26 @@ from typing import Any, Callable, Type
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
 
-from xplore_path.label_matchers.ignore_case_label_matcher import IgnoreCaseLabelMatcher
-from xplore_path.label_matchers.numeric_range_label_matcher import NumericRangeLabelMatcher
+from xplore_path.matchers.ignore_case_label_matcher import IgnoreCaseMatcher
+from xplore_path.matchers.numeric_range_label_matcher import NumericRangeMatcher
 from xplore_path.XPath31GrammarLexer import XPath31GrammarLexer
 from xplore_path.XPath31GrammarParser import XPath31GrammarParser
 from xplore_path.XPath31GrammarVisitor import XPath31GrammarVisitor
-from xplore_path.paths.filesystem_path import FileSystemPath
+from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
 from xplore_path.path.path import Path
-from xplore_path.paths.python_object_path import PythonObjectPath
+from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 from xplore_path.coercer_fallback.coercer_fallback import CoercerFallback
 from xplore_path.coercer_fallbacks.default_coercer_fallback import DefaultCoercerFallback
 from xplore_path.coercer_fallbacks.discard_coercer_fallback import DiscardCoercerFallback
 from xplore_path.coercer_fallbacks.fail_coercer_fallback import FailCoerecerFallback
 from xplore_path.coercions import coerce_single_value, coerce_to_list, coerce_for_set_operation
-from xplore_path.label_matcher.label_matcher import LabelMatcher
-from xplore_path.label_matchers.combined_label_matcher import CombinedLabelMatcher
-from xplore_path.label_matchers.fuzzy_label_matcher import FuzzyLabelMatcher
-from xplore_path.label_matchers.glob_label_matcher import GlobLabelMatcher
-from xplore_path.label_matchers.regex_label_matcher import RegexLabelMatcher
-from xplore_path.label_matchers.strict_label_matcher import StrictLabelMatcher
-from xplore_path.label_matchers.wildcard_label_matcher import WildcardLabelMatcher
+from xplore_path.matcher.matcher import Matcher
+from xplore_path.matchers.combined_label_matcher import CombinedMatcher
+from xplore_path.matchers.fuzzy_label_matcher import FuzzyMatcher
+from xplore_path.matchers.glob_label_matcher import GlobMatcher
+from xplore_path.matchers.regex_label_matcher import RegexMatcher
+from xplore_path.matchers.strict_label_matcher import StrictMatcher
+from xplore_path.matchers.wildcard_label_matcher import WildcardMatcher
 from xplore_path.raise_parse_error_listener import RaiseParseErrorListener
 
 
@@ -35,7 +35,7 @@ class PrimeMode(Enum):
     PRIME_WITH_SELF = 'PRIME_WITH_SELF'
     PRIME_WITH_EMPTY = 'PRIME_WITH_EMPTY'
 
-EntityType = Path | int | float | str | bool | LabelMatcher
+EntityType = Path | int | float | str | bool | Matcher
 
 @dataclass
 class Context:
@@ -223,13 +223,13 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             combine_op = zip
         elif ctx.mulop().KW_PRODUCT():
             combine_op = product
-        if ctx.mulop().STAR:
+        if ctx.mulop().STAR():
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l * _r, float, coercer_fallback)
-        elif ctx.mulop().KW_DIV:
+        elif ctx.mulop().KW_DIV():
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l / _r, float, coercer_fallback)
-        elif ctx.mulop().KW_IDIV:
+        elif ctx.mulop().KW_IDIV():
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l // _r, float, coercer_fallback)
-        elif ctx.mulop().KW_MOD:
+        elif ctx.mulop().KW_MOD():
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l % _r, float, coercer_fallback)
         raise ValueError('Unexpected')
 
@@ -294,7 +294,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             if required_type is not None:
                 l_ = coerce_single_value(l_, required_type)  # noqa
                 r_ = coerce_single_value(r_, required_type)  # noqa
-            elif isinstance(l_, LabelMatcher) or isinstance(r_, LabelMatcher):
+            elif isinstance(l_, Matcher) or isinstance(r_, Matcher):
                 ...  # skip cohersion if either is a label matcher
             else:
                 new_r_ = coerce_single_value(r_, type(l_))
@@ -339,9 +339,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         r = self.visit(ctx.expr(1))
 
         def eq_op(_l, _r):
-            if isinstance(_l, LabelMatcher):
+            if isinstance(_l, Matcher):
                 return _l.match(_r)
-            elif isinstance(_r, LabelMatcher):
+            elif isinstance(_r, Matcher):
                 return _r.match(_l)
             # WHAT IF THEY'RE BOTH LABEL MATCHERS? ALWAYS RETURN FALSE?
             return _l == _r
@@ -627,7 +627,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         return self.context.entities[:]  # Return existing
 
     def _walk_down(self, result: Any):
-        to_matcher = lambda v: v if isinstance(v, LabelMatcher) else StrictLabelMatcher(v)
+        to_matcher = lambda v: v if isinstance(v, Matcher) else StrictMatcher(v)
         matchers = []
         if isinstance(result, list):
             for v in result:
@@ -637,7 +637,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         else:
             matchers.append(to_matcher(result))
         # test
-        combined_matcher = CombinedLabelMatcher(matchers)
+        combined_matcher = CombinedMatcher(matchers)
         ret = []
         for e in self.context:
             if isinstance(e, Path):
@@ -702,29 +702,29 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
 
     def visitMatcherStrict(self, ctx: XPath31GrammarParser.MatcherStrictContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return StrictLabelMatcher(pattern)
+        return StrictMatcher(pattern)
 
     def visitMatcherRegex(self, ctx: XPath31GrammarParser.MatcherRegexContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return RegexLabelMatcher(pattern)
+        return RegexMatcher(pattern)
 
     def visitMatcherGlob(self, ctx: XPath31GrammarParser.MatcherGlobContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return GlobLabelMatcher(pattern)
+        return GlobMatcher(pattern)
 
     def visitMatcherFuzzy(self, ctx: XPath31GrammarParser.MatcherGlobContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return FuzzyLabelMatcher(pattern)
+        return FuzzyMatcher(pattern)
 
     def visitMatcherCaseInsensitive(self, ctx: XPath31GrammarParser.MatcherCaseInsensitiveContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return IgnoreCaseLabelMatcher(pattern)
+        return IgnoreCaseMatcher(pattern)
 
     def visitMatcherNumericRange(self, ctx: XPath31GrammarParser.MatcherNumericRangeContext):
         return self.visit(ctx.numericRangeMatcher())
 
     def visitMatcherWildcard(self, ctx: XPath31GrammarParser.MatcherWildcardContext):
-        return WildcardLabelMatcher()
+        return WildcardMatcher()
 
     def visitNumericRangeMatcherTolerance(self, ctx: XPath31GrammarParser.NumericRangeMatcherToleranceContext):
         value = self.visit(ctx.numericRangeMatcherLiteral(0))
@@ -734,19 +734,19 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             tolerance = 0.001
         min_ = value - tolerance
         max_ = value + tolerance
-        return NumericRangeLabelMatcher(min_, True, max_, True)
+        return NumericRangeMatcher(min_, True, max_, True)
 
     def visitNumericRangeMatcherBounded(self, ctx: XPath31GrammarParser.NumericRangeMatcherBoundedContext):
         min_ = self.visit(ctx.numericRangeMatcherLiteral(0))
         min_inclusive = bool(ctx.OB())
         max_ = self.visit(ctx.numericRangeMatcherLiteral(1))
         max_inclusive = bool(ctx.CB())
-        return NumericRangeLabelMatcher(min_, min_inclusive, max_, max_inclusive)
+        return NumericRangeMatcher(min_, min_inclusive, max_, max_inclusive)
 
     def visitNumericRangeMatcherInclusive(self, ctx: XPath31GrammarParser.NumericRangeMatcherInclusiveContext):
         min_ = self.visit(ctx.numericRangeMatcherLiteral(0))
         max_ = self.visit(ctx.numericRangeMatcherLiteral(1))
-        return NumericRangeLabelMatcher(min_, True, max_, True)
+        return NumericRangeMatcher(min_, True, max_, True)
 
     def visitNumericRangeMatcherLiteral(self, ctx: XPath31GrammarParser.NumericRangeMatcherLiteralContext):
         if ctx.IntegerLiteral():

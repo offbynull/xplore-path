@@ -12,7 +12,7 @@ from prompt_toolkit.styles import Style
 import xplore_path.path.path
 from xplore_path.repl.utils import print_line
 from xplore_path.evaluator import evaluate
-from xplore_path.paths.filesystem_path import FileSystemPath
+from xplore_path.filesystem.filesystem_path import FileSystemPath
 from xplore_path.raise_parse_error_listener import ParseException
 from xplore_path.repl.path_completer import PathCompleter, TOKENS
 

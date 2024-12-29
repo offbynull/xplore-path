@@ -6,7 +6,7 @@ from prompt_toolkit.document import Document
 
 import xplore_path.path.path
 from xplore_path.evaluator import evaluate
-from xplore_path.paths.filesystem_path import FileSystemPath
+from xplore_path.filesystem.filesystem_path import FileSystemPath
 
 _tokens_text = (Path(__file__).parent.parent / 'XPath31GrammarLexer.tokens').read_text()
 TOKENS = [re.search(r"'(.*?)'", line).group(1) for line in _tokens_text.splitlines() if '\'' in line]
