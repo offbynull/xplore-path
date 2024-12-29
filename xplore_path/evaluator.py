@@ -7,8 +7,8 @@ from typing import Any, Callable, Type
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
 
-from xplore_path.matchers.ignore_case_label_matcher import IgnoreCaseMatcher
-from xplore_path.matchers.numeric_range_label_matcher import NumericRangeMatcher
+from xplore_path.matchers.ignore_case_matcher import IgnoreCaseMatcher
+from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
 from xplore_path.XPath31GrammarLexer import XPath31GrammarLexer
 from xplore_path.XPath31GrammarParser import XPath31GrammarParser
 from xplore_path.XPath31GrammarVisitor import XPath31GrammarVisitor
@@ -21,12 +21,12 @@ from xplore_path.coercer_fallbacks.discard_coercer_fallback import DiscardCoerce
 from xplore_path.coercer_fallbacks.fail_coercer_fallback import FailCoerecerFallback
 from xplore_path.coercions import coerce_single_value, coerce_to_list, coerce_for_set_operation
 from xplore_path.matcher.matcher import Matcher
-from xplore_path.matchers.combined_label_matcher import CombinedMatcher
-from xplore_path.matchers.fuzzy_label_matcher import FuzzyMatcher
-from xplore_path.matchers.glob_label_matcher import GlobMatcher
-from xplore_path.matchers.regex_label_matcher import RegexMatcher
-from xplore_path.matchers.strict_label_matcher import StrictMatcher
-from xplore_path.matchers.wildcard_label_matcher import WildcardMatcher
+from xplore_path.matchers.combined_matcher import CombinedMatcher
+from xplore_path.matchers.fuzzy_matcher import FuzzyMatcher
+from xplore_path.matchers.glob_matcher import GlobMatcher
+from xplore_path.matchers.regex_matcher import RegexMatcher
+from xplore_path.matchers.strict_matcher import StrictMatcher
+from xplore_path.matchers.wildcard_matcher import WildcardMatcher
 from xplore_path.raise_parse_error_listener import RaiseParseErrorListener
 
 

@@ -15,7 +15,7 @@
 * TODO: add callback that notifies of what's happening when evaluation is running
 * ~~TODO: html parser~~
 * TODO: xml and html parser - tag value should be returned directly as opposed to going inside .text child
-* TODO: test matchers raw
+* ~~TODO: test matchers raw~~
 * TODO: test matchers when used in path predicates
 * TODO: test matchers when used in = and !=
 * TODO: test paths
@@ -24,3 +24,4 @@
 * TODO: test label directive
 * ~~TODO: test filesystem file loaders~~
 * TODO: make use of variables in REPL - store results in var names and use those var names in queries
+* TODO: ANTLR grammar rule names must be fixed

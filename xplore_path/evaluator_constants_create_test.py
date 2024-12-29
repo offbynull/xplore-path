@@ -1,15 +1,15 @@
 import math
 import unittest
 
-from xplore_path.matchers.ignore_case_label_matcher import IgnoreCaseMatcher
-from xplore_path.matchers.numeric_range_label_matcher import NumericRangeMatcher
+from xplore_path.matchers.ignore_case_matcher import IgnoreCaseMatcher
+from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
 from xplore_path.paths.dummy.dummy_path import DummyPath
 from xplore_path.evaluator import evaluate
-from xplore_path.matchers.fuzzy_label_matcher import FuzzyMatcher
-from xplore_path.matchers.glob_label_matcher import GlobMatcher
-from xplore_path.matchers.regex_label_matcher import RegexMatcher
-from xplore_path.matchers.strict_label_matcher import StrictMatcher
-from xplore_path.matchers.wildcard_label_matcher import WildcardMatcher
+from xplore_path.matchers.fuzzy_matcher import FuzzyMatcher
+from xplore_path.matchers.glob_matcher import GlobMatcher
+from xplore_path.matchers.regex_matcher import RegexMatcher
+from xplore_path.matchers.strict_matcher import StrictMatcher
+from xplore_path.matchers.wildcard_matcher import WildcardMatcher
 from xplore_path.raise_parse_error_listener import ParseException
 
 
