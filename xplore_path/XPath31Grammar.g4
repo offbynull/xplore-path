@@ -144,13 +144,6 @@ xplorepath
     : expr EOF
     ;
 
-// TODO: add join syntax - inner, left, right
-// TODO: add string concat operator back in
-// TODO: new matcher to test if a number is "close to" - floating point check
-// TODO: new matcher to test for a number range
-// TODO: add invocations into atomicorencapsulation
-// TODO: add operator "keys" that'll return labels of the current paths (if not path, return self)
-
 expr
     : (KW_ANY | KW_ALL) expr coerecefallback?             # ExprBoolAggregate
     | expr COMMA expr                                     # ExprConcatenate

@@ -76,7 +76,7 @@ class XlsxFileLoader(FileLoader):
         return p.suffix == '.xlsx'
 
     def load(self, p: pathlib.Path) -> Any:
-        data = pd.read_excel(p)
+        data = pd.read_excel(p, sheet_name=None)
         return {sheet: df.to_dict(orient='index') for sheet, df in data.items()}
 
 
@@ -116,7 +116,7 @@ class DefaultFileLoader(FileLoader):
         try:
             return p.read_text(encoding='US-ASCII')
         except Exception:
-            return {}
+            return []
 
 
 class CombinedFileLoader(FileLoader):

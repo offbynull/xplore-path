@@ -54,7 +54,7 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
     if type(v) == new_t:
         return v
     elif new_t == bool:
-        if type(v) == Path:
+        if isinstance(v, Path):
             return coerce_single_value(v.value(), new_t)
         elif type(v) == bool:
             return v
@@ -65,7 +65,7 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
         elif type(v) == int:
             return v != 0
     elif new_t == int:
-        if type(v) == Path:
+        if isinstance(v, Path):
             return coerce_single_value(v.value(), new_t)
         elif type(v) == bool:
             return int(v)
@@ -79,7 +79,7 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
         elif type(v) == int:
             return v
     elif new_t == float:
-        if type(v) == Path:
+        if isinstance(v, Path):
             return coerce_single_value(v.value(), new_t)
         elif type(v) == bool:
             return float(v)
@@ -93,7 +93,7 @@ def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T
         elif type(v) == int:
             return float(v)
     elif new_t == str:
-        if type(v) == Path:
+        if isinstance(v, Path):
             return coerce_single_value(v.value(), new_t)
         elif type(v) == float and v.is_integer():
             return str(int(v))

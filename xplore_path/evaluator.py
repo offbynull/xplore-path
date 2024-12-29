@@ -124,7 +124,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         else:
             coercer_fallback = DiscardCoercerFallback()
         inner = self.visit(ctx.atomicorencapsulate())
-        if ctx.MINUS:
+        if ctx.MINUS():
             if type(inner) == list:
                 inner = [coerce_single_value(v, float) for v in inner]
                 inner = coercer_fallback.coerce(inner)
@@ -138,8 +138,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                     return inner[0]
                 else:
                     return []
-        elif ctx.PLUS:
+        elif ctx.PLUS():
             return inner  # Keep it as-is -- not required to do any manipulation here
+        raise ValueError('Unexpected')
 
     def visitExprAtomicOrEncapsulate(self, ctx: XPath31GrammarParser.ExprAtomicOrEncapsulateContext):
         return self.visit(ctx.atomicorencapsulate())
@@ -482,7 +483,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         try:
             self.context.save_entities(PrimeMode.PRIME_WITH_SELF)
             new_paths = []
-            if ctx.SLASH:
+            if ctx.SLASH():
                 left_contexts = self.visit(ctx.relpath(0))
                 for left_path in left_contexts:
                     self.context.save_entities([left_path])
@@ -490,7 +491,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                     for right_path in right_contexts:
                         new_paths.append(right_path)
                     self.context.restore_entities()
-            elif ctx.SS:
+            elif ctx.SS():
                 left_contexts = []
                 for e in self.visit(ctx.relpath(0)):
                     left_contexts.append(e)
@@ -508,9 +509,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             self.context.restore_entities()
 
     def visitRelPathStep(self, ctx: XPath31GrammarParser.RelPathStepContext):
-        if ctx.forwardstep:
+        if ctx.forwardstep():
             ret = self.visit(ctx.forwardstep())
-        elif ctx.reversestep:
+        elif ctx.reversestep():
             ret = self.visit(ctx.reversestep())
         else:
             raise ValueError('Unexpected')
@@ -897,8 +898,11 @@ if __name__ == '__main__':
     # _test_with_path(FileSystemPath.create_root_path('~'), '/*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json//*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json/address/city')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.xml//*')
-    _test_with_path(FileSystemPath.create_root_path('~/Downloads'), '/pycharm-community-2024.3.1.tar.gz/*')
+    _test_with_path(FileSystemPath.create_root_path('~'), '/test.xml//*')
+    # _test_with_path(FileSystemPath.create_root_path('~/Downloads'), '/pycharm-community-2024.3.1.tar.gz/*')
+    # _test_with_path(FileSystemPath.create_root_path('~/Downloads'), "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'")
+    # _test_with_path(FileSystemPath.create_root_path('~/Downloads'), "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'//*")
+    # _test_with_path(FileSystemPath.create_root_path('~/Downloads'), "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.yaml//*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name[. = "John Doe"]')
