@@ -140,35 +140,35 @@ Whitespace: ('\u000d' | '\u000a' | '\u0020' | '\u0009')+ -> skip;
 
 
 //PARSER
-xplorepath
+xplorePath
     : expr EOF
     ;
 
 expr
-    : (KW_ANY | KW_ALL) expr coerecefallback?             # ExprBoolAggregate
+    : (KW_ANY | KW_ALL) expr coerceFallback?             # ExprBoolAggregate
     | expr COMMA expr                                     # ExprConcatenate
     | expr (KW_INTERSECT | KW_EXCEPT) expr                # ExprSetIntersect
     | expr (KW_UNION | P) expr                            # ExprSetUnion
     | expr KW_TO expr                                     # ExprRange
     | KW_LABEL expr                                       # ExprExtractLabel
-    | expr orop expr coerecefallback?                     # ExprOr
-    | expr andop expr coerecefallback?                    # ExprAnd
-    | expr relop expr coerecefallback?                    # ExprComparison
-    | expr addop expr coerecefallback?                    # ExprAdditive
-    | expr mulop expr coerecefallback?                    # ExprMultiplicative
-    | atomicorencapsulate                                 # ExprAtomicOrEncapsulate
+    | expr orOp expr coerceFallback?                     # ExprOr
+    | expr andOp expr coerceFallback?                    # ExprAnd
+    | expr relOp expr coerceFallback?                    # ExprComparison
+    | expr addOp expr coerceFallback?                    # ExprAdditive
+    | expr mulOp expr coerceFallback?                    # ExprMultiplicative
+    | atomicOrEncapsulate                                 # ExprAtomicOrEncapsulate
     ;
 
-// Why isn't atomicorencapsulate directly tied embedded within expr? It was, and the ExprUnary alternative was defined
+// Why isn't atomicOrEncapsulate directly tied embedded within expr? It was, and the ExprUnary alternative was defined
 // as "(MINUS | PLUS) expr". This worked fine except that when you did something like -1-1, it evaluated as -(1-1)
 // instead of (-1)-1. The later evaluation is the correct evaluation order, and that's what happens now with this
 // current grammar.
-atomicorencapsulate
-    : (MINUS | PLUS) atomicorencapsulate coerecefallback? # ExprUnary
+atomicOrEncapsulate
+    : (MINUS | PLUS) atomicOrEncapsulate coerceFallback? # ExprUnary
     | OP expr CP filter?                                  # ExprWrap
     | OB expr? CB filter?                                 # ExprWrapForceList
     | matcher                                             # ExprMatcher
-    | varref                                              # ExprVariable
+    | varRef                                              # ExprVariable
     | literal                                             # ExprLiteral
     | path filter?                                        # ExprPath
     ;
@@ -177,68 +177,62 @@ filter
     : OB expr CB
     ;
 
-relop
+relOp
     : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? (EQ | NE | LT | LE | GT | GE | LL | GG)
     | (KW_SEQUENCE | KW_ANY | KW_ALL)? (KW_ZIP | KW_PRODUCT)? (EQ | NE | LT | LE | GT | GE | LL | GG)
-    | (EQ | NE | LT | LE | GT | GE | LL | GG) (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)?
-    | (EQ | NE | LT | LE | GT | GE | LL | GG) (KW_SEQUENCE | KW_ANY | KW_ALL)? (KW_ZIP | KW_PRODUCT)?
     ;
 
-mulop
+mulOp
     : (KW_ZIP | KW_PRODUCT)? (STAR | KW_DIV | KW_IDIV | KW_MOD)
-    | (STAR | KW_DIV | KW_IDIV | KW_MOD) (KW_ZIP | KW_PRODUCT)?
     ;
 
-addop
+addOp
     : (KW_ZIP | KW_PRODUCT)? (PLUS | MINUS | PP)
-    | (PLUS | MINUS | PP) (KW_ZIP | KW_PRODUCT)?
     ;
 
-andop
-    :(KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_AND
-    | KW_AND (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)?
+andOp
+    : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_AND
     ;
 
-orop
+orOp
     : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_OR
-    | KW_OR (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)?
     ;
 
 path
-    : SLASH relpath    # PathFromRoot
+    : SLASH relPath    # PathFromRoot
     | SLASH            # PathRootExact
-    | SS relpath       # PathFromAny
-    | D SLASH relpath  # PathFromRelative
+    | SS relPath       # PathFromAny
+    | D SLASH relPath  # PathFromRelative
     | D                # PathSelf
     | DD               # PathParent
     ;
 
-relpath
-    : relpath (SLASH | SS) relpath                 # RelPathChain
-    | (reversestep | forwardstep) (argumentlist)*  # RelPathStep
+relPath
+    : relPath (SLASH | SS) relPath                 # RelPathChain
+    | (reverseStep | forwardStep) (argumentList)*  # RelPathStep
     ;
 
-forwardstep
-    : KW_CHILD COLONCOLON atomicorencapsulate               # ForwardStepChild
-    | KW_DESCENDANT COLONCOLON atomicorencapsulate          # ForwardStepDescendant
-    | KW_SELF COLONCOLON atomicorencapsulate                # ForwardStepSelf
-    | KW_DESCENDANT_OR_SELF COLONCOLON atomicorencapsulate  # ForwardStepDescendantOrSelf
-    | KW_FOLLOWING_SIBLING COLONCOLON atomicorencapsulate   # ForwardStepFollowingSibling
-    | KW_FOLLOWING COLONCOLON atomicorencapsulate           # ForwardStepFollowing
+forwardStep
+    : KW_CHILD COLONCOLON atomicOrEncapsulate               # ForwardStepChild
+    | KW_DESCENDANT COLONCOLON atomicOrEncapsulate          # ForwardStepDescendant
+    | KW_SELF COLONCOLON atomicOrEncapsulate                # ForwardStepSelf
+    | KW_DESCENDANT_OR_SELF COLONCOLON atomicOrEncapsulate  # ForwardStepDescendantOrSelf
+    | KW_FOLLOWING_SIBLING COLONCOLON atomicOrEncapsulate   # ForwardStepFollowingSibling
+    | KW_FOLLOWING COLONCOLON atomicOrEncapsulate           # ForwardStepFollowing
     | D                                                     # ForwardStepDirectSelf
-    | atomicorencapsulate                                   # ForwardStepValue
+    | atomicOrEncapsulate                                   # ForwardStepValue
     ;
 
-reversestep
-    : KW_PARENT COLONCOLON atomicorencapsulate             # ReverseStepParent
-    | KW_ANCESTOR COLONCOLON atomicorencapsulate           # ReverseStepAncestor
-    | KW_PRECEDING_SIBLING COLONCOLON atomicorencapsulate  # ReverseStepPrecedingSibling
-    | KW_PRECEDING COLONCOLON atomicorencapsulate          # ReverseStepPreceding
-    | KW_ANCESTOR_OR_SELF COLONCOLON atomicorencapsulate   # ReverseStepAncestorOrSelf
+reverseStep
+    : KW_PARENT COLONCOLON atomicOrEncapsulate             # ReverseStepParent
+    | KW_ANCESTOR COLONCOLON atomicOrEncapsulate           # ReverseStepAncestor
+    | KW_PRECEDING_SIBLING COLONCOLON atomicOrEncapsulate  # ReverseStepPrecedingSibling
+    | KW_PRECEDING COLONCOLON atomicOrEncapsulate          # ReverseStepPreceding
+    | KW_ANCESTOR_OR_SELF COLONCOLON atomicOrEncapsulate   # ReverseStepAncestorOrSelf
     | DD                                                   # ReverseStepDirectParent
     ;
 
-argumentlist
+argumentList
     : OP (argument ( COMMA argument)*)? CP
     ;
 
@@ -277,10 +271,10 @@ numericRangeMatcherLiteral
     : MINUS? (IntegerLiteral | DecimalLiteral | DoubleLiteral | KW_INF)
     ;
 
-coerecefallback
+coerceFallback
     : KW_ON KW_ERROR (KW_DISCARD | KW_FAIL | expr)
     ;
 
-varref
+varRef
     : DOLLAR Name
     ;

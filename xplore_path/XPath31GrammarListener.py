@@ -8,12 +8,12 @@ else:
 # This class defines a complete listener for a parse tree produced by XPath31GrammarParser.
 class XPath31GrammarListener(ParseTreeListener):
 
-    # Enter a parse tree produced by XPath31GrammarParser#xplorepath.
-    def enterXplorepath(self, ctx:XPath31GrammarParser.XplorepathContext):
+    # Enter a parse tree produced by XPath31GrammarParser#xplorePath.
+    def enterXplorePath(self, ctx:XPath31GrammarParser.XplorePathContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#xplorepath.
-    def exitXplorepath(self, ctx:XPath31GrammarParser.XplorepathContext):
+    # Exit a parse tree produced by XPath31GrammarParser#xplorePath.
+    def exitXplorePath(self, ctx:XPath31GrammarParser.XplorePathContext):
         pass
 
 
@@ -197,48 +197,48 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#relop.
-    def enterRelop(self, ctx:XPath31GrammarParser.RelopContext):
+    # Enter a parse tree produced by XPath31GrammarParser#relOp.
+    def enterRelOp(self, ctx:XPath31GrammarParser.RelOpContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#relop.
-    def exitRelop(self, ctx:XPath31GrammarParser.RelopContext):
-        pass
-
-
-    # Enter a parse tree produced by XPath31GrammarParser#mulop.
-    def enterMulop(self, ctx:XPath31GrammarParser.MulopContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#mulop.
-    def exitMulop(self, ctx:XPath31GrammarParser.MulopContext):
+    # Exit a parse tree produced by XPath31GrammarParser#relOp.
+    def exitRelOp(self, ctx:XPath31GrammarParser.RelOpContext):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#addop.
-    def enterAddop(self, ctx:XPath31GrammarParser.AddopContext):
+    # Enter a parse tree produced by XPath31GrammarParser#mulOp.
+    def enterMulOp(self, ctx:XPath31GrammarParser.MulOpContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#addop.
-    def exitAddop(self, ctx:XPath31GrammarParser.AddopContext):
-        pass
-
-
-    # Enter a parse tree produced by XPath31GrammarParser#andop.
-    def enterAndop(self, ctx:XPath31GrammarParser.AndopContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#andop.
-    def exitAndop(self, ctx:XPath31GrammarParser.AndopContext):
+    # Exit a parse tree produced by XPath31GrammarParser#mulOp.
+    def exitMulOp(self, ctx:XPath31GrammarParser.MulOpContext):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#orop.
-    def enterOrop(self, ctx:XPath31GrammarParser.OropContext):
+    # Enter a parse tree produced by XPath31GrammarParser#addOp.
+    def enterAddOp(self, ctx:XPath31GrammarParser.AddOpContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#orop.
-    def exitOrop(self, ctx:XPath31GrammarParser.OropContext):
+    # Exit a parse tree produced by XPath31GrammarParser#addOp.
+    def exitAddOp(self, ctx:XPath31GrammarParser.AddOpContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#andOp.
+    def enterAndOp(self, ctx:XPath31GrammarParser.AndOpContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#andOp.
+    def exitAndOp(self, ctx:XPath31GrammarParser.AndOpContext):
+        pass
+
+
+    # Enter a parse tree produced by XPath31GrammarParser#orOp.
+    def enterOrOp(self, ctx:XPath31GrammarParser.OrOpContext):
+        pass
+
+    # Exit a parse tree produced by XPath31GrammarParser#orOp.
+    def exitOrOp(self, ctx:XPath31GrammarParser.OrOpContext):
         pass
 
 
@@ -440,12 +440,12 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#argumentlist.
-    def enterArgumentlist(self, ctx:XPath31GrammarParser.ArgumentlistContext):
+    # Enter a parse tree produced by XPath31GrammarParser#argumentList.
+    def enterArgumentList(self, ctx:XPath31GrammarParser.ArgumentListContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#argumentlist.
-    def exitArgumentlist(self, ctx:XPath31GrammarParser.ArgumentlistContext):
+    # Exit a parse tree produced by XPath31GrammarParser#argumentList.
+    def exitArgumentList(self, ctx:XPath31GrammarParser.ArgumentListContext):
         pass
 
 
@@ -566,21 +566,21 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#coerecefallback.
-    def enterCoerecefallback(self, ctx:XPath31GrammarParser.CoerecefallbackContext):
+    # Enter a parse tree produced by XPath31GrammarParser#coerceFallback.
+    def enterCoerceFallback(self, ctx:XPath31GrammarParser.CoerceFallbackContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#coerecefallback.
-    def exitCoerecefallback(self, ctx:XPath31GrammarParser.CoerecefallbackContext):
+    # Exit a parse tree produced by XPath31GrammarParser#coerceFallback.
+    def exitCoerceFallback(self, ctx:XPath31GrammarParser.CoerceFallbackContext):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#varref.
-    def enterVarref(self, ctx:XPath31GrammarParser.VarrefContext):
+    # Enter a parse tree produced by XPath31GrammarParser#varRef.
+    def enterVarRef(self, ctx:XPath31GrammarParser.VarRefContext):
         pass
 
-    # Exit a parse tree produced by XPath31GrammarParser#varref.
-    def exitVarref(self, ctx:XPath31GrammarParser.VarrefContext):
+    # Exit a parse tree produced by XPath31GrammarParser#varRef.
+    def exitVarRef(self, ctx:XPath31GrammarParser.VarRefContext):
         pass
 
 
