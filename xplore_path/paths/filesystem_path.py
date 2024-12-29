@@ -3,10 +3,11 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
+import pickle
 import tarfile
 import zipfile
 from abc import ABC, abstractmethod
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, gettempdir
 from typing import Hashable, Any
 from xml.etree import ElementTree
 
@@ -132,8 +133,7 @@ class CombinedFileLoader(FileLoader):
                     return l.load(p)
                 except Exception:
                     ...
-        return []
-
+        return None
 
 
 _DEFAULT_FILE_LOADER = CombinedFileLoader([
@@ -147,6 +147,10 @@ _DEFAULT_FILE_LOADER = CombinedFileLoader([
     XmlFileLoader(),
     # DefaultFileLoader()
 ])
+
+
+def _temp_dir() -> pathlib.Path:
+    return pathlib.Path(TemporaryDirectory(prefix='filesystem_path_intermediary', delete=False).name)
 
 
 class FileSystemPath(Path):
@@ -163,39 +167,62 @@ class FileSystemPath(Path):
             file_loader = _DEFAULT_FILE_LOADER
         self.file_loader = file_loader
         if workspace is None:
-            workspace = pathlib.Path(TemporaryDirectory(prefix='filesystem_path_workspace', delete=False).name)
+            workspace = pathlib.Path(f'{gettempdir()}/xplore_path_cache').expanduser()
         self.workspace = workspace
 
     def all_children(self) -> list[Path]:
         ret = []
         path: pathlib.Path = self.value()
         for c in path.iterdir():
+            c: pathlib.Path = c
             if c.is_file():
+                c_stat = c.stat()
+                cache_lookup_key = [str(c.absolute()), c_stat.st_mtime, c_stat.st_size]
+                cache_lookup_key_bytes = pickle.dumps(cache_lookup_key)
+                cache_lookup_key_hash = hashlib.sha256(cache_lookup_key_bytes).hexdigest()
                 if self.file_loader.is_loadable(c):
-                    ret.append(PythonObjectPath(self, c.name, self.file_loader.load(c)))
+                    cache_path = self.workspace / cache_lookup_key_hash
+                    data = None
+                    if cache_path.exists():
+                        try:
+                            data = pickle.loads(cache_path.read_bytes())
+                        except Exception:
+                            ...
+                    if data is None:
+                        data = self.file_loader.load(c)
+                        cache_path.unlink(missing_ok=True)
+                        cache_path.write_bytes(pickle.dumps(data))
+                        # TODO: fsync to make sure its rewritten in the event of an OS crash?
+                    ret.append(PythonObjectPath(self, c.name, data))
                 elif c.suffix == '.zip':
-                    hash = hashlib.sha256(str(c.absolute()).encode()).hexdigest()
-                    out_dir = self.workspace / hash
-                    if not out_dir.exists():
+                    cache_path = self.workspace / cache_lookup_key_hash
+                    if not cache_path.exists():
+                        intermediate_path = _temp_dir()
                         with zipfile.ZipFile(c, 'r') as f:
-                            f.extractall(out_dir)
-                    ret.append(FileSystemPath(self, c.name, out_dir, self.file_loader, self.workspace))
+                            f.extractall(intermediate_path)
+                        # TODO: before renaming, fsync to make sure its rewritten in the event of an OS crash?
+                        intermediate_path.rename(cache_path)
+                    ret.append(FileSystemPath(self, c.name, cache_path, self.file_loader, self.workspace))
                 elif c.suffix == '.tar':
-                    hash = hashlib.sha256(str(c.absolute()).encode()).hexdigest()
-                    out_dir = self.workspace / hash
-                    if not out_dir.exists():
+                    cache_path = self.workspace / cache_lookup_key_hash
+                    if not cache_path.exists():
+                        intermediate_path = _temp_dir()
                         with tarfile.open(c, 'r') as f:
-                            f.extractall(out_dir)
-                    ret.append(FileSystemPath(self, c.name, out_dir, self.file_loader, self.workspace))
+                            f.extractall(intermediate_path)
+                        # TODO: before renaming, fsync to make sure its rewritten in the event of an OS crash?
+                        intermediate_path.rename(cache_path)
+                    ret.append(FileSystemPath(self, c.name, cache_path, self.file_loader, self.workspace))
                 elif c.suffixes[-2:] == ['.tar', '.gz']:
-                    hash = hashlib.sha256(str(c.absolute()).encode()).hexdigest()
-                    out_dir = self.workspace / hash
-                    if not out_dir.exists():
+                    cache_path = self.workspace / cache_lookup_key_hash
+                    if not cache_path.exists():
+                        intermediate_path = _temp_dir()
                         with tarfile.open(c, 'r:gz') as f:
-                            f.extractall(out_dir)
-                    ret.append(FileSystemPath(self, c.name, out_dir, self.file_loader, self.workspace))
+                            f.extractall(intermediate_path)
+                        # TODO: before renaming, fsync to make sure its rewritten in the event of an OS crash?
+                        intermediate_path.rename(cache_path)
+                    ret.append(FileSystemPath(self, c.name, cache_path, self.file_loader, self.workspace))
                 else:
-                    ret.append(PythonObjectPath(self, c.name, []))
+                    ret.append(PythonObjectPath(self, c.name, None))
             elif c.is_dir():
                 ret.append(FileSystemPath(self, c.name, c, self.file_loader, self.workspace))
         return ret

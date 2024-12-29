@@ -12,7 +12,7 @@
 * TODO: add invocations into atomicorencapsulation
 * ~~TODO: filesystem path~~
 * ~~TODO: filesystem path support for zips, tars, and tar.gz~~
-* TODO: filesystem add caching layer
+* ~~TODO: filesystem add caching layer~~ (not great, but workable for now)
 * TODO: filesystem path - for each parsed file, inject invocations that can re-work the file
 * TODO: change syntax so keywords must be followed by ::, ENFORCE IN LEXER (so people can still use the keywords as-is)
 * TODO: add callback that notifies of what's happening when evaluation is running
