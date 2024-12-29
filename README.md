@@ -25,3 +25,5 @@
 * ~~TODO: test filesystem file loaders~~
 * TODO: make use of variables in REPL - store results in var names and use those var names in queries
 * TODO: ANTLR grammar rule names must be fixed
+* TODO: REPL/CLI filesystem add option to pre-cache on launch - just get //* and output results after the fact
+* ~~TODO: filesystem notify of caching/loadings ops~~

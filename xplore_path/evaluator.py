@@ -12,7 +12,7 @@ from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
 from xplore_path.XPath31GrammarLexer import XPath31GrammarLexer
 from xplore_path.XPath31GrammarParser import XPath31GrammarParser
 from xplore_path.XPath31GrammarVisitor import XPath31GrammarVisitor
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
+from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext
 from xplore_path.path.path import Path
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 from xplore_path.coercer_fallback.coercer_fallback import CoercerFallback
@@ -796,6 +796,21 @@ def evaluate(root: EntityType, expr: str):
 def _test(root_obj, expr):
     return _test_with_path(PythonObjectPath.create_root_path(root_obj), expr)
 
+def _test_with_fs_path(dir, expr):
+    print(f'---- res for {expr}')
+    fs_path = FileSystemPath.create_root_path(
+        dir,
+        FileSystemPathContext(
+            cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
+        )
+    )
+    ret = evaluate(fs_path, expr)
+    if isinstance(ret, list):
+        for v in ret:
+            print(f'  {v}')
+        return ret
+    else:
+        print(f'  {ret}')
 
 def _test_with_path(p, expr):
     print(f'---- res for {expr}')
@@ -895,26 +910,30 @@ if __name__ == '__main__':
     # _test(root, '.')
     # _test(root, '/a')
 
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/*')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json//*')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json/address/city')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.xml//*')
-    _test_with_path(FileSystemPath.create_root_path('~'), '/test.html//*')
-    # _test_with_path(FileSystemPath.create_root_path('~/Downloads'), '/pycharm-community-2024.3.1.tar.gz/*')
-    # _test_with_path(FileSystemPath.create_root_path('~/Downloads'), "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'")
-    # _test_with_path(FileSystemPath.create_root_path('~/Downloads'), "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'//*")
-    # _test_with_path(FileSystemPath.create_root_path('~/Downloads'), "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.yaml//*')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name[. = "John Doe"]')
-    # # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*[./Name = f"John Do"]')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*[f"John Do" = ./Name]')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*[r"J.*" = ./Name]')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '(/test.csv/*)[./Name/r"J.*"]')
+    # _test_with_fs_path('~', '/*')
+    # _test_with_fs_path('~', '/test.json//*')
+    # _test_with_fs_path('~', '/test.json/address/city')
+    # _test_with_fs_path('~', '/test.xml//*')
+    # _test_with_fs_path('~', '/test.html//*')
+    # _test_with_fs_path('~/Downloads', '/pycharm-community-2024.3.1.tar.gz/*')
+    # _test_with_fs_path('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'")
+    # _test_with_fs_path('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'//*")
+    # _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
+    # _test_with_fs_path('~', '/test.yaml//*')
+    # _test_with_fs_path('~', '/test.csv/*/Name')
+    # _test_with_fs_path('~', '/test.csv/*/Name[. = "John Doe"]')
+    # # _test_with_fs_path('~', '/test.csv/*')
+    # _test_with_fs_path('~', '/test.csv/*[./Name = f"John Do"]')
+    # _test_with_fs_path('~', '/test.csv/*[f"John Do" = ./Name]')
+    # _test_with_fs_path('~', '/test.csv/*[r"J.*" = ./Name]')
+    # _test_with_fs_path('~', '(/test.csv/*)[./Name/r"J.*"]')
 
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/Downloads/*')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/Downloads/"parabilis.zip"/*')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/Downloads/"parabilis.zip"/parabilis/*')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/Downloads/"parabilis.zip"/parabilis/".idea"/*')
-    # _test_with_path(FileSystemPath.create_root_path('~'), '/Downloads/"parabilis.zip"/parabilis/".idea"/modules.xml//*')
+    # _test_with_fs_path('~', '/Downloads/*')
+    # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/*')
+    # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/parabilis/*')
+    # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/*')
+    # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/modules.xml//*')
+
+    _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
+    _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
+    _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
