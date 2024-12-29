@@ -16,8 +16,8 @@
 * TODO: filesystem path - for each parsed file, inject invocations that can re-work the file
 * TODO: change syntax so keywords must be followed by ::, ENFORCE IN LEXER (so people can still use the keywords as-is)
 * TODO: add callback that notifies of what's happening when evaluation is running
-* TODO: html parser
-* TODO: xml parser - tag value should be returned directly as opposed to going inside .text child 
+* ~~TODO: html parser~~
+* TODO: xml and html parser - tag value should be returned directly as opposed to going inside .text child 
 
 * TEST paths
 * TEST paths with predicates

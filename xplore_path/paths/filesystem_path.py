@@ -11,9 +11,11 @@ from tempfile import TemporaryDirectory, gettempdir
 from typing import Hashable, Any
 from xml.etree import ElementTree
 
+import bs4
 import pandas as pd
 import yaml
 from PyPDF2 import PdfReader
+from bs4 import BeautifulSoup, NavigableString
 from docx import Document
 
 from xplore_path.path.path import Path
@@ -108,6 +110,34 @@ class XmlFileLoader(FileLoader):
         return {root.tag: xml_to_dict_with_attributes(root)}
 
 
+class HtmlFileLoader(FileLoader):
+    def is_loadable(self, p: pathlib.Path) -> bool:
+        return p.suffix == '.html'
+
+    def load(self, p: pathlib.Path) -> Any:
+        def html_to_dict_with_attributes(element):
+            node = {}
+            if element.attrs:
+                for k, v in element.attrs.items():
+                    node[f'@{k}'] = str(v)
+            if list(element):
+                for i, child in enumerate(element):
+                    if isinstance(child, bs4.element.Tag):
+                        node[i] = {child.name: html_to_dict_with_attributes(child)}
+                    elif isinstance(child, (str, bs4.element.NavigableString)):
+                        child = str(child).strip()
+                        if child:
+                            node[i] = child
+                    else:
+                        node[i] = child
+            elif element.text and element.text.strip():
+                node['.text'] = element.text.strip()
+            return node
+
+        root = BeautifulSoup(p.read_bytes(), 'html.parser').html
+        return {root.name: html_to_dict_with_attributes(root)}
+
+
 class DefaultFileLoader(FileLoader):
     def is_loadable(self, p: pathlib.Path) -> bool:
         return True
@@ -145,6 +175,7 @@ _DEFAULT_FILE_LOADER = CombinedFileLoader([
     XlsxFileLoader(),
     DocxFileLoader(),
     XmlFileLoader(),
+    HtmlFileLoader(),
     # DefaultFileLoader()
 ])
 
