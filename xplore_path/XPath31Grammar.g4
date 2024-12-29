@@ -31,6 +31,7 @@ OB         : '[';
 OC         : '{';
 OP         : '(';
 P          : '|';
+PP         : '||';
 PLUS       : '+';
 QM         : '?';
 SLASH      : '/';
@@ -38,7 +39,6 @@ SS         : '//';
 STAR       : '*';
 
 // KEYWORDS
-
 KW_ANCESTOR               : 'ancestor';
 KW_ANCESTOR_OR_SELF       : 'ancestor-or-self';
 KW_AND                    : 'and';
@@ -197,8 +197,8 @@ mulop
     ;
 
 addop
-    : (KW_ZIP | KW_PRODUCT)? (PLUS | MINUS)
-    | (PLUS | MINUS) (KW_ZIP | KW_PRODUCT)?
+    : (KW_ZIP | KW_PRODUCT)? (PLUS | MINUS | PP)
+    | (PLUS | MINUS | PP) (KW_ZIP | KW_PRODUCT)?
     ;
 
 andop

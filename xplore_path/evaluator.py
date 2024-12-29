@@ -124,7 +124,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         else:
             coercer_fallback = DiscardCoercerFallback()
         inner = self.visit(ctx.atomicorencapsulate())
-        if ctx.MINUS() is not None:
+        if ctx.MINUS:
             if type(inner) == list:
                 inner = [coerce_single_value(v, float) for v in inner]
                 inner = coercer_fallback.coerce(inner)
@@ -138,7 +138,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                     return inner[0]
                 else:
                     return []
-        elif ctx.PLUS() is not None:
+        elif ctx.PLUS:
             return inner  # Keep it as-is -- not required to do any manipulation here
 
     def visitExprAtomicOrEncapsulate(self, ctx: XPath31GrammarParser.ExprAtomicOrEncapsulateContext):
@@ -182,29 +182,30 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             r = coercer_fallback.coerce(r)
             return op(r)
 
-    def _apply_binary_number_op(
+    def _apply_binary_arithmetic_op(
             self,
             l: int | float | str | bool | list[Any],
             r: int | float | str | bool | list[Any],
             combine_op: Callable[[Any, Any], Any],
             op: Callable[[Any, Any], Any],
+            expected_type: Type[bool | int | float | str],
             coercer_fallback: CoercerFallback
     ):
         if isinstance(l, list) and isinstance(r, list):
-            l = coercer_fallback.coerce([coerce_single_value(v, float) for v in l])
-            r = coercer_fallback.coerce([coerce_single_value(v, float) for v in r])
+            l = coercer_fallback.coerce([coerce_single_value(v, expected_type) for v in l])
+            r = coercer_fallback.coerce([coerce_single_value(v, expected_type) for v in r])
             return [op(l_, r_) for l_, r_ in combine_op(l, r)]
         elif isinstance(l, list):
-            l = coercer_fallback.coerce([coerce_single_value(v, float) for v in l])
-            r = coercer_fallback.coerce([coerce_single_value(r, float)])
+            l = coercer_fallback.coerce([coerce_single_value(v, expected_type) for v in l])
+            r = coercer_fallback.coerce([coerce_single_value(r, expected_type)])
             return [op(l_, r_) for l_, r_ in combine_op(l, r)]
         elif isinstance(r, list):
-            l = coercer_fallback.coerce([coerce_single_value(l, float)])
-            r = coercer_fallback.coerce([coerce_single_value(v, float) for v in r])
+            l = coercer_fallback.coerce([coerce_single_value(l, expected_type)])
+            r = coercer_fallback.coerce([coerce_single_value(v, expected_type) for v in r])
             return [op(l_, r_) for l_, r_ in combine_op(l, r)]
         else:
-            l = coercer_fallback.coerce([coerce_single_value(l, float)])
-            r = coercer_fallback.coerce([coerce_single_value(r, float)])
+            l = coercer_fallback.coerce([coerce_single_value(l, expected_type)])
+            r = coercer_fallback.coerce([coerce_single_value(r, expected_type)])
             single_or_empty = [op(l_, r_) for l_, r_ in combine_op(l, r)]
             return single_or_empty[0] if single_or_empty else []
 
@@ -221,14 +222,14 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             combine_op = zip
         elif ctx.mulop().KW_PRODUCT():
             combine_op = product
-        if ctx.mulop().STAR() is not None:
-            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l * _r, coercer_fallback)
-        elif ctx.mulop().KW_DIV() is not None:
-            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l / _r, coercer_fallback)
-        elif ctx.mulop().KW_IDIV() is not None:
-            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l // _r, coercer_fallback)
-        elif ctx.mulop().KW_MOD() is not None:
-            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l % _r, coercer_fallback)
+        if ctx.mulop().STAR:
+            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l * _r, float, coercer_fallback)
+        elif ctx.mulop().KW_DIV:
+            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l / _r, float, coercer_fallback)
+        elif ctx.mulop().KW_IDIV:
+            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l // _r, float, coercer_fallback)
+        elif ctx.mulop().KW_MOD:
+            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l % _r, float, coercer_fallback)
         raise ValueError('Unexpected')
 
     def visitExprAdditive(self, ctx: XPath31GrammarParser.ExprAdditiveContext):
@@ -244,10 +245,12 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             combine_op = zip
         elif ctx.addop().KW_PRODUCT():
             combine_op = product
-        if ctx.addop().PLUS() is not None:
-            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l + _r, coercer_fallback)
-        elif ctx.addop().MINUS() is not None:
-            return self._apply_binary_number_op(l, r, combine_op, lambda _l, _r: _l - _r, coercer_fallback)
+        if ctx.addop().PLUS():
+            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l + _r, float, coercer_fallback)
+        elif ctx.addop().MINUS():
+            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l - _r, float, coercer_fallback)
+        elif ctx.addop().PP():
+            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l + _r, str, coercer_fallback)
         raise ValueError('Unexpected')
 
     def visitExprRange(self, ctx: XPath31GrammarParser.ExprRangeContext):
@@ -479,7 +482,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         try:
             self.context.save_entities(PrimeMode.PRIME_WITH_SELF)
             new_paths = []
-            if ctx.SLASH() is not None:
+            if ctx.SLASH:
                 left_contexts = self.visit(ctx.relpath(0))
                 for left_path in left_contexts:
                     self.context.save_entities([left_path])
@@ -487,7 +490,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
                     for right_path in right_contexts:
                         new_paths.append(right_path)
                     self.context.restore_entities()
-            elif ctx.SS() is not None:
+            elif ctx.SS:
                 left_contexts = []
                 for e in self.visit(ctx.relpath(0)):
                     left_contexts.append(e)
@@ -505,9 +508,9 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             self.context.restore_entities()
 
     def visitRelPathStep(self, ctx: XPath31GrammarParser.RelPathStepContext):
-        if ctx.forwardstep() is not None:
+        if ctx.forwardstep:
             ret = self.visit(ctx.forwardstep())
-        elif ctx.reversestep() is not None:
+        elif ctx.reversestep:
             ret = self.visit(ctx.reversestep())
         else:
             raise ValueError('Unexpected')
@@ -894,7 +897,8 @@ if __name__ == '__main__':
     # _test_with_path(FileSystemPath.create_root_path('~'), '/*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json//*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.json/address/city')
-    _test_with_path(FileSystemPath.create_root_path('~'), '/test.xml//*')
+    # _test_with_path(FileSystemPath.create_root_path('~'), '/test.xml//*')
+    _test_with_path(FileSystemPath.create_root_path('~/Downloads'), '/pycharm-community-2024.3.1.tar.gz/*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.yaml//*')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name')
     # _test_with_path(FileSystemPath.create_root_path('~'), '/test.csv/*/Name[. = "John Doe"]')

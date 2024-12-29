@@ -187,7 +187,7 @@ class FileSystemPath(Path):
                         with tarfile.open(c, 'r') as f:
                             f.extractall(out_dir)
                     ret.append(FileSystemPath(self, c.name, out_dir, self.file_loader, self.workspace))
-                elif c.suffixes == ['.tar', '.gz']:
+                elif c.suffixes[-2:] == ['.tar', '.gz']:
                     hash = hashlib.sha256(str(c.absolute()).encode()).hexdigest()
                     out_dir = self.workspace / hash
                     if not out_dir.exists():
