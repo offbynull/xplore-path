@@ -135,28 +135,29 @@ def main(query_path: Path, cache_path: Path):
     )
 
     session.app.print_text([
-        ('           ', _ASCII_LOGO + '\n'),
-        ('           ', '\n'),
-        ('           ', 'Xplore Path REPL\n'),
-        ('           ', '----------------\n'),
-        ('           ', f'Active directory: {query_path}\n'),
-        ('           ', '\n'),
-        ('           ', 'Keys:\n'),
-        ('fg:ansiblue', '  Enter'), ('', ' to execute\n'),
-        ('fg:ansiblue', '  Tab'), ('', ' for autocomplete suggestions\n'),
-        ('fg:ansiblue', '  ↑↓'), ('', ' to navigate history\n'),
-        ('fg:ansiblue', '  Ctrl-L'), ('', ' to turn on/off full labels in outputs\n'),
-        ('fg:ansiblue', '  Ctrl-T'), ('', ' to turn on/off truncating outputs\n'),
-        ('fg:ansiblue', '  Ctrl-C'), ('', ' to exit\n'),
-        ('           ', '\n'),
-        ('           ', 'Examples:\n'),
-        ('fg:ansiblue', '  /*'), ('', ' - get all children\n'),
-        ('fg:ansiblue', '  //*'), ('', ' - get all descendants (may take a long time)\n'),
-        ('fg:ansiblue', '  /apple/*[./cherry]'), ('', ' - get all children of apple who have a child named cherry\n'),
-        ('           ', '\n'),
+        ('            ', _ASCII_LOGO + '\n'),
+        ('            ', '\n'),
+        ('            ', 'Xplore Path REPL\n'),
+        ('            ', '----------------\n'),
+        ('            ', f'Active directory:\n'),
+        ('fg:ansiwhite', f'  {query_path}\n'),
+        ('            ', '\n'),
+        ('            ', 'Keys:\n'),
+        ('fg:ansiblue ', '  Enter'), ('', ' to execute\n'),
+        ('fg:ansiblue ', '  Tab'), ('', ' for autocomplete suggestions\n'),
+        ('fg:ansiblue ', '  ↑↓'), ('', ' to navigate history\n'),
+        ('fg:ansiblue ', '  Ctrl-L'), ('', ' to turn on/off full labels in outputs\n'),
+        ('fg:ansiblue ', '  Ctrl-T'), ('', ' to turn on/off truncating outputs\n'),
+        ('fg:ansiblue ', '  Ctrl-C'), ('', ' to exit\n'),
+        ('            ', '\n'),
+        ('            ', 'Examples:\n'),
+        ('fg:ansiblue ', '  /*'), ('', ' - get all children\n'),
+        ('fg:ansiblue ', '  //*'), ('', ' - get all descendants (may take a long time)\n'),
+        ('fg:ansiblue ', '  /apple/*[./cherry]'), ('', ' - get all children of apple who have a child named cherry\n'),
+        ('            ', '\n'),
         ('fg:ansiyellow', 'WARNING: '), ('', 'Autocomplete suggestions are best-effort and may not always be '
                                              'correct and / or may not always be exhaustive.\n'),
-        ('           ', '\n')
+        ('            ', '\n')
     ])
 
     default_prompt = ''
