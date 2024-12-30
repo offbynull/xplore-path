@@ -72,6 +72,8 @@ KW_FAIL                   : 'fail';
 KW_NAN                    : 'nan';
 KW_INF                    : 'inf';
 KW_LABEL                  : 'label';
+KW_DISTINCT               : 'distinct';
+KW_COUNT                  : 'count';
 
 // A.2.1. TERMINAL SYMBOLS
 // This isn't a complete list of tokens in the language.
@@ -145,18 +147,20 @@ xplorePath
     ;
 
 expr
-    : (KW_ANY | KW_ALL) expr coerceFallback?             # ExprBoolAggregate
-    | expr COMMA expr                                     # ExprConcatenate
-    | expr (KW_INTERSECT | KW_EXCEPT) expr                # ExprSetIntersect
-    | expr (KW_UNION | P) expr                            # ExprSetUnion
-    | expr KW_TO expr                                     # ExprRange
-    | KW_LABEL expr                                       # ExprExtractLabel
-    | expr orOp expr coerceFallback?                     # ExprOr
-    | expr andOp expr coerceFallback?                    # ExprAnd
-    | expr relOp expr coerceFallback?                    # ExprComparison
-    | expr addOp expr coerceFallback?                    # ExprAdditive
-    | expr mulOp expr coerceFallback?                    # ExprMultiplicative
-    | atomicOrEncapsulate                                 # ExprAtomicOrEncapsulate
+    : (KW_ANY | KW_ALL) expr coerceFallback?  # ExprBoolAggregate
+    | KW_COUNT expr                           # ExprCount
+    | KW_DISTINCT expr                        # ExprDistinct
+    | expr COMMA expr                         # ExprConcatenate
+    | expr (KW_INTERSECT | KW_EXCEPT) expr    # ExprSetIntersect
+    | expr (KW_UNION | P) expr                # ExprSetUnion
+    | expr KW_TO expr                         # ExprRange
+    | KW_LABEL expr                           # ExprExtractLabel
+    | expr orOp expr coerceFallback?          # ExprOr
+    | expr andOp expr coerceFallback?         # ExprAnd
+    | expr relOp expr coerceFallback?         # ExprComparison
+    | expr addOp expr coerceFallback?         # ExprAdditive
+    | expr mulOp expr coerceFallback?         # ExprMultiplicative
+    | atomicOrEncapsulate                     # ExprAtomicOrEncapsulate
     ;
 
 // Why isn't atomicOrEncapsulate directly tied embedded within expr? It was, and the ExprUnary alternative was defined

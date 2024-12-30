@@ -1,5 +1,13 @@
 * TODO: add join syntax - inner, left, right
-* TODO: add distinct/unique syntax - just coerce it into a set
+* TODO: add distinct/unique syntax - just coerce it into a set~~
+* ~~TODO: add count syntax - just coerce it into a set~~~~
+* TODO: add 'bin count' syntax to count value collisions?
+* TODO: add 'bin aggregate' syntax to list all paths that collide for a certain value?
+* TODO: add 'bin histogram' syntax to generate histogram?
+* TODO: add 'strip'/'collapse' to trim leading/trailing whitespace + collapse multiple contig whitespace to single
+  much of the above can be added in as variable functions?
+    as well as even things like "to", "intersect", "union", etc..
+* TODO: comparison operators - ADD MODIFIER THAT MAKES IT STRICT (no coercions allowed except int/float)
 * ~~TODO: add string concat operator back in~~
 * ~~TODO: add label directive to extract label name~~
 * ~~TODO: new matcher to test ignorecase~~

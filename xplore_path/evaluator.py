@@ -145,6 +145,12 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def visitExprAtomicOrEncapsulate(self, ctx: XPath31GrammarParser.ExprAtomicOrEncapsulateContext):
         return self.visit(ctx.atomicOrEncapsulate())
 
+    def visitExprCount(self, ctx: XPath31GrammarParser.ExprCountContext):
+        return len(coerce_to_list(self.visit(ctx.expr())))
+
+    def visitExprDistinct(self, ctx: XPath31GrammarParser.ExprDistinctContext):
+        return list({v.value() if isinstance(v, Path) else v for v in self.visit(ctx.expr())})
+
     def visitExprConcatenate(self, ctx: XPath31GrammarParser.ExprConcatenateContext):
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
@@ -934,6 +940,7 @@ if __name__ == '__main__':
     # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/*')
     # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/modules.xml//*')
 
-    _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
-    _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
-    _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
+    # _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
+    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
+    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
+    _test_with_fs_path('~/Downloads', "distinct /Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'")
