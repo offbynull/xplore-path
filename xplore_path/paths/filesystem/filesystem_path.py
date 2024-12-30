@@ -17,6 +17,7 @@ from xplore_path.paths.filesystem.file_loader import FileLoader
 from xplore_path.paths.filesystem.html_file_loader import HtmlFileLoader
 from xplore_path.paths.filesystem.json_file_loader import JsonFileLoader
 from xplore_path.paths.filesystem.pdf_file_loader import PdfFileLoader
+from xplore_path.paths.filesystem.sqlite_file_loader import SqliteFileLoader
 from xplore_path.paths.filesystem.text_file_loader import TextFileLoader
 from xplore_path.paths.filesystem.xlsx_file_loader import XlsxFileLoader
 from xplore_path.paths.filesystem.xml_file_loader import XmlFileLoader
@@ -33,6 +34,7 @@ _DEFAULT_FILE_LOADER = CombinedFileLoader([
     DocxFileLoader(),
     XmlFileLoader(),
     HtmlFileLoader(),
+    SqliteFileLoader(),
     # DefaultFileLoader()
 ])
 
@@ -142,7 +144,11 @@ class FileSystemPath(Path):
                             # TODO: fsync to make sure its rewritten in the event of an OS crash?
                             self._notify(NoticeType.DATA_CACHE_COMPLETE, c)
                     # done
-                    ret.append(PythonObjectPath(self, c.name, data))
+                    if data is not None:
+                        path_creator = self.ctx.file_loader.path_creator(c)
+                        ret.append(path_creator(self, c.name, data))
+                    else:
+                        ret.append(PythonObjectPath(self, c.name, None))
                 elif c.suffix == '.zip':  # skip it if set to only access cached
                     cache_path = self.ctx.cache.to_path(cache_lookup_key)
                     if not cache_path.exists() and not self.ctx.cache_only_access:  # skip unpack if cache only access

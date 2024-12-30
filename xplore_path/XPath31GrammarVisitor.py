@@ -14,6 +14,11 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XPath31GrammarParser#ExprAnd.
+    def visitExprAnd(self, ctx:XPath31GrammarParser.ExprAndContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XPath31GrammarParser#ExprBoolAggregate.
     def visitExprBoolAggregate(self, ctx:XPath31GrammarParser.ExprBoolAggregateContext):
         return self.visitChildren(ctx)
@@ -39,26 +44,6 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprConcatenate.
-    def visitExprConcatenate(self, ctx:XPath31GrammarParser.ExprConcatenateContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprDistinct.
-    def visitExprDistinct(self, ctx:XPath31GrammarParser.ExprDistinctContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprAdditive.
-    def visitExprAdditive(self, ctx:XPath31GrammarParser.ExprAdditiveContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprAnd.
-    def visitExprAnd(self, ctx:XPath31GrammarParser.ExprAndContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XPath31GrammarParser#ExprOr.
     def visitExprOr(self, ctx:XPath31GrammarParser.ExprOrContext):
         return self.visitChildren(ctx)
@@ -66,6 +51,11 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XPath31GrammarParser#ExprMultiplicative.
     def visitExprMultiplicative(self, ctx:XPath31GrammarParser.ExprMultiplicativeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#ExprConcatenate.
+    def visitExprConcatenate(self, ctx:XPath31GrammarParser.ExprConcatenateContext):
         return self.visitChildren(ctx)
 
 
@@ -79,18 +69,8 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprCount.
-    def visitExprCount(self, ctx:XPath31GrammarParser.ExprCountContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprUnary.
-    def visitExprUnary(self, ctx:XPath31GrammarParser.ExprUnaryContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#ExprWrap.
-    def visitExprWrap(self, ctx:XPath31GrammarParser.ExprWrapContext):
+    # Visit a parse tree produced by XPath31GrammarParser#ExprAdditive.
+    def visitExprAdditive(self, ctx:XPath31GrammarParser.ExprAdditiveContext):
         return self.visitChildren(ctx)
 
 
@@ -104,8 +84,18 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XPath31GrammarParser#ExprVariable.
-    def visitExprVariable(self, ctx:XPath31GrammarParser.ExprVariableContext):
+    # Visit a parse tree produced by XPath31GrammarParser#ExprFunctionCall.
+    def visitExprFunctionCall(self, ctx:XPath31GrammarParser.ExprFunctionCallContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#ExprWrap.
+    def visitExprWrap(self, ctx:XPath31GrammarParser.ExprWrapContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#ExprUnary.
+    def visitExprUnary(self, ctx:XPath31GrammarParser.ExprUnaryContext):
         return self.visitChildren(ctx)
 
 
@@ -116,6 +106,16 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XPath31GrammarParser#ExprPath.
     def visitExprPath(self, ctx:XPath31GrammarParser.ExprPathContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#ExprVariable.
+    def visitExprVariable(self, ctx:XPath31GrammarParser.ExprVariableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XPath31GrammarParser#argumentList.
+    def visitArgumentList(self, ctx:XPath31GrammarParser.ArgumentListContext):
         return self.visitChildren(ctx)
 
 
@@ -256,16 +256,6 @@ class XPath31GrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XPath31GrammarParser#ReverseStepDirectParent.
     def visitReverseStepDirectParent(self, ctx:XPath31GrammarParser.ReverseStepDirectParentContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#argumentList.
-    def visitArgumentList(self, ctx:XPath31GrammarParser.ArgumentListContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XPath31GrammarParser#argument.
-    def visitArgument(self, ctx:XPath31GrammarParser.ArgumentContext):
         return self.visitChildren(ctx)
 
 

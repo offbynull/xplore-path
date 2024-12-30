@@ -7,6 +7,13 @@ from typing import Any, Callable, Type
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
 
+from xplore_path.invocable.invocable import Invocable
+from xplore_path.invocables.count_invocable import CountInvocable
+from xplore_path.invocables.distinct_invocable import DistinctInvocable
+from xplore_path.invocables.frequency_count_invocable import FrequencyCountInvocable
+from xplore_path.invocables.whitespace_collapse_invocable import WhitespaceCollapseInvocable
+from xplore_path.invocables.whitespace_remove_invocable import WhitespaceRemoveInvocable
+from xplore_path.invocables.whitespace_strip_invocable import WhitespaceStripInvocable
 from xplore_path.matchers.ignore_case_matcher import IgnoreCaseMatcher
 from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
 from xplore_path.XPath31GrammarLexer import XPath31GrammarLexer
@@ -35,20 +42,20 @@ class PrimeMode(Enum):
     PRIME_WITH_SELF = 'PRIME_WITH_SELF'
     PRIME_WITH_EMPTY = 'PRIME_WITH_EMPTY'
 
+
 EntityType = Path | int | float | str | bool | Matcher
 
+
 @dataclass
-class Context:
+class _EvaluatorVisitorContext:
     original_root: Path
     entities: list[EntityType]
     entities_save_stack: list[list[EntityType]]
+    variables: dict[str, Any]
 
     def __post_init__(self):
         if self.original_root.full_label() != [None]:
             raise ValueError('Root path in context not root path')
-
-    def __add__(self, other):
-        return Context(self.original_root, self.entities + other.entities, [])
 
     def __contains__(self, item):
         return item in self.entities
@@ -84,24 +91,26 @@ class Context:
         self.entities.append(entity)
 
     @staticmethod
-    def prime(root_: EntityType):
-        return Context(
+    def prime(
+            root_: EntityType,
+            variables_: dict[str, Any]
+    ):
+        return _EvaluatorVisitorContext(
             original_root=root_,
             entities=[root_],
-            entities_save_stack=[]
+            entities_save_stack=[],
+            variables=variables_
         )
 
 
-
-
-
-
-
-class PathEvaluatorVisitor(XPath31GrammarVisitor):
-    def __init__(self, root: Any):
+class _EvaluatorVisitor(XPath31GrammarVisitor):
+    def __init__(
+            self,
+            root: Any,
+            variables: dict[str, Any]
+    ):
         self.root = root
-        self.context = Context.prime(root)
-        self.context_save_stack = []
+        self.context = _EvaluatorVisitorContext.prime(root, variables)
 
     def visitXplorePath(self, ctx: XPath31GrammarParser.XplorePathContext):
         return self.visit(ctx.expr())
@@ -116,7 +125,16 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         return self.visit(ctx.literal())
 
     def visitExprVariable(self, ctx: XPath31GrammarParser.ExprVariableContext):
-        raise ValueError('Variables not supported yet')
+        if ctx.varRef().Name():
+            name = ctx.varRef().Name().getText()
+        elif ctx.varRef().IntegerLiteral():
+            name = str(ctx.varRef().IntegerLiteral().getText())
+        elif ctx.varRef().StringLiteral():
+            name = self._decode_str(ctx.varRef().StringLiteral().getText())
+        else:
+            raise ValueError('Unexpected')
+
+        return self.context.variables.get(name, None)
 
     def visitExprUnary(self, ctx: XPath31GrammarParser.ExprUnaryContext):
         if ctx.coerceFallback():
@@ -145,11 +163,33 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def visitExprAtomicOrEncapsulate(self, ctx: XPath31GrammarParser.ExprAtomicOrEncapsulateContext):
         return self.visit(ctx.atomicOrEncapsulate())
 
-    def visitExprCount(self, ctx: XPath31GrammarParser.ExprCountContext):
-        return len(coerce_to_list(self.visit(ctx.expr())))
+    def visitExprFunctionCall(self, ctx: XPath31GrammarParser.ExprFunctionCallContext):
+        if ctx.coerceFallback():
+            coercer_fallback = self.visit(ctx.coerceFallback())
+        else:
+            coercer_fallback = DiscardCoercerFallback()
 
-    def visitExprDistinct(self, ctx: XPath31GrammarParser.ExprDistinctContext):
-        return list({v.value() if isinstance(v, Path) else v for v in self.visit(ctx.expr())})
+        def op(_invocable, _args):
+            if isinstance(_invocable, Invocable):
+                try:
+                    return _invocable.invoke(_args)
+                except Exception:
+                    ...  # do nothing
+            return None
+
+        invocable = self.visit(ctx.atomicOrEncapsulate())
+        args = [self.visit(n) for n in ctx.argumentList().expr()]
+        if type(invocable) == list:
+            ret = [op(i, args) for i in invocable]
+            ret = coercer_fallback.coerce(ret)
+            return ret
+        else:
+            ret = [op(invocable, args)]
+            ret = coercer_fallback.coerce(ret)
+            if ret:
+                return ret[0]
+            else:
+                return []
 
     def visitExprConcatenate(self, ctx: XPath31GrammarParser.ExprConcatenateContext):
         l = self.visit(ctx.expr(0))
@@ -159,14 +199,19 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
     def visitExprSetIntersect(self, ctx: XPath31GrammarParser.ExprSetIntersectContext):
         l = coerce_for_set_operation(self.visit(ctx.expr(0)))
         r = coerce_for_set_operation(self.visit(ctx.expr(1)))
-        intersected = l.keys() & r.keys()
-        return [l[p] for p in intersected]
+        if ctx.KW_INTERSECT():
+            result_keys = l.keys() & r.keys()
+        elif ctx.KW_EXCEPT():
+            result_keys = l.keys() - r.keys()
+        else:
+            raise ValueError('Unexpected')
+        return [l[p] for p in result_keys]
 
     def visitExprSetUnion(self, ctx: XPath31GrammarParser.ExprSetUnionContext):
         l = coerce_for_set_operation(self.visit(ctx.expr(0)))
         r = coerce_for_set_operation(self.visit(ctx.expr(1)))
-        unioned = l | r
-        return list(unioned.values())
+        result = l | r
+        return list(result.values())
 
     def visitExprBoolAggregate(self, ctx: XPath31GrammarParser.ExprBoolAggregateContext):
         if ctx.coerceFallback():
@@ -521,8 +566,6 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
             ret = self.visit(ctx.reverseStep())
         else:
             raise ValueError('Unexpected')
-        if len(ctx.argumentList()) > 0:
-            raise ValueError('IMPLEMENT ME')
         return ret
 
     def visitReverseStepParent(self, ctx: XPath31GrammarParser.ReverseStepParentContext):
@@ -785,7 +828,13 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         raise ValueError('Unexpected')
 
 
-def evaluate(root: EntityType, expr: str):
+def evaluate(
+        root: EntityType,
+        expr: str,
+        variables: dict[str, Any] | None = None
+) -> list[Any] | Any:
+    if variables is None:
+        variables = {}
     input_stream = InputStream(expr)
     lexer = XPath31GrammarLexer(input_stream)
     lexer.removeErrorListeners()
@@ -795,12 +844,39 @@ def evaluate(root: EntityType, expr: str):
     parser.removeErrorListeners()
     parser.addErrorListener(RaiseParseErrorListener())
     tree = parser.xplorePath()
-    visitor = PathEvaluatorVisitor(root)
+    visitor = _EvaluatorVisitor(root, variables)
     return tree.accept(visitor)
+
+
+class Evaluator:
+    _DEFAULT_VARIABLES = {
+        'distinct': DistinctInvocable(),
+        'count': CountInvocable(),
+        'frequency_count': FrequencyCountInvocable(),
+        'whitespace_collapse': WhitespaceCollapseInvocable(),
+        'whitespace_strip': WhitespaceStripInvocable(),
+        'whitespace_remove': WhitespaceRemoveInvocable()
+    }
+
+    def __init__(
+            self,
+            variables: dict[str, Any] | None = None
+    ):
+        if variables is None:
+            variables = {}
+        self.variables = Evaluator._DEFAULT_VARIABLES | variables  # same key? _DEFAULT_VARIABLES loses
+
+    def evaluate(
+            self,
+            root: EntityType,
+            expr: str
+    ):
+        return evaluate(root, expr, self.variables)
 
 
 def _test(root_obj, expr):
     return _test_with_path(PythonObjectPath.create_root_path(root_obj), expr)
+
 
 def _test_with_fs_path(dir, expr):
     print(f'---- res for {expr}')
@@ -810,7 +886,7 @@ def _test_with_fs_path(dir, expr):
             cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
         )
     )
-    ret = evaluate(fs_path, expr)
+    ret = Evaluator().evaluate(fs_path, expr)
     if isinstance(ret, list):
         for v in ret:
             print(f'  {v}')
@@ -820,7 +896,7 @@ def _test_with_fs_path(dir, expr):
 
 def _test_with_path(p, expr):
     print(f'---- res for {expr}')
-    ret = evaluate(p, expr)
+    ret = Evaluator().evaluate(p, expr)
     if isinstance(ret, list):
         for v in ret:
             print(f'  {v}')
@@ -943,4 +1019,11 @@ if __name__ == '__main__':
     # _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
     # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
     # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
-    _test_with_fs_path('~/Downloads', "distinct /Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'")
+    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'")
+    # _test_with_fs_path('~/Downloads', "$count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+    # _test_with_fs_path('~/Downloads', "$distinct(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+    # _test_with_fs_path('~/Downloads', "$frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+    _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
+    # _test_with_fs_path('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
+    # _test_with_fs_path('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
+    # _test_with_fs_path('~/Downloads', "$whitespace_strip([' hello world ', ' hello world', 'hello world '])")

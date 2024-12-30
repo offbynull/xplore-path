@@ -6,12 +6,16 @@ from typing import Any
 import bs4
 from bs4 import BeautifulSoup
 
-from xplore_path.paths.filesystem.file_loader import FileLoader
+from xplore_path.paths.filesystem.file_loader import FileLoader, PATH_LOADER
+from xplore_path.paths.filesystem.html_object_path import HtmlObjectPath
 
 
 class HtmlFileLoader(FileLoader):
     def is_loadable(self, p: pathlib.Path) -> bool:
         return p.suffix == '.html'
+
+    def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
+        return HtmlObjectPath
 
     def load(self, p: pathlib.Path) -> Any:
         def html_to_dict_with_attributes(element):
@@ -29,8 +33,8 @@ class HtmlFileLoader(FileLoader):
                             node[i] = child
                     else:
                         node[i] = child
-            elif element.text and element.text.strip():
-                node['.text'] = element.text.strip()
+            if element.string and element.string.strip():
+                node['.text'] = element.string.strip()
             return node
 
         root = BeautifulSoup(p.read_bytes(), 'html.parser').html

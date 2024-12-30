@@ -2,13 +2,21 @@ from __future__ import annotations
 
 import pathlib
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Callable
+
+from xplore_path.path.path import Path
+from xplore_path.paths.python_object.python_object_path import PythonObjectPath
+
+PATH_LOADER = Callable[[Path, Any, Any], Path]  # path, label, data
 
 
 class FileLoader(ABC):
     @abstractmethod
     def is_loadable(self, p: pathlib.Path) -> bool:
         ...
+
+    def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
+        return PythonObjectPath
 
     @abstractmethod
     def load(self, p: pathlib.Path) -> Any:

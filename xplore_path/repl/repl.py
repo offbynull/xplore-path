@@ -12,11 +12,13 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 
 import xplore_path.path.path
+from xplore_path.evaluator import Evaluator
+from xplore_path.raise_parse_error_listener import ParseException
+from xplore_path.repl.query_completer import QueryCompleter
 from xplore_path.repl.utils import print_line, fix_label_for_expression
 from xplore_path.evaluator import evaluate
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext, NoticeType
 from xplore_path.raise_parse_error_listener import ParseException
-from xplore_path.repl.path_completer import PathCompleter
 
 
 def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
@@ -79,7 +81,7 @@ def _cache_notifier(notice_type: NoticeType, child_path: Path):
         print(f'error', flush=True)
 
 
-def main(query_path: Path, cache_path: Path):
+def main(evaluator: Evaluator, query_path: Path, cache_path: Path):
     bindings = KeyBindings()
 
     full_labels = True
@@ -125,7 +127,12 @@ def main(query_path: Path, cache_path: Path):
             cache_only_access=True
         )
     )
-    completer = ThreadedCompleter(PathCompleter(p_cached_only))  # Wrap in ThreadedCompleter because can take a while
+    completer = ThreadedCompleter(
+        QueryCompleter(
+            evaluator,
+            p_cached_only
+        )
+    )  # Wrap in ThreadedCompleter because can take a while
     session = PromptSession(
         completer=completer,
         complete_while_typing=True,
@@ -169,7 +176,7 @@ def main(query_path: Path, cache_path: Path):
             print('Exiting.')
             break
         try:
-            query_res = evaluate(p, expr)
+            query_res = evaluator.evaluate(p, expr)
             if not isinstance(query_res, list):
                 query_res = [query_res]
             for v in query_res:
@@ -179,7 +186,7 @@ def main(query_path: Path, cache_path: Path):
             print(f'Unable to parse expression: {e}')
 
 
-def precache(query_path: Path, cache_path: Path) -> None:
+def precache(evaluator: Evaluator, query_path: Path, cache_path: Path) -> None:
     p = FileSystemPath.create_root_path(
         query_path,
         FileSystemPathContext(
@@ -187,7 +194,7 @@ def precache(query_path: Path, cache_path: Path) -> None:
             cache_notifier=_cache_notifier
         )
     )
-    evaluate(p, '//*')
+    evaluator.evaluate(p, '//*')
     print('Pre-cache complete')
 
 
@@ -233,10 +240,11 @@ if __name__ == '__main__':
         print(f'Path is not directory: {query_path}')
         sys.exit(1)
     cache_path = Path(args.cache_path)
+    evaluator = Evaluator()
     if args.cache_clear:
         print(f'Clearing cache at {cache_path}...')
         shutil.rmtree(cache_path, ignore_errors=True)
     if args.cache_preload:
         print(f'Preloading cache to {cache_path} (may take a while)...')
-        precache(query_path, cache_path)
-    main(query_path, cache_path)
+        precache(evaluator, query_path, cache_path)
+    main(evaluator, query_path, cache_path)

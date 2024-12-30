@@ -4,12 +4,16 @@ import pathlib
 from typing import Any
 from xml.etree import ElementTree
 
-from xplore_path.paths.filesystem.file_loader import FileLoader
+from xplore_path.paths.filesystem.file_loader import FileLoader, PATH_LOADER
+from xplore_path.paths.filesystem.xml_object_path import XmlObjectPath
 
 
 class XmlFileLoader(FileLoader):
     def is_loadable(self, p: pathlib.Path) -> bool:
         return p.suffix == '.xml'
+
+    def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
+        return XmlObjectPath
 
     def load(self, p: pathlib.Path) -> Any:
         def xml_to_dict_with_attributes(element):
