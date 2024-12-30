@@ -348,22 +348,22 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
 
         if ctx.relOp().EQ():
             op = eq_op
-            numerics_required = None
+            required_type = None
         elif ctx.relOp().NE():
             op = lambda _l, _r: not eq_op(_l, _r)
-            numerics_required = None
+            required_type = None
         elif ctx.relOp().LT():
             op = lambda _l, _r: _l < _r
-            numerics_required = float
+            required_type = float
         elif ctx.relOp().LE():
             op = lambda _l, _r: _l <= _r
-            numerics_required = float
+            required_type = float
         elif ctx.relOp().GT():
             op = lambda _l, _r: _l > _r
-            numerics_required = float
+            required_type = float
         elif ctx.relOp().GE():
             op = lambda _l, _r: _l >= _r
-            numerics_required = float
+            required_type = float
         elif ctx.relOp().LL():
             raise ValueError('Test if node A is before node B - unimplemented')
         elif ctx.relOp().GG():
@@ -371,7 +371,7 @@ class PathEvaluatorVisitor(XPath31GrammarVisitor):
         else:
             raise ValueError('Unexpected')
         combine_op = self._boolean_op_combiner(ctx.relOp())
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op, numerics_required, coercer_fallback)  # noqa
+        ret = self._apply_binary_boolean_op(l, r, combine_op, op, required_type, coercer_fallback)  # noqa
         agg_op, ret = self._boolean_op_aggregator(ctx.relOp(), ret)
         ret = agg_op(ret)
         return ret

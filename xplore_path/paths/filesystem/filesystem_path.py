@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import hashlib
 import pathlib
-import pickle
 import tarfile
 import zipfile
 from enum import Enum
@@ -63,14 +61,16 @@ class FileSystemPathContext:
             self,
             file_loader: FileLoader | None = None,
             workspace: pathlib.Path | None = None,
+            cache_only_access: bool = False,
             cache_notifier: Callable[[NoticeType, pathlib.Path], None] | None = None
     ):
         if file_loader is None:
             file_loader = _DEFAULT_FILE_LOADER
         self.file_loader = file_loader
         if workspace is None:
-            workspace = pathlib.Path(f'{gettempdir()}/xplore_path_cache').expanduser()
+            workspace = pathlib.Path(f'{gettempdir()}/xplore_path_cache')
         self.cache = Cache(workspace)
+        self.cache_only_access = cache_only_access
         if cache_notifier is None:
             cache_notifier = lambda _: None
         self.cache_notifier = cache_notifier
@@ -127,8 +127,8 @@ class FileSystemPath(Path):
                         self._notify(NoticeType.DATA_LOAD_CACHE_ABSENT, c)
                     else:
                         self._notify(NoticeType.DATA_LOAD_CACHE_SUCCESS, c)
-                    # if fail - try loading it directly
-                    if data is None:
+                    # if fail - try loading it directly - skip load+cache if cache only access
+                    if data is None and not self.ctx.cache_only_access:
                         self._notify(NoticeType.DATA_LOAD_FULL_START, c)
                         try:
                             data = self.ctx.file_loader.load(c)
@@ -143,19 +143,19 @@ class FileSystemPath(Path):
                             self._notify(NoticeType.DATA_CACHE_COMPLETE, c)
                     # done
                     ret.append(PythonObjectPath(self, c.name, data))
-                elif c.suffix == '.zip':
+                elif c.suffix == '.zip':  # skip it if set to only access cached
                     cache_path = self.ctx.cache.to_path(cache_lookup_key)
-                    if not cache_path.exists():
+                    if not cache_path.exists() and not self.ctx.cache_only_access:  # skip unpack if cache only access
                         self._unpack_archive(lambda c: zipfile.ZipFile(c, 'r'), c, cache_path)
                     ret.append(FileSystemPath(self, c.name, cache_path, self.ctx))
-                elif c.suffix == '.tar':
+                elif c.suffix == '.tar':  # skip it if set to only access cached
                     cache_path = self.ctx.cache.to_path(cache_lookup_key)
-                    if not cache_path.exists():
+                    if not cache_path.exists() and not self.ctx.cache_only_access:  # skip unpack if cache only access
                         self._unpack_archive(lambda c: tarfile.open(c, 'r'), c, cache_path)
                     ret.append(FileSystemPath(self, c.name, cache_path, self.ctx))
                 elif c.suffixes[-2:] == ['.tar', '.gz']:
                     cache_path = self.ctx.cache.to_path(cache_lookup_key)
-                    if not cache_path.exists():
+                    if not cache_path.exists() and not self.ctx.cache_only_access:  # skip unpack if cache only access
                         self._unpack_archive(lambda c: tarfile.open(c, 'r:gz'), c, cache_path)
                     ret.append(FileSystemPath(self, c.name, cache_path, self.ctx))
                 else:

@@ -43,7 +43,7 @@ class Cache:
 
     def cache(self, key: Any, value: Any) -> None:
         key_hash = self._to_hash(key)
-        if key in self._mem_cache:
+        if key_hash in self._mem_cache:
             self._mem_cache.move_to_end(key_hash)
         self._mem_cache[key_hash] = value
         if len(self._mem_cache) > self._mem_cache_capacity:

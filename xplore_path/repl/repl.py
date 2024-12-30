@@ -1,6 +1,8 @@
 import argparse
+import shutil
 import sys
 from pathlib import Path
+from tempfile import gettempdir
 from typing import Any
 
 from prompt_toolkit import PromptSession
@@ -10,11 +12,11 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 
 import xplore_path.path.path
-from xplore_path.repl.utils import print_line
+from xplore_path.repl.utils import print_line, fix_label_for_expression
 from xplore_path.evaluator import evaluate
-from xplore_path.filesystem.filesystem_path import FileSystemPath
+from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext, NoticeType
 from xplore_path.raise_parse_error_listener import ParseException
-from xplore_path.repl.path_completer import PathCompleter, TOKENS
+from xplore_path.repl.path_completer import PathCompleter
 
 
 def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
@@ -24,21 +26,18 @@ def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
             ret += [('fg:ansiwhite bold', f'{v.label()}')]
         else:
             for l in v.full_label()[1:]:
-                l = str(l)
-                if any(l.startswith(t) for t in TOKENS):
-                    l = l.replace('\'', '\'\'')
-                    l = f'\'{l}\''
+                l = fix_label_for_expression(l)
                 ret.append(('fg:ansigray', '/'))
                 ret.append(('fg:ansiwhite bold', f'{l}'))
-
-        highlight = ''
-        cnt = len(v.all_children())
-        if cnt > 0:
-            highlight = 'fg:ansiwhite bold'
-        ret += [
-            ('', ' child_count='),
-            (highlight, f'{cnt}')
-        ]
+        #
+        # highlight = ''
+        # cnt = len(v.all_children())
+        # if cnt > 0:
+        #     highlight = 'fg:ansiwhite bold'
+        # ret += [
+        #     ('', ' child_count='),
+        #     (highlight, f'{cnt}')
+        # ]
         data = v.value()
     else:
         ret += [('', '<NO_LABEL> ')]
@@ -71,7 +70,16 @@ __  __     _               ___      _   _
 '''.strip()
 
 
-def main(active_dir_path: Path):
+def _cache_notifier(notice_type: NoticeType, child_path: Path):
+    if notice_type in {NoticeType.ARCHIVE_CACHE_START, NoticeType.DATA_CACHE_START}:
+        print(f'Caching {child_path}... ', end='', flush=True)
+    elif notice_type in {NoticeType.DATA_CACHE_COMPLETE, NoticeType.ARCHIVE_CACHE_COMPLETE}:
+        print(f'ok', flush=True)
+    elif notice_type in {NoticeType.DATA_CACHE_ERROR, NoticeType.ARCHIVE_CACHE_ERROR}:
+        print(f'error', flush=True)
+
+
+def main(query_path: Path, cache_path: Path):
     bindings = KeyBindings()
 
     full_labels = True
@@ -103,8 +111,21 @@ def main(active_dir_path: Path):
         return toolbar_text
 
 
-    p = FileSystemPath.create_root_path(active_dir_path)
-    completer = ThreadedCompleter(PathCompleter(p))  # Wrap in ThreadedCompleter because completions can take a while
+    p = FileSystemPath.create_root_path(
+        query_path,
+        FileSystemPathContext(
+            workspace=cache_path,
+            cache_notifier=_cache_notifier
+        )
+    )
+    p_cached_only = FileSystemPath.create_root_path(
+        query_path,
+        FileSystemPathContext(
+            workspace=cache_path,
+            cache_only_access=True
+        )
+    )
+    completer = ThreadedCompleter(PathCompleter(p_cached_only))  # Wrap in ThreadedCompleter because can take a while
     session = PromptSession(
         completer=completer,
         complete_while_typing=True,
@@ -118,11 +139,11 @@ def main(active_dir_path: Path):
         ('           ', '\n'),
         ('           ', 'Xplore Path REPL\n'),
         ('           ', '----------------\n'),
-        ('           ', f'Active directory: {active_dir_path}\n'),
+        ('           ', f'Active directory: {query_path}\n'),
         ('           ', '\n'),
         ('           ', 'Keys:\n'),
         ('fg:ansiblue', '  Enter'), ('', ' to execute\n'),
-        ('fg:ansiblue', '  Tab'), ('', ' for autocomplete\n'),
+        ('fg:ansiblue', '  Tab'), ('', ' for autocomplete suggestions\n'),
         ('fg:ansiblue', '  ↑↓'), ('', ' to navigate history\n'),
         ('fg:ansiblue', '  Ctrl-L'), ('', ' to turn on/off full labels in outputs\n'),
         ('fg:ansiblue', '  Ctrl-T'), ('', ' to turn on/off truncating outputs\n'),
@@ -132,6 +153,9 @@ def main(active_dir_path: Path):
         ('fg:ansiblue', '  /*'), ('', ' - get all children\n'),
         ('fg:ansiblue', '  //*'), ('', ' - get all descendants (may take a long time)\n'),
         ('fg:ansiblue', '  /apple/*[./cherry]'), ('', ' - get all children of apple who have a child named cherry\n'),
+        ('           ', '\n'),
+        ('fg:ansiyellow', 'WARNING: '), ('', 'Autocomplete suggestions are best-effort and may not always be '
+                                             'correct and / or may not always be exhaustive.\n'),
         ('           ', '\n')
     ])
 
@@ -154,20 +178,64 @@ def main(active_dir_path: Path):
             print(f'Unable to parse expression: {e}')
 
 
+def precache(query_path: Path, cache_path: Path) -> None:
+    p = FileSystemPath.create_root_path(
+        query_path,
+        FileSystemPathContext(
+            workspace=cache_path,
+            cache_notifier=_cache_notifier
+        )
+    )
+    evaluate(p, '//*')
+    print('Pre-cache complete')
+
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Xplore Path REPL')
+    parser = argparse.ArgumentParser(
+        description='Xplore Path REPL',
+        add_help=False
+    )
+    parser.add_argument(
+        '-h', '--help',
+        action='help',
+        default=argparse.SUPPRESS,
+        help="Display help message and exit."
+    )
     parser.add_argument(
         '--path',
         type=str,
         default=str(Path.cwd().absolute()),
-        help='path to top-level directory to explore (default: current directory)'
+        help='Path to directory to query (default: current directory).'
+    )
+    parser.add_argument(
+        '--cache-path',
+        type=str,
+        default=str(Path(f'{gettempdir()}/xplore_path_cache')),
+        help='Path to directory to use for caching (default: temporary directory).'
+    )
+    parser.add_argument(
+        '--cache-preload',
+        action='store_true',
+        help='Preload cache at launch (may take some time at launch but quicker feedback).'
+    )
+    parser.add_argument(
+        '--cache-clear',
+        action='store_true',
+        help='Clear cache at launch.'
     )
     args = parser.parse_args()
-    path = Path(args.path)
-    if not path.exists():
-        print(f'Path does not exist: {path}')
+    query_path = Path(args.path)
+    if not query_path.exists():
+        print(f'Path does not exist: {query_path}')
         sys.exit(1)
-    if not path.is_dir():
-        print(f'Path is not directory: {path}')
+    if not query_path.is_dir():
+        print(f'Path is not directory: {query_path}')
         sys.exit(1)
-    main(path)
+    cache_path = Path(args.cache_path)
+    if args.cache_clear:
+        print(f'Clearing cache at {cache_path}...')
+        shutil.rmtree(cache_path, ignore_errors=True)
+    if args.cache_preload:
+        print(f'Preloading cache to {cache_path} (may take a while)...')
+        precache(query_path, cache_path)
+    main(query_path, cache_path)

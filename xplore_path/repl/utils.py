@@ -1,4 +1,21 @@
+import re
+from pathlib import Path
+from typing import Any
+
 from prompt_toolkit import PromptSession
+
+
+_tokens_text = (Path(__file__).parent.parent / 'XPath31GrammarLexer.tokens').read_text()
+TOKENS = [re.search(r"'(.*?)'", line).group(1) for line in _tokens_text.splitlines() if '\'' in line]
+TOKENS = sorted(TOKENS, reverse=True)
+
+
+def fix_label_for_expression(v: Any) -> str:
+    v = str(v)
+    if any(ch.isspace() for ch in v) or any(v.startswith(t) for t in TOKENS):
+        v = v.replace('\'', '\'\'')
+        v = f'\'{v}\''
+    return v
 
 
 def print_line(
