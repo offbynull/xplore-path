@@ -1,4 +1,4 @@
-# Generated from XPath31Grammar.g4 by ANTLR 4.13.2
+# Generated from XplorePathGrammar.g4 by ANTLR 4.13.2
 from antlr4 import *
 from io import StringIO
 import sys
@@ -228,7 +228,7 @@ def serializedATN():
         586,592,600,1,6,0,0
     ]
 
-class XPath31GrammarLexer(Lexer):
+class XplorePathGrammarLexer(Lexer):
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
@@ -359,7 +359,7 @@ class XPath31GrammarLexer(Lexer):
                   "FragNameStartChar", "FragNameChar", "FragmentName", "FragChar", 
                   "Whitespace" ]
 
-    grammarFileName = "XPath31Grammar.g4"
+    grammarFileName = "XplorePathGrammar.g4"
 
     def __init__(self, input=None, output:TextIO = sys.stdout):
         super().__init__(input, output)

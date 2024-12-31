@@ -5,7 +5,7 @@ from typing import Any
 from prompt_toolkit import PromptSession
 
 
-_tokens_text = (Path(__file__).parent.parent / 'XPath31GrammarLexer.tokens').read_text()
+_tokens_text = (Path(__file__).parent.parent / 'XplorePathGrammarLexer.tokens').read_text()
 TOKENS = [re.search(r"'(.*?)'", line).group(1) for line in _tokens_text.splitlines() if '\'' in line]
 TOKENS = sorted(TOKENS, reverse=True)
 

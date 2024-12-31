@@ -1,4 +1,4 @@
-# Generated from XPath31Grammar.g4 by ANTLR 4.13.2
+# Generated from XplorePathGrammar.g4 by ANTLR 4.13.2
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -131,9 +131,9 @@ def serializedATN():
         189,192,206,211,218,241,259,270,288,290,293,302
     ]
 
-class XPath31GrammarParser ( Parser ):
+class XplorePathGrammarParser ( Parser ):
 
-    grammarFileName = "XPath31Grammar.g4"
+    grammarFileName = "XplorePathGrammar.g4"
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
@@ -292,14 +292,14 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def expr(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,0)
 
 
         def EOF(self):
-            return self.getToken(XPath31GrammarParser.EOF, 0)
+            return self.getToken(XplorePathGrammarParser.EOF, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_xplorePath
+            return XplorePathGrammarParser.RULE_xplorePath
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterXplorePath" ):
@@ -320,14 +320,14 @@ class XPath31GrammarParser ( Parser ):
 
     def xplorePath(self):
 
-        localctx = XPath31GrammarParser.XplorePathContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.XplorePathContext(self, self._ctx, self.state)
         self.enterRule(localctx, 0, self.RULE_xplorePath)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 40
             self.expr(0)
             self.state = 41
-            self.match(XPath31GrammarParser.EOF)
+            self.match(XplorePathGrammarParser.EOF)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -346,7 +346,7 @@ class XPath31GrammarParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_expr
+            return XplorePathGrammarParser.RULE_expr
 
      
         def copyFrom(self, ctx:ParserRuleContext):
@@ -355,21 +355,21 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprAndContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
         def andOp(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AndOpContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AndOpContext,0)
 
         def coerceFallback(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.CoerceFallbackContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.CoerceFallbackContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -389,19 +389,19 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprBoolAggregateContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,0)
 
         def KW_ANY(self):
-            return self.getToken(XPath31GrammarParser.KW_ANY, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ANY, 0)
         def KW_ALL(self):
-            return self.getToken(XPath31GrammarParser.KW_ALL, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ALL, 0)
         def coerceFallback(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.CoerceFallbackContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.CoerceFallbackContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -421,12 +421,12 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprAtomicOrEncapsulateContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -446,20 +446,20 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprSetIntersectContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
         def KW_INTERSECT(self):
-            return self.getToken(XPath31GrammarParser.KW_INTERSECT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_INTERSECT, 0)
         def KW_EXCEPT(self):
-            return self.getToken(XPath31GrammarParser.KW_EXCEPT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_EXCEPT, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterExprSetIntersect" ):
@@ -478,21 +478,21 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprComparisonContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
         def relOp(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.RelOpContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.RelOpContext,0)
 
         def coerceFallback(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.CoerceFallbackContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.CoerceFallbackContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -512,14 +512,14 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprExtractLabelContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_LABEL(self):
-            return self.getToken(XPath31GrammarParser.KW_LABEL, 0)
+            return self.getToken(XplorePathGrammarParser.KW_LABEL, 0)
         def expr(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -539,21 +539,21 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprOrContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
         def orOp(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.OrOpContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.OrOpContext,0)
 
         def coerceFallback(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.CoerceFallbackContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.CoerceFallbackContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -573,21 +573,21 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprMultiplicativeContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
         def mulOp(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.MulOpContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.MulOpContext,0)
 
         def coerceFallback(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.CoerceFallbackContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.CoerceFallbackContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -607,18 +607,18 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprConcatenateContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
         def COMMA(self):
-            return self.getToken(XPath31GrammarParser.COMMA, 0)
+            return self.getToken(XplorePathGrammarParser.COMMA, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterExprConcatenate" ):
@@ -637,20 +637,20 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprSetUnionContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
         def KW_UNION(self):
-            return self.getToken(XPath31GrammarParser.KW_UNION, 0)
+            return self.getToken(XplorePathGrammarParser.KW_UNION, 0)
         def P(self):
-            return self.getToken(XPath31GrammarParser.P, 0)
+            return self.getToken(XplorePathGrammarParser.P, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterExprSetUnion" ):
@@ -669,21 +669,21 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprAdditiveContext(ExprContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ExprContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ExprContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
         def addOp(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AddOpContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AddOpContext,0)
 
         def coerceFallback(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.CoerceFallbackContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.CoerceFallbackContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -705,7 +705,7 @@ class XPath31GrammarParser ( Parser ):
     def expr(self, _p:int=0):
         _parentctx = self._ctx
         _parentState = self.state
-        localctx = XPath31GrammarParser.ExprContext(self, self._ctx, _parentState)
+        localctx = XplorePathGrammarParser.ExprContext(self, self._ctx, _parentState)
         _prevctx = localctx
         _startState = 2
         self.enterRecursionRule(localctx, 2, self.RULE_expr, _p)
@@ -716,7 +716,7 @@ class XPath31GrammarParser ( Parser ):
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [52, 53]:
-                localctx = XPath31GrammarParser.ExprBoolAggregateContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprBoolAggregateContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
 
@@ -739,16 +739,16 @@ class XPath31GrammarParser ( Parser ):
 
                 pass
             elif token in [63]:
-                localctx = XPath31GrammarParser.ExprExtractLabelContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprExtractLabelContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 49
-                self.match(XPath31GrammarParser.KW_LABEL)
+                self.match(XplorePathGrammarParser.KW_LABEL)
                 self.state = 50
                 self.expr(7)
                 pass
             elif token in [1, 10, 11, 12, 20, 22, 24, 27, 29, 30, 31, 61, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74]:
-                localctx = XPath31GrammarParser.ExprAtomicOrEncapsulateContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprAtomicOrEncapsulateContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 51
@@ -770,20 +770,20 @@ class XPath31GrammarParser ( Parser ):
                     self._errHandler.sync(self)
                     la_ = self._interp.adaptivePredict(self._input,7,self._ctx)
                     if la_ == 1:
-                        localctx = XPath31GrammarParser.ExprConcatenateContext(self, XPath31GrammarParser.ExprContext(self, _parentctx, _parentState))
+                        localctx = XplorePathGrammarParser.ExprConcatenateContext(self, XplorePathGrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 54
                         if not self.precpred(self._ctx, 10):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 10)")
                         self.state = 55
-                        self.match(XPath31GrammarParser.COMMA)
+                        self.match(XplorePathGrammarParser.COMMA)
                         self.state = 56
                         self.expr(11)
                         pass
 
                     elif la_ == 2:
-                        localctx = XPath31GrammarParser.ExprSetIntersectContext(self, XPath31GrammarParser.ExprContext(self, _parentctx, _parentState))
+                        localctx = XplorePathGrammarParser.ExprSetIntersectContext(self, XplorePathGrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 57
                         if not self.precpred(self._ctx, 9):
@@ -801,7 +801,7 @@ class XPath31GrammarParser ( Parser ):
                         pass
 
                     elif la_ == 3:
-                        localctx = XPath31GrammarParser.ExprSetUnionContext(self, XPath31GrammarParser.ExprContext(self, _parentctx, _parentState))
+                        localctx = XplorePathGrammarParser.ExprSetUnionContext(self, XplorePathGrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 60
                         if not self.precpred(self._ctx, 8):
@@ -819,7 +819,7 @@ class XPath31GrammarParser ( Parser ):
                         pass
 
                     elif la_ == 4:
-                        localctx = XPath31GrammarParser.ExprOrContext(self, XPath31GrammarParser.ExprContext(self, _parentctx, _parentState))
+                        localctx = XplorePathGrammarParser.ExprOrContext(self, XplorePathGrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 63
                         if not self.precpred(self._ctx, 6):
@@ -840,7 +840,7 @@ class XPath31GrammarParser ( Parser ):
                         pass
 
                     elif la_ == 5:
-                        localctx = XPath31GrammarParser.ExprAndContext(self, XPath31GrammarParser.ExprContext(self, _parentctx, _parentState))
+                        localctx = XplorePathGrammarParser.ExprAndContext(self, XplorePathGrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 69
                         if not self.precpred(self._ctx, 5):
@@ -861,7 +861,7 @@ class XPath31GrammarParser ( Parser ):
                         pass
 
                     elif la_ == 6:
-                        localctx = XPath31GrammarParser.ExprComparisonContext(self, XPath31GrammarParser.ExprContext(self, _parentctx, _parentState))
+                        localctx = XplorePathGrammarParser.ExprComparisonContext(self, XplorePathGrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 75
                         if not self.precpred(self._ctx, 4):
@@ -882,7 +882,7 @@ class XPath31GrammarParser ( Parser ):
                         pass
 
                     elif la_ == 7:
-                        localctx = XPath31GrammarParser.ExprAdditiveContext(self, XPath31GrammarParser.ExprContext(self, _parentctx, _parentState))
+                        localctx = XplorePathGrammarParser.ExprAdditiveContext(self, XplorePathGrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 81
                         if not self.precpred(self._ctx, 3):
@@ -903,7 +903,7 @@ class XPath31GrammarParser ( Parser ):
                         pass
 
                     elif la_ == 8:
-                        localctx = XPath31GrammarParser.ExprMultiplicativeContext(self, XPath31GrammarParser.ExprContext(self, _parentctx, _parentState))
+                        localctx = XplorePathGrammarParser.ExprMultiplicativeContext(self, XplorePathGrammarParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 87
                         if not self.precpred(self._ctx, 2):
@@ -946,7 +946,7 @@ class XPath31GrammarParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_atomicOrEncapsulate
+            return XplorePathGrammarParser.RULE_atomicOrEncapsulate
 
      
         def copyFrom(self, ctx:ParserRuleContext):
@@ -955,19 +955,19 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprWrapForceListContext(AtomicOrEncapsulateContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.AtomicOrEncapsulateContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.AtomicOrEncapsulateContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def OB(self):
-            return self.getToken(XPath31GrammarParser.OB, 0)
+            return self.getToken(XplorePathGrammarParser.OB, 0)
         def CB(self):
-            return self.getToken(XPath31GrammarParser.CB, 0)
+            return self.getToken(XplorePathGrammarParser.CB, 0)
         def expr(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,0)
 
         def filter_(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.FilterContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.FilterContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -987,12 +987,12 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprMatcherContext(AtomicOrEncapsulateContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.AtomicOrEncapsulateContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.AtomicOrEncapsulateContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def matcher(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.MatcherContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.MatcherContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -1012,18 +1012,18 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprFunctionCallContext(AtomicOrEncapsulateContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.AtomicOrEncapsulateContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.AtomicOrEncapsulateContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
         def argumentList(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ArgumentListContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ArgumentListContext,0)
 
         def coerceFallback(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.CoerceFallbackContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.CoerceFallbackContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -1043,19 +1043,19 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprWrapContext(AtomicOrEncapsulateContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.AtomicOrEncapsulateContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.AtomicOrEncapsulateContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def OP(self):
-            return self.getToken(XPath31GrammarParser.OP, 0)
+            return self.getToken(XplorePathGrammarParser.OP, 0)
         def expr(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,0)
 
         def CP(self):
-            return self.getToken(XPath31GrammarParser.CP, 0)
+            return self.getToken(XplorePathGrammarParser.CP, 0)
         def filter_(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.FilterContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.FilterContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -1075,19 +1075,19 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprUnaryContext(AtomicOrEncapsulateContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.AtomicOrEncapsulateContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.AtomicOrEncapsulateContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
         def MINUS(self):
-            return self.getToken(XPath31GrammarParser.MINUS, 0)
+            return self.getToken(XplorePathGrammarParser.MINUS, 0)
         def PLUS(self):
-            return self.getToken(XPath31GrammarParser.PLUS, 0)
+            return self.getToken(XplorePathGrammarParser.PLUS, 0)
         def coerceFallback(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.CoerceFallbackContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.CoerceFallbackContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -1107,12 +1107,12 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprLiteralContext(AtomicOrEncapsulateContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.AtomicOrEncapsulateContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.AtomicOrEncapsulateContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def literal(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.LiteralContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.LiteralContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -1132,15 +1132,15 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprPathContext(AtomicOrEncapsulateContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.AtomicOrEncapsulateContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.AtomicOrEncapsulateContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def path(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.PathContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.PathContext,0)
 
         def filter_(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.FilterContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.FilterContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -1160,12 +1160,12 @@ class XPath31GrammarParser ( Parser ):
 
     class ExprVariableContext(AtomicOrEncapsulateContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.AtomicOrEncapsulateContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.AtomicOrEncapsulateContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def varRef(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.VarRefContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.VarRefContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -1187,7 +1187,7 @@ class XPath31GrammarParser ( Parser ):
     def atomicOrEncapsulate(self, _p:int=0):
         _parentctx = self._ctx
         _parentState = self.state
-        localctx = XPath31GrammarParser.AtomicOrEncapsulateContext(self, self._ctx, _parentState)
+        localctx = XplorePathGrammarParser.AtomicOrEncapsulateContext(self, self._ctx, _parentState)
         _prevctx = localctx
         _startState = 4
         self.enterRecursionRule(localctx, 4, self.RULE_atomicOrEncapsulate, _p)
@@ -1198,7 +1198,7 @@ class XPath31GrammarParser ( Parser ):
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [20, 27]:
-                localctx = XPath31GrammarParser.ExprUnaryContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprUnaryContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
 
@@ -1221,15 +1221,15 @@ class XPath31GrammarParser ( Parser ):
 
                 pass
             elif token in [24]:
-                localctx = XPath31GrammarParser.ExprWrapContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprWrapContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 104
-                self.match(XPath31GrammarParser.OP)
+                self.match(XplorePathGrammarParser.OP)
                 self.state = 105
                 self.expr(0)
                 self.state = 106
-                self.match(XPath31GrammarParser.CP)
+                self.match(XplorePathGrammarParser.CP)
                 self.state = 108
                 self._errHandler.sync(self)
                 la_ = self._interp.adaptivePredict(self._input,10,self._ctx)
@@ -1240,11 +1240,11 @@ class XPath31GrammarParser ( Parser ):
 
                 pass
             elif token in [22]:
-                localctx = XPath31GrammarParser.ExprWrapForceListContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprWrapForceListContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 110
-                self.match(XPath31GrammarParser.OB)
+                self.match(XplorePathGrammarParser.OB)
                 self.state = 112
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
@@ -1254,7 +1254,7 @@ class XPath31GrammarParser ( Parser ):
 
 
                 self.state = 114
-                self.match(XPath31GrammarParser.CB)
+                self.match(XplorePathGrammarParser.CB)
                 self.state = 116
                 self._errHandler.sync(self)
                 la_ = self._interp.adaptivePredict(self._input,12,self._ctx)
@@ -1265,28 +1265,28 @@ class XPath31GrammarParser ( Parser ):
 
                 pass
             elif token in [1, 31, 64, 65, 66, 67, 68]:
-                localctx = XPath31GrammarParser.ExprMatcherContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprMatcherContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 118
                 self.matcher()
                 pass
             elif token in [12]:
-                localctx = XPath31GrammarParser.ExprVariableContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprVariableContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 119
                 self.varRef()
                 pass
             elif token in [61, 62, 69, 70, 71, 72, 73, 74]:
-                localctx = XPath31GrammarParser.ExprLiteralContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprLiteralContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 120
                 self.literal()
                 pass
             elif token in [10, 11, 29, 30]:
-                localctx = XPath31GrammarParser.ExprPathContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprPathContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 121
@@ -1312,7 +1312,7 @@ class XPath31GrammarParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    localctx = XPath31GrammarParser.ExprFunctionCallContext(self, XPath31GrammarParser.AtomicOrEncapsulateContext(self, _parentctx, _parentState))
+                    localctx = XplorePathGrammarParser.ExprFunctionCallContext(self, XplorePathGrammarParser.AtomicOrEncapsulateContext(self, _parentctx, _parentState))
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_atomicOrEncapsulate)
                     self.state = 127
                     if not self.precpred(self._ctx, 5):
@@ -1349,26 +1349,26 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def OP(self):
-            return self.getToken(XPath31GrammarParser.OP, 0)
+            return self.getToken(XplorePathGrammarParser.OP, 0)
 
         def CP(self):
-            return self.getToken(XPath31GrammarParser.CP, 0)
+            return self.getToken(XplorePathGrammarParser.CP, 0)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.ExprContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
 
 
         def COMMA(self, i:int=None):
             if i is None:
-                return self.getTokens(XPath31GrammarParser.COMMA)
+                return self.getTokens(XplorePathGrammarParser.COMMA)
             else:
-                return self.getToken(XPath31GrammarParser.COMMA, i)
+                return self.getToken(XplorePathGrammarParser.COMMA, i)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_argumentList
+            return XplorePathGrammarParser.RULE_argumentList
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterArgumentList" ):
@@ -1389,13 +1389,13 @@ class XPath31GrammarParser ( Parser ):
 
     def argumentList(self):
 
-        localctx = XPath31GrammarParser.ArgumentListContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.ArgumentListContext(self, self._ctx, self.state)
         self.enterRule(localctx, 6, self.RULE_argumentList)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 137
-            self.match(XPath31GrammarParser.OP)
+            self.match(XplorePathGrammarParser.OP)
             self.state = 146
             self._errHandler.sync(self)
             _la = self._input.LA(1)
@@ -1407,7 +1407,7 @@ class XPath31GrammarParser ( Parser ):
                 _la = self._input.LA(1)
                 while _la==8:
                     self.state = 139
-                    self.match(XPath31GrammarParser.COMMA)
+                    self.match(XplorePathGrammarParser.COMMA)
                     self.state = 140
                     self.expr(0)
                     self.state = 145
@@ -1417,7 +1417,7 @@ class XPath31GrammarParser ( Parser ):
 
 
             self.state = 148
-            self.match(XPath31GrammarParser.CP)
+            self.match(XplorePathGrammarParser.CP)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1435,17 +1435,17 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def OB(self):
-            return self.getToken(XPath31GrammarParser.OB, 0)
+            return self.getToken(XplorePathGrammarParser.OB, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,0)
 
 
         def CB(self):
-            return self.getToken(XPath31GrammarParser.CB, 0)
+            return self.getToken(XplorePathGrammarParser.CB, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_filter
+            return XplorePathGrammarParser.RULE_filter
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterFilter" ):
@@ -1466,16 +1466,16 @@ class XPath31GrammarParser ( Parser ):
 
     def filter_(self):
 
-        localctx = XPath31GrammarParser.FilterContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.FilterContext(self, self._ctx, self.state)
         self.enterRule(localctx, 8, self.RULE_filter)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 150
-            self.match(XPath31GrammarParser.OB)
+            self.match(XplorePathGrammarParser.OB)
             self.state = 151
             self.expr(0)
             self.state = 152
-            self.match(XPath31GrammarParser.CB)
+            self.match(XplorePathGrammarParser.CB)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1493,46 +1493,46 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def EQ(self):
-            return self.getToken(XPath31GrammarParser.EQ, 0)
+            return self.getToken(XplorePathGrammarParser.EQ, 0)
 
         def NE(self):
-            return self.getToken(XPath31GrammarParser.NE, 0)
+            return self.getToken(XplorePathGrammarParser.NE, 0)
 
         def LT(self):
-            return self.getToken(XPath31GrammarParser.LT, 0)
+            return self.getToken(XplorePathGrammarParser.LT, 0)
 
         def LE(self):
-            return self.getToken(XPath31GrammarParser.LE, 0)
+            return self.getToken(XplorePathGrammarParser.LE, 0)
 
         def GT(self):
-            return self.getToken(XPath31GrammarParser.GT, 0)
+            return self.getToken(XplorePathGrammarParser.GT, 0)
 
         def GE(self):
-            return self.getToken(XPath31GrammarParser.GE, 0)
+            return self.getToken(XplorePathGrammarParser.GE, 0)
 
         def LL(self):
-            return self.getToken(XPath31GrammarParser.LL, 0)
+            return self.getToken(XplorePathGrammarParser.LL, 0)
 
         def GG(self):
-            return self.getToken(XPath31GrammarParser.GG, 0)
+            return self.getToken(XplorePathGrammarParser.GG, 0)
 
         def KW_ZIP(self):
-            return self.getToken(XPath31GrammarParser.KW_ZIP, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ZIP, 0)
 
         def KW_PRODUCT(self):
-            return self.getToken(XPath31GrammarParser.KW_PRODUCT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_PRODUCT, 0)
 
         def KW_ANY(self):
-            return self.getToken(XPath31GrammarParser.KW_ANY, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ANY, 0)
 
         def KW_ALL(self):
-            return self.getToken(XPath31GrammarParser.KW_ALL, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ALL, 0)
 
         def KW_SEQUENCE(self):
-            return self.getToken(XPath31GrammarParser.KW_SEQUENCE, 0)
+            return self.getToken(XplorePathGrammarParser.KW_SEQUENCE, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_relOp
+            return XplorePathGrammarParser.RULE_relOp
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterRelOp" ):
@@ -1553,7 +1553,7 @@ class XPath31GrammarParser ( Parser ):
 
     def relOp(self):
 
-        localctx = XPath31GrammarParser.RelOpContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.RelOpContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_relOp)
         self._la = 0 # Token type
         try:
@@ -1652,25 +1652,25 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def STAR(self):
-            return self.getToken(XPath31GrammarParser.STAR, 0)
+            return self.getToken(XplorePathGrammarParser.STAR, 0)
 
         def KW_DIV(self):
-            return self.getToken(XPath31GrammarParser.KW_DIV, 0)
+            return self.getToken(XplorePathGrammarParser.KW_DIV, 0)
 
         def KW_IDIV(self):
-            return self.getToken(XPath31GrammarParser.KW_IDIV, 0)
+            return self.getToken(XplorePathGrammarParser.KW_IDIV, 0)
 
         def KW_MOD(self):
-            return self.getToken(XPath31GrammarParser.KW_MOD, 0)
+            return self.getToken(XplorePathGrammarParser.KW_MOD, 0)
 
         def KW_ZIP(self):
-            return self.getToken(XPath31GrammarParser.KW_ZIP, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ZIP, 0)
 
         def KW_PRODUCT(self):
-            return self.getToken(XPath31GrammarParser.KW_PRODUCT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_PRODUCT, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_mulOp
+            return XplorePathGrammarParser.RULE_mulOp
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMulOp" ):
@@ -1691,7 +1691,7 @@ class XPath31GrammarParser ( Parser ):
 
     def mulOp(self):
 
-        localctx = XPath31GrammarParser.MulOpContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.MulOpContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_mulOp)
         self._la = 0 # Token type
         try:
@@ -1733,22 +1733,22 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def PLUS(self):
-            return self.getToken(XPath31GrammarParser.PLUS, 0)
+            return self.getToken(XplorePathGrammarParser.PLUS, 0)
 
         def MINUS(self):
-            return self.getToken(XPath31GrammarParser.MINUS, 0)
+            return self.getToken(XplorePathGrammarParser.MINUS, 0)
 
         def PP(self):
-            return self.getToken(XPath31GrammarParser.PP, 0)
+            return self.getToken(XplorePathGrammarParser.PP, 0)
 
         def KW_ZIP(self):
-            return self.getToken(XPath31GrammarParser.KW_ZIP, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ZIP, 0)
 
         def KW_PRODUCT(self):
-            return self.getToken(XPath31GrammarParser.KW_PRODUCT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_PRODUCT, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_addOp
+            return XplorePathGrammarParser.RULE_addOp
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAddOp" ):
@@ -1769,7 +1769,7 @@ class XPath31GrammarParser ( Parser ):
 
     def addOp(self):
 
-        localctx = XPath31GrammarParser.AddOpContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.AddOpContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_addOp)
         self._la = 0 # Token type
         try:
@@ -1811,25 +1811,25 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def KW_AND(self):
-            return self.getToken(XPath31GrammarParser.KW_AND, 0)
+            return self.getToken(XplorePathGrammarParser.KW_AND, 0)
 
         def KW_ZIP(self):
-            return self.getToken(XPath31GrammarParser.KW_ZIP, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ZIP, 0)
 
         def KW_PRODUCT(self):
-            return self.getToken(XPath31GrammarParser.KW_PRODUCT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_PRODUCT, 0)
 
         def KW_ANY(self):
-            return self.getToken(XPath31GrammarParser.KW_ANY, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ANY, 0)
 
         def KW_ALL(self):
-            return self.getToken(XPath31GrammarParser.KW_ALL, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ALL, 0)
 
         def KW_SEQUENCE(self):
-            return self.getToken(XPath31GrammarParser.KW_SEQUENCE, 0)
+            return self.getToken(XplorePathGrammarParser.KW_SEQUENCE, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_andOp
+            return XplorePathGrammarParser.RULE_andOp
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAndOp" ):
@@ -1850,7 +1850,7 @@ class XPath31GrammarParser ( Parser ):
 
     def andOp(self):
 
-        localctx = XPath31GrammarParser.AndOpContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.AndOpContext(self, self._ctx, self.state)
         self.enterRule(localctx, 16, self.RULE_andOp)
         self._la = 0 # Token type
         try:
@@ -1882,7 +1882,7 @@ class XPath31GrammarParser ( Parser ):
 
 
             self.state = 186
-            self.match(XPath31GrammarParser.KW_AND)
+            self.match(XplorePathGrammarParser.KW_AND)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1900,25 +1900,25 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def KW_OR(self):
-            return self.getToken(XPath31GrammarParser.KW_OR, 0)
+            return self.getToken(XplorePathGrammarParser.KW_OR, 0)
 
         def KW_ZIP(self):
-            return self.getToken(XPath31GrammarParser.KW_ZIP, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ZIP, 0)
 
         def KW_PRODUCT(self):
-            return self.getToken(XPath31GrammarParser.KW_PRODUCT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_PRODUCT, 0)
 
         def KW_ANY(self):
-            return self.getToken(XPath31GrammarParser.KW_ANY, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ANY, 0)
 
         def KW_ALL(self):
-            return self.getToken(XPath31GrammarParser.KW_ALL, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ALL, 0)
 
         def KW_SEQUENCE(self):
-            return self.getToken(XPath31GrammarParser.KW_SEQUENCE, 0)
+            return self.getToken(XplorePathGrammarParser.KW_SEQUENCE, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_orOp
+            return XplorePathGrammarParser.RULE_orOp
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterOrOp" ):
@@ -1939,7 +1939,7 @@ class XPath31GrammarParser ( Parser ):
 
     def orOp(self):
 
-        localctx = XPath31GrammarParser.OrOpContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.OrOpContext(self, self._ctx, self.state)
         self.enterRule(localctx, 18, self.RULE_orOp)
         self._la = 0 # Token type
         try:
@@ -1971,7 +1971,7 @@ class XPath31GrammarParser ( Parser ):
 
 
             self.state = 194
-            self.match(XPath31GrammarParser.KW_OR)
+            self.match(XplorePathGrammarParser.KW_OR)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1990,7 +1990,7 @@ class XPath31GrammarParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_path
+            return XplorePathGrammarParser.RULE_path
 
      
         def copyFrom(self, ctx:ParserRuleContext):
@@ -2000,14 +2000,14 @@ class XPath31GrammarParser ( Parser ):
 
     class PathFromRootContext(PathContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.PathContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.PathContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def SLASH(self):
-            return self.getToken(XPath31GrammarParser.SLASH, 0)
+            return self.getToken(XplorePathGrammarParser.SLASH, 0)
         def relPath(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.RelPathContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.RelPathContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2027,12 +2027,12 @@ class XPath31GrammarParser ( Parser ):
 
     class PathRootExactContext(PathContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.PathContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.PathContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def SLASH(self):
-            return self.getToken(XPath31GrammarParser.SLASH, 0)
+            return self.getToken(XplorePathGrammarParser.SLASH, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterPathRootExact" ):
@@ -2051,16 +2051,16 @@ class XPath31GrammarParser ( Parser ):
 
     class PathFromRelativeContext(PathContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.PathContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.PathContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def D(self):
-            return self.getToken(XPath31GrammarParser.D, 0)
+            return self.getToken(XplorePathGrammarParser.D, 0)
         def SLASH(self):
-            return self.getToken(XPath31GrammarParser.SLASH, 0)
+            return self.getToken(XplorePathGrammarParser.SLASH, 0)
         def relPath(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.RelPathContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.RelPathContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2080,12 +2080,12 @@ class XPath31GrammarParser ( Parser ):
 
     class PathSelfContext(PathContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.PathContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.PathContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def D(self):
-            return self.getToken(XPath31GrammarParser.D, 0)
+            return self.getToken(XplorePathGrammarParser.D, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterPathSelf" ):
@@ -2104,14 +2104,14 @@ class XPath31GrammarParser ( Parser ):
 
     class PathFromAnyContext(PathContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.PathContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.PathContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def SS(self):
-            return self.getToken(XPath31GrammarParser.SS, 0)
+            return self.getToken(XplorePathGrammarParser.SS, 0)
         def relPath(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.RelPathContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.RelPathContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2131,12 +2131,12 @@ class XPath31GrammarParser ( Parser ):
 
     class PathParentContext(PathContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.PathContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.PathContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def DD(self):
-            return self.getToken(XPath31GrammarParser.DD, 0)
+            return self.getToken(XplorePathGrammarParser.DD, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterPathParent" ):
@@ -2156,60 +2156,60 @@ class XPath31GrammarParser ( Parser ):
 
     def path(self):
 
-        localctx = XPath31GrammarParser.PathContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.PathContext(self, self._ctx, self.state)
         self.enterRule(localctx, 20, self.RULE_path)
         try:
             self.state = 206
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,30,self._ctx)
             if la_ == 1:
-                localctx = XPath31GrammarParser.PathFromRootContext(self, localctx)
+                localctx = XplorePathGrammarParser.PathFromRootContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 196
-                self.match(XPath31GrammarParser.SLASH)
+                self.match(XplorePathGrammarParser.SLASH)
                 self.state = 197
                 self.relPath(0)
                 pass
 
             elif la_ == 2:
-                localctx = XPath31GrammarParser.PathRootExactContext(self, localctx)
+                localctx = XplorePathGrammarParser.PathRootExactContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 198
-                self.match(XPath31GrammarParser.SLASH)
+                self.match(XplorePathGrammarParser.SLASH)
                 pass
 
             elif la_ == 3:
-                localctx = XPath31GrammarParser.PathFromAnyContext(self, localctx)
+                localctx = XplorePathGrammarParser.PathFromAnyContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 199
-                self.match(XPath31GrammarParser.SS)
+                self.match(XplorePathGrammarParser.SS)
                 self.state = 200
                 self.relPath(0)
                 pass
 
             elif la_ == 4:
-                localctx = XPath31GrammarParser.PathFromRelativeContext(self, localctx)
+                localctx = XplorePathGrammarParser.PathFromRelativeContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
                 self.state = 201
-                self.match(XPath31GrammarParser.D)
+                self.match(XplorePathGrammarParser.D)
                 self.state = 202
-                self.match(XPath31GrammarParser.SLASH)
+                self.match(XplorePathGrammarParser.SLASH)
                 self.state = 203
                 self.relPath(0)
                 pass
 
             elif la_ == 5:
-                localctx = XPath31GrammarParser.PathSelfContext(self, localctx)
+                localctx = XplorePathGrammarParser.PathSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
                 self.state = 204
-                self.match(XPath31GrammarParser.D)
+                self.match(XplorePathGrammarParser.D)
                 pass
 
             elif la_ == 6:
-                localctx = XPath31GrammarParser.PathParentContext(self, localctx)
+                localctx = XplorePathGrammarParser.PathParentContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
                 self.state = 205
-                self.match(XPath31GrammarParser.DD)
+                self.match(XplorePathGrammarParser.DD)
                 pass
 
 
@@ -2231,7 +2231,7 @@ class XPath31GrammarParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_relPath
+            return XplorePathGrammarParser.RULE_relPath
 
      
         def copyFrom(self, ctx:ParserRuleContext):
@@ -2240,15 +2240,15 @@ class XPath31GrammarParser ( Parser ):
 
     class RelPathStepContext(RelPathContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.RelPathContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.RelPathContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def reverseStep(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ReverseStepContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ReverseStepContext,0)
 
         def forwardStep(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ForwardStepContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ForwardStepContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2268,20 +2268,20 @@ class XPath31GrammarParser ( Parser ):
 
     class RelPathChainContext(RelPathContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.RelPathContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.RelPathContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def relPath(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.RelPathContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.RelPathContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.RelPathContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.RelPathContext,i)
 
         def SLASH(self):
-            return self.getToken(XPath31GrammarParser.SLASH, 0)
+            return self.getToken(XplorePathGrammarParser.SLASH, 0)
         def SS(self):
-            return self.getToken(XPath31GrammarParser.SS, 0)
+            return self.getToken(XplorePathGrammarParser.SS, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterRelPathChain" ):
@@ -2302,14 +2302,14 @@ class XPath31GrammarParser ( Parser ):
     def relPath(self, _p:int=0):
         _parentctx = self._ctx
         _parentState = self.state
-        localctx = XPath31GrammarParser.RelPathContext(self, self._ctx, _parentState)
+        localctx = XplorePathGrammarParser.RelPathContext(self, self._ctx, _parentState)
         _prevctx = localctx
         _startState = 22
         self.enterRecursionRule(localctx, 22, self.RULE_relPath, _p)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            localctx = XPath31GrammarParser.RelPathStepContext(self, localctx)
+            localctx = XplorePathGrammarParser.RelPathStepContext(self, localctx)
             self._ctx = localctx
             _prevctx = localctx
 
@@ -2336,7 +2336,7 @@ class XPath31GrammarParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    localctx = XPath31GrammarParser.RelPathChainContext(self, XPath31GrammarParser.RelPathContext(self, _parentctx, _parentState))
+                    localctx = XplorePathGrammarParser.RelPathChainContext(self, XplorePathGrammarParser.RelPathContext(self, _parentctx, _parentState))
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_relPath)
                     self.state = 213
                     if not self.precpred(self._ctx, 2):
@@ -2373,7 +2373,7 @@ class XPath31GrammarParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_forwardStep
+            return XplorePathGrammarParser.RULE_forwardStep
 
      
         def copyFrom(self, ctx:ParserRuleContext):
@@ -2383,16 +2383,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ForwardStepSelfContext(ForwardStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ForwardStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ForwardStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_SELF(self):
-            return self.getToken(XPath31GrammarParser.KW_SELF, 0)
+            return self.getToken(XplorePathGrammarParser.KW_SELF, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2412,16 +2412,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ForwardStepFollowingSiblingContext(ForwardStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ForwardStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ForwardStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_FOLLOWING_SIBLING(self):
-            return self.getToken(XPath31GrammarParser.KW_FOLLOWING_SIBLING, 0)
+            return self.getToken(XplorePathGrammarParser.KW_FOLLOWING_SIBLING, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2441,16 +2441,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ForwardStepDescendantOrSelfContext(ForwardStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ForwardStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ForwardStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_DESCENDANT_OR_SELF(self):
-            return self.getToken(XPath31GrammarParser.KW_DESCENDANT_OR_SELF, 0)
+            return self.getToken(XplorePathGrammarParser.KW_DESCENDANT_OR_SELF, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2470,16 +2470,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ForwardStepDescendantContext(ForwardStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ForwardStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ForwardStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_DESCENDANT(self):
-            return self.getToken(XPath31GrammarParser.KW_DESCENDANT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_DESCENDANT, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2499,16 +2499,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ForwardStepFollowingContext(ForwardStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ForwardStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ForwardStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_FOLLOWING(self):
-            return self.getToken(XPath31GrammarParser.KW_FOLLOWING, 0)
+            return self.getToken(XplorePathGrammarParser.KW_FOLLOWING, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2528,12 +2528,12 @@ class XPath31GrammarParser ( Parser ):
 
     class ForwardStepDirectSelfContext(ForwardStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ForwardStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ForwardStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def D(self):
-            return self.getToken(XPath31GrammarParser.D, 0)
+            return self.getToken(XplorePathGrammarParser.D, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterForwardStepDirectSelf" ):
@@ -2552,16 +2552,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ForwardStepChildContext(ForwardStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ForwardStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ForwardStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_CHILD(self):
-            return self.getToken(XPath31GrammarParser.KW_CHILD, 0)
+            return self.getToken(XplorePathGrammarParser.KW_CHILD, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2581,12 +2581,12 @@ class XPath31GrammarParser ( Parser ):
 
     class ForwardStepValueContext(ForwardStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ForwardStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ForwardStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2607,87 +2607,87 @@ class XPath31GrammarParser ( Parser ):
 
     def forwardStep(self):
 
-        localctx = XPath31GrammarParser.ForwardStepContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.ForwardStepContext(self, self._ctx, self.state)
         self.enterRule(localctx, 24, self.RULE_forwardStep)
         try:
             self.state = 241
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,33,self._ctx)
             if la_ == 1:
-                localctx = XPath31GrammarParser.ForwardStepChildContext(self, localctx)
+                localctx = XplorePathGrammarParser.ForwardStepChildContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 221
-                self.match(XPath31GrammarParser.KW_CHILD)
+                self.match(XplorePathGrammarParser.KW_CHILD)
                 self.state = 222
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 223
                 self.atomicOrEncapsulate(0)
                 pass
 
             elif la_ == 2:
-                localctx = XPath31GrammarParser.ForwardStepDescendantContext(self, localctx)
+                localctx = XplorePathGrammarParser.ForwardStepDescendantContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 224
-                self.match(XPath31GrammarParser.KW_DESCENDANT)
+                self.match(XplorePathGrammarParser.KW_DESCENDANT)
                 self.state = 225
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 226
                 self.atomicOrEncapsulate(0)
                 pass
 
             elif la_ == 3:
-                localctx = XPath31GrammarParser.ForwardStepSelfContext(self, localctx)
+                localctx = XplorePathGrammarParser.ForwardStepSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 227
-                self.match(XPath31GrammarParser.KW_SELF)
+                self.match(XplorePathGrammarParser.KW_SELF)
                 self.state = 228
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 229
                 self.atomicOrEncapsulate(0)
                 pass
 
             elif la_ == 4:
-                localctx = XPath31GrammarParser.ForwardStepDescendantOrSelfContext(self, localctx)
+                localctx = XplorePathGrammarParser.ForwardStepDescendantOrSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
                 self.state = 230
-                self.match(XPath31GrammarParser.KW_DESCENDANT_OR_SELF)
+                self.match(XplorePathGrammarParser.KW_DESCENDANT_OR_SELF)
                 self.state = 231
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 232
                 self.atomicOrEncapsulate(0)
                 pass
 
             elif la_ == 5:
-                localctx = XPath31GrammarParser.ForwardStepFollowingSiblingContext(self, localctx)
+                localctx = XplorePathGrammarParser.ForwardStepFollowingSiblingContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
                 self.state = 233
-                self.match(XPath31GrammarParser.KW_FOLLOWING_SIBLING)
+                self.match(XplorePathGrammarParser.KW_FOLLOWING_SIBLING)
                 self.state = 234
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 235
                 self.atomicOrEncapsulate(0)
                 pass
 
             elif la_ == 6:
-                localctx = XPath31GrammarParser.ForwardStepFollowingContext(self, localctx)
+                localctx = XplorePathGrammarParser.ForwardStepFollowingContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
                 self.state = 236
-                self.match(XPath31GrammarParser.KW_FOLLOWING)
+                self.match(XplorePathGrammarParser.KW_FOLLOWING)
                 self.state = 237
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 238
                 self.atomicOrEncapsulate(0)
                 pass
 
             elif la_ == 7:
-                localctx = XPath31GrammarParser.ForwardStepDirectSelfContext(self, localctx)
+                localctx = XplorePathGrammarParser.ForwardStepDirectSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 7)
                 self.state = 239
-                self.match(XPath31GrammarParser.D)
+                self.match(XplorePathGrammarParser.D)
                 pass
 
             elif la_ == 8:
-                localctx = XPath31GrammarParser.ForwardStepValueContext(self, localctx)
+                localctx = XplorePathGrammarParser.ForwardStepValueContext(self, localctx)
                 self.enterOuterAlt(localctx, 8)
                 self.state = 240
                 self.atomicOrEncapsulate(0)
@@ -2712,7 +2712,7 @@ class XPath31GrammarParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_reverseStep
+            return XplorePathGrammarParser.RULE_reverseStep
 
      
         def copyFrom(self, ctx:ParserRuleContext):
@@ -2722,12 +2722,12 @@ class XPath31GrammarParser ( Parser ):
 
     class ReverseStepDirectParentContext(ReverseStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ReverseStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ReverseStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def DD(self):
-            return self.getToken(XPath31GrammarParser.DD, 0)
+            return self.getToken(XplorePathGrammarParser.DD, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterReverseStepDirectParent" ):
@@ -2746,16 +2746,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ReverseStepParentContext(ReverseStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ReverseStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ReverseStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_PARENT(self):
-            return self.getToken(XPath31GrammarParser.KW_PARENT, 0)
+            return self.getToken(XplorePathGrammarParser.KW_PARENT, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2775,16 +2775,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ReverseStepAncestorContext(ReverseStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ReverseStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ReverseStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_ANCESTOR(self):
-            return self.getToken(XPath31GrammarParser.KW_ANCESTOR, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ANCESTOR, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2804,16 +2804,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ReverseStepPrecedingSiblingContext(ReverseStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ReverseStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ReverseStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_PRECEDING_SIBLING(self):
-            return self.getToken(XPath31GrammarParser.KW_PRECEDING_SIBLING, 0)
+            return self.getToken(XplorePathGrammarParser.KW_PRECEDING_SIBLING, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2833,16 +2833,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ReverseStepAncestorOrSelfContext(ReverseStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ReverseStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ReverseStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_ANCESTOR_OR_SELF(self):
-            return self.getToken(XPath31GrammarParser.KW_ANCESTOR_OR_SELF, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ANCESTOR_OR_SELF, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2862,16 +2862,16 @@ class XPath31GrammarParser ( Parser ):
 
     class ReverseStepPrecedingContext(ReverseStepContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.ReverseStepContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.ReverseStepContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def KW_PRECEDING(self):
-            return self.getToken(XPath31GrammarParser.KW_PRECEDING, 0)
+            return self.getToken(XplorePathGrammarParser.KW_PRECEDING, 0)
         def COLONCOLON(self):
-            return self.getToken(XPath31GrammarParser.COLONCOLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLONCOLON, 0)
         def atomicOrEncapsulate(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.AtomicOrEncapsulateContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.AtomicOrEncapsulateContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -2892,67 +2892,67 @@ class XPath31GrammarParser ( Parser ):
 
     def reverseStep(self):
 
-        localctx = XPath31GrammarParser.ReverseStepContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.ReverseStepContext(self, self._ctx, self.state)
         self.enterRule(localctx, 26, self.RULE_reverseStep)
         try:
             self.state = 259
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [47]:
-                localctx = XPath31GrammarParser.ReverseStepParentContext(self, localctx)
+                localctx = XplorePathGrammarParser.ReverseStepParentContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 243
-                self.match(XPath31GrammarParser.KW_PARENT)
+                self.match(XplorePathGrammarParser.KW_PARENT)
                 self.state = 244
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 245
                 self.atomicOrEncapsulate(0)
                 pass
             elif token in [32]:
-                localctx = XPath31GrammarParser.ReverseStepAncestorContext(self, localctx)
+                localctx = XplorePathGrammarParser.ReverseStepAncestorContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 246
-                self.match(XPath31GrammarParser.KW_ANCESTOR)
+                self.match(XplorePathGrammarParser.KW_ANCESTOR)
                 self.state = 247
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 248
                 self.atomicOrEncapsulate(0)
                 pass
             elif token in [49]:
-                localctx = XPath31GrammarParser.ReverseStepPrecedingSiblingContext(self, localctx)
+                localctx = XplorePathGrammarParser.ReverseStepPrecedingSiblingContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 249
-                self.match(XPath31GrammarParser.KW_PRECEDING_SIBLING)
+                self.match(XplorePathGrammarParser.KW_PRECEDING_SIBLING)
                 self.state = 250
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 251
                 self.atomicOrEncapsulate(0)
                 pass
             elif token in [48]:
-                localctx = XPath31GrammarParser.ReverseStepPrecedingContext(self, localctx)
+                localctx = XplorePathGrammarParser.ReverseStepPrecedingContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
                 self.state = 252
-                self.match(XPath31GrammarParser.KW_PRECEDING)
+                self.match(XplorePathGrammarParser.KW_PRECEDING)
                 self.state = 253
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 254
                 self.atomicOrEncapsulate(0)
                 pass
             elif token in [33]:
-                localctx = XPath31GrammarParser.ReverseStepAncestorOrSelfContext(self, localctx)
+                localctx = XplorePathGrammarParser.ReverseStepAncestorOrSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
                 self.state = 255
-                self.match(XPath31GrammarParser.KW_ANCESTOR_OR_SELF)
+                self.match(XplorePathGrammarParser.KW_ANCESTOR_OR_SELF)
                 self.state = 256
-                self.match(XPath31GrammarParser.COLONCOLON)
+                self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 257
                 self.atomicOrEncapsulate(0)
                 pass
             elif token in [11]:
-                localctx = XPath31GrammarParser.ReverseStepDirectParentContext(self, localctx)
+                localctx = XplorePathGrammarParser.ReverseStepDirectParentContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
                 self.state = 258
-                self.match(XPath31GrammarParser.DD)
+                self.match(XplorePathGrammarParser.DD)
                 pass
             else:
                 raise NoViableAltException(self)
@@ -2974,31 +2974,31 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def IntegerLiteral(self):
-            return self.getToken(XPath31GrammarParser.IntegerLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.IntegerLiteral, 0)
 
         def DecimalLiteral(self):
-            return self.getToken(XPath31GrammarParser.DecimalLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.DecimalLiteral, 0)
 
         def DoubleLiteral(self):
-            return self.getToken(XPath31GrammarParser.DoubleLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.DoubleLiteral, 0)
 
         def StringLiteral(self):
-            return self.getToken(XPath31GrammarParser.StringLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.StringLiteral, 0)
 
         def BooleanLiteral(self):
-            return self.getToken(XPath31GrammarParser.BooleanLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.BooleanLiteral, 0)
 
         def KW_NAN(self):
-            return self.getToken(XPath31GrammarParser.KW_NAN, 0)
+            return self.getToken(XplorePathGrammarParser.KW_NAN, 0)
 
         def KW_INF(self):
-            return self.getToken(XPath31GrammarParser.KW_INF, 0)
+            return self.getToken(XplorePathGrammarParser.KW_INF, 0)
 
         def Name(self):
-            return self.getToken(XPath31GrammarParser.Name, 0)
+            return self.getToken(XplorePathGrammarParser.Name, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_literal
+            return XplorePathGrammarParser.RULE_literal
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterLiteral" ):
@@ -3019,7 +3019,7 @@ class XPath31GrammarParser ( Parser ):
 
     def literal(self):
 
-        localctx = XPath31GrammarParser.LiteralContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.LiteralContext(self, self._ctx, self.state)
         self.enterRule(localctx, 28, self.RULE_literal)
         self._la = 0 # Token type
         try:
@@ -3049,7 +3049,7 @@ class XPath31GrammarParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_matcher
+            return XplorePathGrammarParser.RULE_matcher
 
      
         def copyFrom(self, ctx:ParserRuleContext):
@@ -3059,12 +3059,12 @@ class XPath31GrammarParser ( Parser ):
 
     class MatcherCaseInsensitiveContext(MatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.MatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.MatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def IgnoreCaseMatcher(self):
-            return self.getToken(XPath31GrammarParser.IgnoreCaseMatcher, 0)
+            return self.getToken(XplorePathGrammarParser.IgnoreCaseMatcher, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMatcherCaseInsensitive" ):
@@ -3083,12 +3083,12 @@ class XPath31GrammarParser ( Parser ):
 
     class MatcherGlobContext(MatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.MatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.MatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def GlobMatcher(self):
-            return self.getToken(XPath31GrammarParser.GlobMatcher, 0)
+            return self.getToken(XplorePathGrammarParser.GlobMatcher, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMatcherGlob" ):
@@ -3107,12 +3107,12 @@ class XPath31GrammarParser ( Parser ):
 
     class MatcherFuzzyContext(MatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.MatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.MatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def FuzzyMatcher(self):
-            return self.getToken(XPath31GrammarParser.FuzzyMatcher, 0)
+            return self.getToken(XplorePathGrammarParser.FuzzyMatcher, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMatcherFuzzy" ):
@@ -3131,12 +3131,12 @@ class XPath31GrammarParser ( Parser ):
 
     class MatcherNumericRangeContext(MatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.MatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.MatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def numericRangeMatcher(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.NumericRangeMatcherContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.NumericRangeMatcherContext,0)
 
 
         def enterRule(self, listener:ParseTreeListener):
@@ -3156,12 +3156,12 @@ class XPath31GrammarParser ( Parser ):
 
     class MatcherWildcardContext(MatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.MatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.MatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def STAR(self):
-            return self.getToken(XPath31GrammarParser.STAR, 0)
+            return self.getToken(XplorePathGrammarParser.STAR, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMatcherWildcard" ):
@@ -3180,12 +3180,12 @@ class XPath31GrammarParser ( Parser ):
 
     class MatcherRegexContext(MatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.MatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.MatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def RegexMatcher(self):
-            return self.getToken(XPath31GrammarParser.RegexMatcher, 0)
+            return self.getToken(XplorePathGrammarParser.RegexMatcher, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMatcherRegex" ):
@@ -3204,12 +3204,12 @@ class XPath31GrammarParser ( Parser ):
 
     class MatcherStrictContext(MatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.MatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.MatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def StrictMatcher(self):
-            return self.getToken(XPath31GrammarParser.StrictMatcher, 0)
+            return self.getToken(XplorePathGrammarParser.StrictMatcher, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMatcherStrict" ):
@@ -3229,53 +3229,53 @@ class XPath31GrammarParser ( Parser ):
 
     def matcher(self):
 
-        localctx = XPath31GrammarParser.MatcherContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.MatcherContext(self, self._ctx, self.state)
         self.enterRule(localctx, 30, self.RULE_matcher)
         try:
             self.state = 270
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [66]:
-                localctx = XPath31GrammarParser.MatcherStrictContext(self, localctx)
+                localctx = XplorePathGrammarParser.MatcherStrictContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 263
-                self.match(XPath31GrammarParser.StrictMatcher)
+                self.match(XplorePathGrammarParser.StrictMatcher)
                 pass
             elif token in [64]:
-                localctx = XPath31GrammarParser.MatcherRegexContext(self, localctx)
+                localctx = XplorePathGrammarParser.MatcherRegexContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 264
-                self.match(XPath31GrammarParser.RegexMatcher)
+                self.match(XplorePathGrammarParser.RegexMatcher)
                 pass
             elif token in [65]:
-                localctx = XPath31GrammarParser.MatcherGlobContext(self, localctx)
+                localctx = XplorePathGrammarParser.MatcherGlobContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 265
-                self.match(XPath31GrammarParser.GlobMatcher)
+                self.match(XplorePathGrammarParser.GlobMatcher)
                 pass
             elif token in [67]:
-                localctx = XPath31GrammarParser.MatcherFuzzyContext(self, localctx)
+                localctx = XplorePathGrammarParser.MatcherFuzzyContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
                 self.state = 266
-                self.match(XPath31GrammarParser.FuzzyMatcher)
+                self.match(XplorePathGrammarParser.FuzzyMatcher)
                 pass
             elif token in [68]:
-                localctx = XPath31GrammarParser.MatcherCaseInsensitiveContext(self, localctx)
+                localctx = XplorePathGrammarParser.MatcherCaseInsensitiveContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
                 self.state = 267
-                self.match(XPath31GrammarParser.IgnoreCaseMatcher)
+                self.match(XplorePathGrammarParser.IgnoreCaseMatcher)
                 pass
             elif token in [1]:
-                localctx = XPath31GrammarParser.MatcherNumericRangeContext(self, localctx)
+                localctx = XplorePathGrammarParser.MatcherNumericRangeContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
                 self.state = 268
                 self.numericRangeMatcher()
                 pass
             elif token in [31]:
-                localctx = XPath31GrammarParser.MatcherWildcardContext(self, localctx)
+                localctx = XplorePathGrammarParser.MatcherWildcardContext(self, localctx)
                 self.enterOuterAlt(localctx, 7)
                 self.state = 269
-                self.match(XPath31GrammarParser.STAR)
+                self.match(XplorePathGrammarParser.STAR)
                 pass
             else:
                 raise NoViableAltException(self)
@@ -3298,7 +3298,7 @@ class XPath31GrammarParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_numericRangeMatcher
+            return XplorePathGrammarParser.RULE_numericRangeMatcher
 
      
         def copyFrom(self, ctx:ParserRuleContext):
@@ -3308,20 +3308,20 @@ class XPath31GrammarParser ( Parser ):
 
     class NumericRangeMatcherInclusiveContext(NumericRangeMatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.NumericRangeMatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.NumericRangeMatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def TILDE(self):
-            return self.getToken(XPath31GrammarParser.TILDE, 0)
+            return self.getToken(XplorePathGrammarParser.TILDE, 0)
         def numericRangeMatcherLiteral(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.NumericRangeMatcherLiteralContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.NumericRangeMatcherLiteralContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.NumericRangeMatcherLiteralContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.NumericRangeMatcherLiteralContext,i)
 
         def COLON(self):
-            return self.getToken(XPath31GrammarParser.COLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLON, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterNumericRangeMatcherInclusive" ):
@@ -3340,20 +3340,20 @@ class XPath31GrammarParser ( Parser ):
 
     class NumericRangeMatcherToleranceContext(NumericRangeMatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.NumericRangeMatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.NumericRangeMatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def TILDE(self):
-            return self.getToken(XPath31GrammarParser.TILDE, 0)
+            return self.getToken(XplorePathGrammarParser.TILDE, 0)
         def numericRangeMatcherLiteral(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.NumericRangeMatcherLiteralContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.NumericRangeMatcherLiteralContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.NumericRangeMatcherLiteralContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.NumericRangeMatcherLiteralContext,i)
 
         def AT(self):
-            return self.getToken(XPath31GrammarParser.AT, 0)
+            return self.getToken(XplorePathGrammarParser.AT, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterNumericRangeMatcherTolerance" ):
@@ -3372,28 +3372,28 @@ class XPath31GrammarParser ( Parser ):
 
     class NumericRangeMatcherBoundedContext(NumericRangeMatcherContext):
 
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XPath31GrammarParser.NumericRangeMatcherContext
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.NumericRangeMatcherContext
             super().__init__(parser)
             self.copyFrom(ctx)
 
         def TILDE(self):
-            return self.getToken(XPath31GrammarParser.TILDE, 0)
+            return self.getToken(XplorePathGrammarParser.TILDE, 0)
         def numericRangeMatcherLiteral(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(XPath31GrammarParser.NumericRangeMatcherLiteralContext)
+                return self.getTypedRuleContexts(XplorePathGrammarParser.NumericRangeMatcherLiteralContext)
             else:
-                return self.getTypedRuleContext(XPath31GrammarParser.NumericRangeMatcherLiteralContext,i)
+                return self.getTypedRuleContext(XplorePathGrammarParser.NumericRangeMatcherLiteralContext,i)
 
         def COLON(self):
-            return self.getToken(XPath31GrammarParser.COLON, 0)
+            return self.getToken(XplorePathGrammarParser.COLON, 0)
         def OP(self):
-            return self.getToken(XPath31GrammarParser.OP, 0)
+            return self.getToken(XplorePathGrammarParser.OP, 0)
         def OB(self):
-            return self.getToken(XPath31GrammarParser.OB, 0)
+            return self.getToken(XplorePathGrammarParser.OB, 0)
         def CP(self):
-            return self.getToken(XPath31GrammarParser.CP, 0)
+            return self.getToken(XplorePathGrammarParser.CP, 0)
         def CB(self):
-            return self.getToken(XPath31GrammarParser.CB, 0)
+            return self.getToken(XplorePathGrammarParser.CB, 0)
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterNumericRangeMatcherBounded" ):
@@ -3413,7 +3413,7 @@ class XPath31GrammarParser ( Parser ):
 
     def numericRangeMatcher(self):
 
-        localctx = XPath31GrammarParser.NumericRangeMatcherContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.NumericRangeMatcherContext(self, self._ctx, self.state)
         self.enterRule(localctx, 32, self.RULE_numericRangeMatcher)
         self._la = 0 # Token type
         try:
@@ -3421,23 +3421,23 @@ class XPath31GrammarParser ( Parser ):
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,37,self._ctx)
             if la_ == 1:
-                localctx = XPath31GrammarParser.NumericRangeMatcherInclusiveContext(self, localctx)
+                localctx = XplorePathGrammarParser.NumericRangeMatcherInclusiveContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 272
-                self.match(XPath31GrammarParser.TILDE)
+                self.match(XplorePathGrammarParser.TILDE)
                 self.state = 273
                 self.numericRangeMatcherLiteral()
                 self.state = 274
-                self.match(XPath31GrammarParser.COLON)
+                self.match(XplorePathGrammarParser.COLON)
                 self.state = 275
                 self.numericRangeMatcherLiteral()
                 pass
 
             elif la_ == 2:
-                localctx = XPath31GrammarParser.NumericRangeMatcherBoundedContext(self, localctx)
+                localctx = XplorePathGrammarParser.NumericRangeMatcherBoundedContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 277
-                self.match(XPath31GrammarParser.TILDE)
+                self.match(XplorePathGrammarParser.TILDE)
                 self.state = 278
                 _la = self._input.LA(1)
                 if not(_la==22 or _la==24):
@@ -3448,7 +3448,7 @@ class XPath31GrammarParser ( Parser ):
                 self.state = 279
                 self.numericRangeMatcherLiteral()
                 self.state = 280
-                self.match(XPath31GrammarParser.COLON)
+                self.match(XplorePathGrammarParser.COLON)
                 self.state = 281
                 self.numericRangeMatcherLiteral()
                 self.state = 282
@@ -3461,10 +3461,10 @@ class XPath31GrammarParser ( Parser ):
                 pass
 
             elif la_ == 3:
-                localctx = XPath31GrammarParser.NumericRangeMatcherToleranceContext(self, localctx)
+                localctx = XplorePathGrammarParser.NumericRangeMatcherToleranceContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 284
-                self.match(XPath31GrammarParser.TILDE)
+                self.match(XplorePathGrammarParser.TILDE)
                 self.state = 285
                 self.numericRangeMatcherLiteral()
                 self.state = 288
@@ -3472,7 +3472,7 @@ class XPath31GrammarParser ( Parser ):
                 la_ = self._interp.adaptivePredict(self._input,36,self._ctx)
                 if la_ == 1:
                     self.state = 286
-                    self.match(XPath31GrammarParser.AT)
+                    self.match(XplorePathGrammarParser.AT)
                     self.state = 287
                     self.numericRangeMatcherLiteral()
 
@@ -3497,22 +3497,22 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def IntegerLiteral(self):
-            return self.getToken(XPath31GrammarParser.IntegerLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.IntegerLiteral, 0)
 
         def DecimalLiteral(self):
-            return self.getToken(XPath31GrammarParser.DecimalLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.DecimalLiteral, 0)
 
         def DoubleLiteral(self):
-            return self.getToken(XPath31GrammarParser.DoubleLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.DoubleLiteral, 0)
 
         def KW_INF(self):
-            return self.getToken(XPath31GrammarParser.KW_INF, 0)
+            return self.getToken(XplorePathGrammarParser.KW_INF, 0)
 
         def MINUS(self):
-            return self.getToken(XPath31GrammarParser.MINUS, 0)
+            return self.getToken(XplorePathGrammarParser.MINUS, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_numericRangeMatcherLiteral
+            return XplorePathGrammarParser.RULE_numericRangeMatcherLiteral
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterNumericRangeMatcherLiteral" ):
@@ -3533,7 +3533,7 @@ class XPath31GrammarParser ( Parser ):
 
     def numericRangeMatcherLiteral(self):
 
-        localctx = XPath31GrammarParser.NumericRangeMatcherLiteralContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.NumericRangeMatcherLiteralContext(self, self._ctx, self.state)
         self.enterRule(localctx, 34, self.RULE_numericRangeMatcherLiteral)
         self._la = 0 # Token type
         try:
@@ -3543,7 +3543,7 @@ class XPath31GrammarParser ( Parser ):
             _la = self._input.LA(1)
             if _la==20:
                 self.state = 292
-                self.match(XPath31GrammarParser.MINUS)
+                self.match(XplorePathGrammarParser.MINUS)
 
 
             self.state = 295
@@ -3570,23 +3570,23 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def KW_ON(self):
-            return self.getToken(XPath31GrammarParser.KW_ON, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ON, 0)
 
         def KW_ERROR(self):
-            return self.getToken(XPath31GrammarParser.KW_ERROR, 0)
+            return self.getToken(XplorePathGrammarParser.KW_ERROR, 0)
 
         def KW_DISCARD(self):
-            return self.getToken(XPath31GrammarParser.KW_DISCARD, 0)
+            return self.getToken(XplorePathGrammarParser.KW_DISCARD, 0)
 
         def KW_FAIL(self):
-            return self.getToken(XPath31GrammarParser.KW_FAIL, 0)
+            return self.getToken(XplorePathGrammarParser.KW_FAIL, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(XPath31GrammarParser.ExprContext,0)
+            return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,0)
 
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_coerceFallback
+            return XplorePathGrammarParser.RULE_coerceFallback
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCoerceFallback" ):
@@ -3607,24 +3607,24 @@ class XPath31GrammarParser ( Parser ):
 
     def coerceFallback(self):
 
-        localctx = XPath31GrammarParser.CoerceFallbackContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.CoerceFallbackContext(self, self._ctx, self.state)
         self.enterRule(localctx, 36, self.RULE_coerceFallback)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 297
-            self.match(XPath31GrammarParser.KW_ON)
+            self.match(XplorePathGrammarParser.KW_ON)
             self.state = 298
-            self.match(XPath31GrammarParser.KW_ERROR)
+            self.match(XplorePathGrammarParser.KW_ERROR)
             self.state = 302
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [59]:
                 self.state = 299
-                self.match(XPath31GrammarParser.KW_DISCARD)
+                self.match(XplorePathGrammarParser.KW_DISCARD)
                 pass
             elif token in [60]:
                 self.state = 300
-                self.match(XPath31GrammarParser.KW_FAIL)
+                self.match(XplorePathGrammarParser.KW_FAIL)
                 pass
             elif token in [1, 10, 11, 12, 20, 22, 24, 27, 29, 30, 31, 52, 53, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74]:
                 self.state = 301
@@ -3650,19 +3650,19 @@ class XPath31GrammarParser ( Parser ):
             self.parser = parser
 
         def DOLLAR(self):
-            return self.getToken(XPath31GrammarParser.DOLLAR, 0)
+            return self.getToken(XplorePathGrammarParser.DOLLAR, 0)
 
         def Name(self):
-            return self.getToken(XPath31GrammarParser.Name, 0)
+            return self.getToken(XplorePathGrammarParser.Name, 0)
 
         def IntegerLiteral(self):
-            return self.getToken(XPath31GrammarParser.IntegerLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.IntegerLiteral, 0)
 
         def StringLiteral(self):
-            return self.getToken(XPath31GrammarParser.StringLiteral, 0)
+            return self.getToken(XplorePathGrammarParser.StringLiteral, 0)
 
         def getRuleIndex(self):
-            return XPath31GrammarParser.RULE_varRef
+            return XplorePathGrammarParser.RULE_varRef
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterVarRef" ):
@@ -3683,13 +3683,13 @@ class XPath31GrammarParser ( Parser ):
 
     def varRef(self):
 
-        localctx = XPath31GrammarParser.VarRefContext(self, self._ctx, self.state)
+        localctx = XplorePathGrammarParser.VarRefContext(self, self._ctx, self.state)
         self.enterRule(localctx, 38, self.RULE_varRef)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 304
-            self.match(XPath31GrammarParser.DOLLAR)
+            self.match(XplorePathGrammarParser.DOLLAR)
             self.state = 305
             _la = self._input.LA(1)
             if not(((((_la - 69)) & ~0x3f) == 0 and ((1 << (_la - 69)) & 41) != 0)):

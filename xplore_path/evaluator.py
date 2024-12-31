@@ -16,9 +16,9 @@ from xplore_path.invocables.whitespace_remove_invocable import WhitespaceRemoveI
 from xplore_path.invocables.whitespace_strip_invocable import WhitespaceStripInvocable
 from xplore_path.matchers.ignore_case_matcher import IgnoreCaseMatcher
 from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
-from xplore_path.XPath31GrammarLexer import XPath31GrammarLexer
-from xplore_path.XPath31GrammarParser import XPath31GrammarParser
-from xplore_path.XPath31GrammarVisitor import XPath31GrammarVisitor
+from xplore_path.XplorePathGrammarLexer import XplorePathGrammarLexer
+from xplore_path.XplorePathGrammarParser import XplorePathGrammarParser
+from xplore_path.XplorePathGrammarVisitor import XplorePathGrammarVisitor
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext
 from xplore_path.path.path import Path
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
@@ -103,7 +103,7 @@ class _EvaluatorVisitorContext:
         )
 
 
-class _EvaluatorVisitor(XPath31GrammarVisitor):
+class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def __init__(
             self,
             root: Any,
@@ -112,19 +112,19 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.root = root
         self.context = _EvaluatorVisitorContext.prime(root, variables)
 
-    def visitXplorePath(self, ctx: XPath31GrammarParser.XplorePathContext):
+    def visitXplorePath(self, ctx: XplorePathGrammarParser.XplorePathContext):
         return self.visit(ctx.expr())
 
-    def visitExprPath(self, ctx: XPath31GrammarParser.ExprPathContext):
+    def visitExprPath(self, ctx: XplorePathGrammarParser.ExprPathContext):
         entities = self.visit(ctx.path())
         if ctx.filter_():
             entities = self._apply_filter(entities, ctx.filter_())
         return entities
 
-    def visitExprLiteral(self, ctx: XPath31GrammarParser.ExprLiteralContext):
+    def visitExprLiteral(self, ctx: XplorePathGrammarParser.ExprLiteralContext):
         return self.visit(ctx.literal())
 
-    def visitExprVariable(self, ctx: XPath31GrammarParser.ExprVariableContext):
+    def visitExprVariable(self, ctx: XplorePathGrammarParser.ExprVariableContext):
         if ctx.varRef().Name():
             name = ctx.varRef().Name().getText()
         elif ctx.varRef().IntegerLiteral():
@@ -136,7 +136,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
 
         return self.context.variables.get(name, None)
 
-    def visitExprUnary(self, ctx: XPath31GrammarParser.ExprUnaryContext):
+    def visitExprUnary(self, ctx: XplorePathGrammarParser.ExprUnaryContext):
         if ctx.coerceFallback():
             coercer_fallback = self.visit(ctx.coerceFallback())
         else:
@@ -160,10 +160,10 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             return inner  # Keep it as-is -- not required to do any manipulation here
         raise ValueError('Unexpected')
 
-    def visitExprAtomicOrEncapsulate(self, ctx: XPath31GrammarParser.ExprAtomicOrEncapsulateContext):
+    def visitExprAtomicOrEncapsulate(self, ctx: XplorePathGrammarParser.ExprAtomicOrEncapsulateContext):
         return self.visit(ctx.atomicOrEncapsulate())
 
-    def visitExprFunctionCall(self, ctx: XPath31GrammarParser.ExprFunctionCallContext):
+    def visitExprFunctionCall(self, ctx: XplorePathGrammarParser.ExprFunctionCallContext):
         if ctx.coerceFallback():
             coercer_fallback = self.visit(ctx.coerceFallback())
         else:
@@ -191,12 +191,12 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             else:
                 return []
 
-    def visitExprConcatenate(self, ctx: XPath31GrammarParser.ExprConcatenateContext):
+    def visitExprConcatenate(self, ctx: XplorePathGrammarParser.ExprConcatenateContext):
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
         return coerce_to_list(l) + coerce_to_list(r)
 
-    def visitExprSetIntersect(self, ctx: XPath31GrammarParser.ExprSetIntersectContext):
+    def visitExprSetIntersect(self, ctx: XplorePathGrammarParser.ExprSetIntersectContext):
         l = coerce_for_set_operation(self.visit(ctx.expr(0)))
         r = coerce_for_set_operation(self.visit(ctx.expr(1)))
         if ctx.KW_INTERSECT():
@@ -207,13 +207,13 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             raise ValueError('Unexpected')
         return [l[p] for p in result_keys]
 
-    def visitExprSetUnion(self, ctx: XPath31GrammarParser.ExprSetUnionContext):
+    def visitExprSetUnion(self, ctx: XplorePathGrammarParser.ExprSetUnionContext):
         l = coerce_for_set_operation(self.visit(ctx.expr(0)))
         r = coerce_for_set_operation(self.visit(ctx.expr(1)))
         result = l | r
         return list(result.values())
 
-    def visitExprBoolAggregate(self, ctx: XPath31GrammarParser.ExprBoolAggregateContext):
+    def visitExprBoolAggregate(self, ctx: XplorePathGrammarParser.ExprBoolAggregateContext):
         if ctx.coerceFallback():
             coercer_fallback = self.visit(ctx.coerceFallback())
         else:
@@ -261,7 +261,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             single_or_empty = [op(l_, r_) for l_, r_ in combine_op(l, r)]
             return single_or_empty[0] if single_or_empty else []
 
-    def visitExprMultiplicative(self, ctx: XPath31GrammarParser.ExprMultiplicativeContext):
+    def visitExprMultiplicative(self, ctx: XplorePathGrammarParser.ExprMultiplicativeContext):
         if ctx.coerceFallback():
             coercer_fallback = self.visit(ctx.coerceFallback())
         else:
@@ -284,7 +284,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l % _r, float, coercer_fallback)
         raise ValueError('Unexpected')
 
-    def visitExprAdditive(self, ctx: XPath31GrammarParser.ExprAdditiveContext):
+    def visitExprAdditive(self, ctx: XplorePathGrammarParser.ExprAdditiveContext):
         if ctx.coerceFallback():
             coercer_fallback = self.visit(ctx.coerceFallback())
         else:
@@ -305,7 +305,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l + _r, str, coercer_fallback)
         raise ValueError('Unexpected')
 
-    def visitExprExtractLabel(self, ctx: XPath31GrammarParser.ExprExtractLabelContext):
+    def visitExprExtractLabel(self, ctx: XplorePathGrammarParser.ExprExtractLabelContext):
         l = self.visit(ctx.expr())
         if type(l) is list:
             return [l_.label() for l_ in l if isinstance(l_, Path)]
@@ -368,7 +368,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             ret = coercer_fallback.coerce(ret)
             return ret[0] if ret else []
 
-    def visitExprComparison(self, ctx: XPath31GrammarParser.ExprComparisonContext):
+    def visitExprComparison(self, ctx: XplorePathGrammarParser.ExprComparisonContext):
         if ctx.coerceFallback():
             coercer_fallback = self.visit(ctx.coerceFallback())
         else:
@@ -414,7 +414,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         ret = agg_op(ret)
         return ret
 
-    def visitExprOr(self, ctx: XPath31GrammarParser.ExprAndContext):
+    def visitExprOr(self, ctx: XplorePathGrammarParser.ExprAndContext):
         if ctx.coerceFallback():
             coercer_fallback = self.visit(ctx.coerceFallback())
         else:
@@ -428,7 +428,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         ret = agg_op(ret)
         return ret
 
-    def visitExprAnd(self, ctx: XPath31GrammarParser.ExprAndContext):
+    def visitExprAnd(self, ctx: XplorePathGrammarParser.ExprAndContext):
         if ctx.coerceFallback():
             coercer_fallback = self.visit(ctx.coerceFallback())
         else:
@@ -461,13 +461,13 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             agg_op = any
         return agg_op, ret
 
-    def visitExprWrap(self, ctx: XPath31GrammarParser.ExprWrapContext):
+    def visitExprWrap(self, ctx: XplorePathGrammarParser.ExprWrapContext):
         entities = self.visit(ctx.expr())
         if ctx.filter_():
             entities = self._apply_filter(entities, ctx.filter_())
         return entities
 
-    def visitExprWrapForceList(self, ctx: XPath31GrammarParser.ExprWrapForceListContext):
+    def visitExprWrapForceList(self, ctx: XplorePathGrammarParser.ExprWrapForceListContext):
         entities = []
         if ctx.expr():
             entities = coerce_to_list(self.visit(ctx.expr()))
@@ -475,21 +475,21 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
                 entities = self._apply_filter(entities, ctx.filter_())
         return entities
 
-    def visitPathFromRoot(self, ctx: XPath31GrammarParser.PathFromRootContext):
+    def visitPathFromRoot(self, ctx: XplorePathGrammarParser.PathFromRootContext):
         try:
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore_entities()
 
-    def visitPathRootExact(self, ctx: XPath31GrammarParser.PathRootExactContext):
+    def visitPathRootExact(self, ctx: XplorePathGrammarParser.PathRootExactContext):
         try:
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
             return self.context.entities[:]
         finally:
             self.context.restore_entities()
 
-    def visitPathFromAny(self, ctx: XPath31GrammarParser.PathFromAnyContext):
+    def visitPathFromAny(self, ctx: XplorePathGrammarParser.PathFromAnyContext):
         try:
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
             self.context.entities = self.context.entities[0].all_descendants()
@@ -497,17 +497,17 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         finally:
             self.context.restore_entities()
 
-    def visitPathFromRelative(self, ctx: XPath31GrammarParser.PathFromRelativeContext):
+    def visitPathFromRelative(self, ctx: XplorePathGrammarParser.PathFromRelativeContext):
         try:
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore_entities()
 
-    def visitPathSelf(self, ctx: XPath31GrammarParser.PathSelfContext):
+    def visitPathSelf(self, ctx: XplorePathGrammarParser.PathSelfContext):
         return self.context.entities[:]
 
-    def visitPathParent(self, ctx: XPath31GrammarParser.PathParentContext):
+    def visitPathParent(self, ctx: XplorePathGrammarParser.PathParentContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -516,7 +516,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
                     new_paths.append(parent_path)
         return new_paths
 
-    def visitRelPathChain(self, ctx: XPath31GrammarParser.RelPathChainContext):
+    def visitRelPathChain(self, ctx: XplorePathGrammarParser.RelPathChainContext):
         # TODO: Pushing / popping state not required?
         try:
             self.context.save_entities(PrimeMode.PRIME_WITH_SELF)
@@ -546,7 +546,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         finally:
             self.context.restore_entities()
 
-    def visitRelPathStep(self, ctx: XPath31GrammarParser.RelPathStepContext):
+    def visitRelPathStep(self, ctx: XplorePathGrammarParser.RelPathStepContext):
         if ctx.forwardStep():
             ret = self.visit(ctx.forwardStep())
         elif ctx.reverseStep():
@@ -555,7 +555,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             raise ValueError('Unexpected')
         return ret
 
-    def visitReverseStepParent(self, ctx: XPath31GrammarParser.ReverseStepParentContext):
+    def visitReverseStepParent(self, ctx: XplorePathGrammarParser.ReverseStepParentContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -565,7 +565,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitReverseStepAncestor(self, ctx: XPath31GrammarParser.ReverseStepAncestorOrSelfContext):
+    def visitReverseStepAncestor(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -573,7 +573,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitReverseStepPreceding(self, ctx: XPath31GrammarParser.ReverseStepPrecedingContext):
+    def visitReverseStepPreceding(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -581,7 +581,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitReverseStepPrecedingSibling(self, ctx: XPath31GrammarParser.ReverseStepPrecedingContext):
+    def visitReverseStepPrecedingSibling(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -589,7 +589,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitReverseStepAncestorOrSelf(self, ctx: XPath31GrammarParser.ReverseStepAncestorOrSelfContext):
+    def visitReverseStepAncestorOrSelf(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -598,7 +598,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitReverseStepDirectParent(self, ctx: XPath31GrammarParser.ReverseStepDirectParentContext):
+    def visitReverseStepDirectParent(self, ctx: XplorePathGrammarParser.ReverseStepDirectParentContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -607,7 +607,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
                     new_paths.append(parent_path)
         return new_paths
 
-    def visitForwardStepChild(self, ctx: XPath31GrammarParser.ForwardStepChildContext):
+    def visitForwardStepChild(self, ctx: XplorePathGrammarParser.ForwardStepChildContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -615,7 +615,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitForwardStepDescendant(self, ctx: XPath31GrammarParser.ForwardStepDescendantContext):
+    def visitForwardStepDescendant(self, ctx: XplorePathGrammarParser.ForwardStepDescendantContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -623,10 +623,10 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitForwardStepSelf(self, ctx: XPath31GrammarParser.ForwardStepSelfContext):
+    def visitForwardStepSelf(self, ctx: XplorePathGrammarParser.ForwardStepSelfContext):
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitForwardStepDescendantOrSelf(self, ctx: XPath31GrammarParser.ForwardStepDescendantOrSelfContext):
+    def visitForwardStepDescendantOrSelf(self, ctx: XplorePathGrammarParser.ForwardStepDescendantOrSelfContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -635,7 +635,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitForwardStepFollowingSibling(self, ctx: XPath31GrammarParser.ForwardStepFollowingSiblingContext):
+    def visitForwardStepFollowingSibling(self, ctx: XplorePathGrammarParser.ForwardStepFollowingSiblingContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -643,7 +643,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitForwardStepFollowing(self, ctx: XPath31GrammarParser.ForwardStepFollowingContext):
+    def visitForwardStepFollowing(self, ctx: XplorePathGrammarParser.ForwardStepFollowingContext):
         new_paths = []
         for e in self.context:
             if isinstance(e, Path):
@@ -651,7 +651,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitForwardStepValue(self, ctx: XPath31GrammarParser.ForwardStepValueContext):
+    def visitForwardStepValue(self, ctx: XplorePathGrammarParser.ForwardStepValueContext):
         new_paths = []
         for e in self.context.entities:
             if isinstance(e, Path):
@@ -659,7 +659,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
-    def visitForwardStepDirectSelf(self, ctx: XPath31GrammarParser.ForwardStepDirectSelfContext):
+    def visitForwardStepDirectSelf(self, ctx: XplorePathGrammarParser.ForwardStepDirectSelfContext):
         return self.context.entities[:]  # Return existing
 
     def _walk_down(self, result: Any):
@@ -684,7 +684,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
                 ret.append(e)
         return ret
 
-    def _apply_filter(self, entities: list[EntityType], ctx: XPath31GrammarParser.FilterContext):
+    def _apply_filter(self, entities: list[EntityType], ctx: XplorePathGrammarParser.FilterContext):
         self.context.save_entities(PrimeMode.PRIME_WITH_EMPTY)
         try:
             ret = []
@@ -714,7 +714,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         else:
             raise ValueError('Unexpected')
 
-    def visitLiteral(self, ctx: XPath31GrammarParser.LiteralContext):
+    def visitLiteral(self, ctx: XplorePathGrammarParser.LiteralContext):
         if ctx.IntegerLiteral():
             return int(ctx.getText())
         elif ctx.DecimalLiteral():
@@ -733,36 +733,36 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             return ctx.Name().getText()
         raise ValueError('Unexpected')
 
-    def visitExprMatcher(self, ctx: XPath31GrammarParser.ExprMatcherContext):
+    def visitExprMatcher(self, ctx: XplorePathGrammarParser.ExprMatcherContext):
         return self.visit(ctx.matcher())
 
-    def visitMatcherStrict(self, ctx: XPath31GrammarParser.MatcherStrictContext):
+    def visitMatcherStrict(self, ctx: XplorePathGrammarParser.MatcherStrictContext):
         pattern = self._decode_str(ctx.getText()[1:])
         return StrictMatcher(pattern)
 
-    def visitMatcherRegex(self, ctx: XPath31GrammarParser.MatcherRegexContext):
+    def visitMatcherRegex(self, ctx: XplorePathGrammarParser.MatcherRegexContext):
         pattern = self._decode_str(ctx.getText()[1:])
         return RegexMatcher(pattern)
 
-    def visitMatcherGlob(self, ctx: XPath31GrammarParser.MatcherGlobContext):
+    def visitMatcherGlob(self, ctx: XplorePathGrammarParser.MatcherGlobContext):
         pattern = self._decode_str(ctx.getText()[1:])
         return GlobMatcher(pattern)
 
-    def visitMatcherFuzzy(self, ctx: XPath31GrammarParser.MatcherGlobContext):
+    def visitMatcherFuzzy(self, ctx: XplorePathGrammarParser.MatcherGlobContext):
         pattern = self._decode_str(ctx.getText()[1:])
         return FuzzyMatcher(pattern)
 
-    def visitMatcherCaseInsensitive(self, ctx: XPath31GrammarParser.MatcherCaseInsensitiveContext):
+    def visitMatcherCaseInsensitive(self, ctx: XplorePathGrammarParser.MatcherCaseInsensitiveContext):
         pattern = self._decode_str(ctx.getText()[1:])
         return IgnoreCaseMatcher(pattern)
 
-    def visitMatcherNumericRange(self, ctx: XPath31GrammarParser.MatcherNumericRangeContext):
+    def visitMatcherNumericRange(self, ctx: XplorePathGrammarParser.MatcherNumericRangeContext):
         return self.visit(ctx.numericRangeMatcher())
 
-    def visitMatcherWildcard(self, ctx: XPath31GrammarParser.MatcherWildcardContext):
+    def visitMatcherWildcard(self, ctx: XplorePathGrammarParser.MatcherWildcardContext):
         return WildcardMatcher()
 
-    def visitNumericRangeMatcherTolerance(self, ctx: XPath31GrammarParser.NumericRangeMatcherToleranceContext):
+    def visitNumericRangeMatcherTolerance(self, ctx: XplorePathGrammarParser.NumericRangeMatcherToleranceContext):
         value = self.visit(ctx.numericRangeMatcherLiteral(0))
         if ctx.numericRangeMatcherLiteral(1):
             tolerance = self.visit(ctx.numericRangeMatcherLiteral(1))
@@ -772,19 +772,19 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
         max_ = value + tolerance
         return NumericRangeMatcher(min_, True, max_, True)
 
-    def visitNumericRangeMatcherBounded(self, ctx: XPath31GrammarParser.NumericRangeMatcherBoundedContext):
+    def visitNumericRangeMatcherBounded(self, ctx: XplorePathGrammarParser.NumericRangeMatcherBoundedContext):
         min_ = self.visit(ctx.numericRangeMatcherLiteral(0))
         min_inclusive = bool(ctx.OB())
         max_ = self.visit(ctx.numericRangeMatcherLiteral(1))
         max_inclusive = bool(ctx.CB())
         return NumericRangeMatcher(min_, min_inclusive, max_, max_inclusive)
 
-    def visitNumericRangeMatcherInclusive(self, ctx: XPath31GrammarParser.NumericRangeMatcherInclusiveContext):
+    def visitNumericRangeMatcherInclusive(self, ctx: XplorePathGrammarParser.NumericRangeMatcherInclusiveContext):
         min_ = self.visit(ctx.numericRangeMatcherLiteral(0))
         max_ = self.visit(ctx.numericRangeMatcherLiteral(1))
         return NumericRangeMatcher(min_, True, max_, True)
 
-    def visitNumericRangeMatcherLiteral(self, ctx: XPath31GrammarParser.NumericRangeMatcherLiteralContext):
+    def visitNumericRangeMatcherLiteral(self, ctx: XplorePathGrammarParser.NumericRangeMatcherLiteralContext):
         if ctx.IntegerLiteral():
             v = int(ctx.IntegerLiteral().getText())
         elif ctx.DecimalLiteral():
@@ -799,7 +799,7 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             v = -v
         return v
 
-    def visitCoerceFallback(self, ctx: XPath31GrammarParser.CoerceFallbackContext):
+    def visitCoerceFallback(self, ctx: XplorePathGrammarParser.CoerceFallbackContext):
         if ctx.KW_DISCARD():
             return DiscardCoercerFallback()
         elif ctx.KW_FAIL():
@@ -823,11 +823,11 @@ def evaluate(
     if variables is None:
         variables = {}
     input_stream = InputStream(expr)
-    lexer = XPath31GrammarLexer(input_stream)
+    lexer = XplorePathGrammarLexer(input_stream)
     lexer.removeErrorListeners()
     lexer.addErrorListener(RaiseParseErrorListener())
     token_stream = CommonTokenStream(lexer)
-    parser = XPath31GrammarParser(token_stream)
+    parser = XplorePathGrammarParser(token_stream)
     parser.removeErrorListeners()
     parser.addErrorListener(RaiseParseErrorListener())
     tree = parser.xplorePath()

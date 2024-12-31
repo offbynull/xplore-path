@@ -1,8 +1,5 @@
 // ORIGINALLY FORKED FROM https://github.com/antlr/grammars-v4/tree/master/xpath/xpath31 ON Dec15 2024
-//
-// //a[b[@id = "123"] and position() < 5]/c[starts-with(@name, "test") or contains(@value, "example")]/(d[@type = "primary"] | e[last() - 1])/@*[not(contains(name(), 'ignore'))]
-
-grammar XPath31Grammar;
+grammar XplorePathGrammar;
 
 
 //LEXER
