@@ -560,7 +560,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitPathFromAny(self, ctx: XplorePathGrammarParser.PathFromAnyContext):
         try:
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
-            self.context.entities = self.context.entities[0].all_descendants()
+            root = self.context.entities[0]
+            self.context.entities = [root] + root.all_descendants()
             return self.visit(ctx.relPath())
         finally:
             self.context.restore_entities()
