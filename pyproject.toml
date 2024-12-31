@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "xpath-test"
+name = "xplore_path"
 version = "0.1.0"
 description = ""
 authors = ["offbynull <offbynull@gmail.com>"]
@@ -22,6 +22,9 @@ antlr4-tools = "^0.2.1"
 
 
 [tool.poetry.group.test.dependencies]
+
+[tool.poetry.scripts]
+xplore-path = "xplore_path.repl.repl:main"
 
 [build-system]
 requires = ["poetry-core"]

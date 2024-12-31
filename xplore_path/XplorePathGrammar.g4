@@ -68,6 +68,10 @@ KW_FAIL                   : 'fail';
 KW_NAN                    : 'nan';
 KW_INF                    : 'inf';
 KW_LABEL                  : 'label';
+KW_LEFT                   : 'left';
+KW_RIGHT                  : 'right';
+KW_INNER                  : 'inner';
+KW_JOIN                   : 'join';
 
 // A.2.1. TERMINAL SYMBOLS
 // This isn't a complete list of tokens in the language.
@@ -143,6 +147,7 @@ xplorePath
 expr
     : (KW_ANY | KW_ALL) expr coerceFallback?            # ExprBoolAggregate
     | expr COMMA expr                                   # ExprConcatenate
+    | expr joinOp expr joinCond                         # ExprJoin
     | expr (KW_INTERSECT | KW_EXCEPT) expr              # ExprSetIntersect
     | expr (KW_UNION | P) expr                          # ExprSetUnion
     | KW_LABEL expr                                     # ExprExtractLabel
@@ -170,11 +175,19 @@ atomicOrEncapsulate
     ;
 
 argumentList
-    : OP (expr (COMMA expr)*)? CP
+    : OP (expr (COMMA expr)*)? CP  // BUG: COMMA also being utilized in expr, multiple params misinterpeted as wrapped list
     ;
 
 filter
     : OB expr CB
+    ;
+
+joinOp
+    : (KW_LEFT | KW_RIGHT | KW_INNER)? KW_JOIN
+    ;
+
+joinCond
+    : KW_ON filter
     ;
 
 relOp

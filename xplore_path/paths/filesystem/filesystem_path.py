@@ -9,6 +9,7 @@ from typing import Hashable, Callable, Any
 from weakref import WeakValueDictionary
 
 from xplore_path.path.path import Path
+from xplore_path.paths.filesystem.abi_file_loader import AbiFileLoader
 from xplore_path.paths.filesystem.cache import Cache
 from xplore_path.paths.filesystem.combined_file_loader import CombinedFileLoader
 from xplore_path.paths.filesystem.csv_file_loader import CsvFileLoader
@@ -35,6 +36,7 @@ _DEFAULT_FILE_LOADER = CombinedFileLoader([
     XmlFileLoader(),
     HtmlFileLoader(),
     SqliteFileLoader(),
+    AbiFileLoader(),
     # DefaultFileLoader()
 ])
 

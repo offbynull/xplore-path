@@ -64,6 +64,11 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprJoin.
+    def visitExprJoin(self, ctx:XplorePathGrammarParser.ExprJoinContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
     def visitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
         return self.visitChildren(ctx)
@@ -116,6 +121,16 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#filter.
     def visitFilter(self, ctx:XplorePathGrammarParser.FilterContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#joinOp.
+    def visitJoinOp(self, ctx:XplorePathGrammarParser.JoinOpContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#joinCond.
+    def visitJoinCond(self, ctx:XplorePathGrammarParser.JoinCondContext):
         return self.visitChildren(ctx)
 
 

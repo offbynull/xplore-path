@@ -22,7 +22,7 @@
 * TODO: change syntax so keywords must be followed by ::, ENFORCE IN LEXER (so people can still use the keywords as-is)
 * TODO: add callback that notifies of what's happening when evaluation is running
 * ~~TODO: html parser~~
-* TODO: xml and html parser - tag value should be returned directly as opposed to going inside .text child
+* ~~TODO: xml and html parser - tag value should be returned directly as opposed to going inside .text child~~
 * ~~TODO: test matchers raw~~
 * ~~TODO: REPL should autocomplete variable names~~
 * TODO: test matchers when used in path predicates
@@ -32,6 +32,7 @@
 * TODO: test complex math (order of operations)
 * TODO: test label directive
 * TODO: test function invocations syntax
+    BUG comma misinterpreted func(a,b) interpretes args as a single argument of [a,b]
 * TODO: test code in the invocables package
 * ~~TODO: test filesystem file loaders~~
 * TODO: make use of variables in REPL - store results in var names and use those var names in queries

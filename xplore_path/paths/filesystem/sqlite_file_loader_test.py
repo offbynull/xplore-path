@@ -10,8 +10,8 @@ class TestCase(unittest.TestCase):
         raw_data = SqliteFileLoader().load(fs_path)
         path_creator = SqliteFileLoader().path_creator(fs_path)
         path = path_creator(None, fs_path.name, raw_data)
-        for inner_path in path.all_descendants(max_level=6):
-            print(f'{inner_path}')
+        # for inner_path in path.all_descendants(max_level=6):
+        #     print(f'{inner_path}')
         self.assertEqual(42, len(path.all_descendants()))  # too lazy to write out every assertion
 
 

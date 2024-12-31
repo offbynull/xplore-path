@@ -107,6 +107,15 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprJoin.
+    def enterExprJoin(self, ctx:XplorePathGrammarParser.ExprJoinContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprJoin.
+    def exitExprJoin(self, ctx:XplorePathGrammarParser.ExprJoinContext):
+        pass
+
+
     # Enter a parse tree produced by XplorePathGrammarParser#ExprAdditive.
     def enterExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
         pass
@@ -203,6 +212,24 @@ class XplorePathGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XplorePathGrammarParser#filter.
     def exitFilter(self, ctx:XplorePathGrammarParser.FilterContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#joinOp.
+    def enterJoinOp(self, ctx:XplorePathGrammarParser.JoinOpContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#joinOp.
+    def exitJoinOp(self, ctx:XplorePathGrammarParser.JoinOpContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#joinCond.
+    def enterJoinCond(self, ctx:XplorePathGrammarParser.JoinCondContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#joinCond.
+    def exitJoinCond(self, ctx:XplorePathGrammarParser.JoinCondContext):
         pass
 
 

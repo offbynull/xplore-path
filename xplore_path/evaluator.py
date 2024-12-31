@@ -21,6 +21,7 @@ from xplore_path.XplorePathGrammarParser import XplorePathGrammarParser
 from xplore_path.XplorePathGrammarVisitor import XplorePathGrammarVisitor
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext
 from xplore_path.path.path import Path
+from xplore_path.paths.mirror.mirror_path import MirrorPath
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 from xplore_path.coercer_fallback.coercer_fallback import CoercerFallback
 from xplore_path.coercer_fallbacks.default_coercer_fallback import DefaultCoercerFallback
@@ -34,6 +35,7 @@ from xplore_path.matchers.glob_matcher import GlobMatcher
 from xplore_path.matchers.regex_matcher import RegexMatcher
 from xplore_path.matchers.strict_matcher import StrictMatcher
 from xplore_path.matchers.wildcard_matcher import WildcardMatcher
+from xplore_path.paths.simple.simple_path import SimplePath
 from xplore_path.raise_parse_error_listener import RaiseParseErrorListener
 
 
@@ -178,7 +180,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             return None
 
         invocable = self.visit(ctx.atomicOrEncapsulate())
-        args = [self.visit(n) for n in ctx.argumentList().expr()]
+        args = [self.visit(n) for n in ctx.argumentList().atomicOrEncapsulate()]
         if type(invocable) == list:
             ret = [op(i, args) for i in invocable]
             ret = coercer_fallback.coerce(ret)
@@ -190,6 +192,72 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 return ret[0]
             else:
                 return []
+
+    # TODO: Deeply inefficient - rework this to properly index before joining based on the condition. For example, if
+    #       condition is == and both operands are known to be hashable, then create hash table and use that for quick
+    #       lookup. Likewise, if relational operator (e.g. > or <=) and operands support sorting, sort and lookup using
+    #       binary search.
+    #
+    #       Maybe, instead of passing around lists of Paths (and singular values), create a Sequence class that holds
+    #       these values. The Sequence class can generate an index (e.g. hash or sorted) based on the values within the
+    #       sequence.
+    def visitExprJoin(self, ctx: XplorePathGrammarParser.ExprJoinContext):
+        def _create_join_obj(l_item, r_item):
+            test_path = SimplePath(None, None, None)
+            mirrored_l_item = MirrorPath(l_item, test_path, 1) if isinstance(l_item, Path) else l_item
+            mirrored_r_item = MirrorPath(r_item, test_path, 2) if isinstance(r_item, Path) else r_item
+            test_path.add_child(mirrored_l_item)
+            test_path.add_child(mirrored_r_item)
+            return test_path
+
+        def _create_join_obj_left_only(l_item):
+            test_path = SimplePath(None, None, None)
+            mirrored_l_item = MirrorPath(l_item, test_path, 1) if isinstance(l_item, Path) else l_item
+            test_path.add_child(mirrored_l_item)
+            return test_path
+
+        def _create_join_obj_right_only(r_item):
+            test_path = SimplePath(None, None, None)
+            mirrored_r_item = MirrorPath(r_item, test_path, 2) if isinstance(r_item, Path) else r_item
+            test_path.add_child(mirrored_r_item)
+            return test_path
+
+        l = coerce_to_list(self.visit(ctx.expr(0)))
+        r = coerce_to_list(self.visit(ctx.expr(1)))
+        matching_paths = []
+        if ctx.joinOp().KW_INNER():
+            for l_item in l:
+                for r_item in r:
+                    test_path = _create_join_obj(l_item, r_item)
+                    entities = [test_path]
+                    entities = self._apply_filter(entities, ctx.joinCond().filter_())
+                    if entities != []:
+                        matching_paths.append(test_path)
+        elif ctx.joinOp().KW_RIGHT():
+            matching_paths = []
+            for r_item in r:
+                joined = False
+                for l_item in l:
+                    test_path = _create_join_obj(l_item, r_item)
+                    entities = [test_path]
+                    entities = self._apply_filter(entities, ctx.joinCond().filter_())
+                    if entities != []:
+                        matching_paths.append(test_path)
+                if not joined:
+                    matching_paths.append(_create_join_obj_right_only(r_item))
+        else:  # if KW_LEFT not set explicitly, assume KW_LEFT
+            matching_paths = []
+            for l_item in l:
+                joined = False
+                for r_item in r:
+                    test_path = _create_join_obj(l_item, r_item)
+                    entities = [test_path]
+                    entities = self._apply_filter(entities, ctx.joinCond().filter_())
+                    if entities != []:
+                        matching_paths.append(test_path)
+                if not joined:
+                    matching_paths.append(_create_join_obj_left_only(l_item))
+        return matching_paths
 
     def visitExprConcatenate(self, ctx: XplorePathGrammarParser.ExprConcatenateContext):
         l = self.visit(ctx.expr(0))
@@ -987,6 +1055,7 @@ if __name__ == '__main__':
     # _test_with_fs_path('~/Downloads', '/pycharm-community-2024.3.1.tar.gz/*')
     # _test_with_fs_path('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'")
     # _test_with_fs_path('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'//*")
+    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies//*")
     # _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
     # _test_with_fs_path('~', '/test.yaml//*')
     # _test_with_fs_path('~', '/test.csv/*/Name')
@@ -1006,11 +1075,14 @@ if __name__ == '__main__':
     # _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
     # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
     # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
+    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* inner join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
+    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* left join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
+    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* right join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
     # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'")
     # _test_with_fs_path('~/Downloads', "$count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
     # _test_with_fs_path('~/Downloads', "$distinct(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
     # _test_with_fs_path('~/Downloads', "$frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
-    _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
+    # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
     # _test_with_fs_path('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs_path('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs_path('~/Downloads', "$whitespace_strip([' hello world ', ' hello world', 'hello world '])")

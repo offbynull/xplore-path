@@ -81,7 +81,7 @@ def _cache_notifier(notice_type: NoticeType, child_path: Path):
         print(f'error', flush=True)
 
 
-def main(evaluator: Evaluator, query_path: Path, cache_path: Path):
+def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
     bindings = KeyBindings()
 
     full_labels = True
@@ -198,7 +198,7 @@ def precache(evaluator: Evaluator, query_path: Path, cache_path: Path) -> None:
     print('Pre-cache complete')
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(
         description='Xplore Path REPL',
         add_help=False
@@ -247,4 +247,8 @@ if __name__ == '__main__':
     if args.cache_preload:
         print(f'Preloading cache to {cache_path} (may take a while)...')
         precache(evaluator, query_path, cache_path)
-    main(evaluator, query_path, cache_path)
+    prompt(evaluator, query_path, cache_path)
+
+
+if __name__ == '__main__':
+    main()
