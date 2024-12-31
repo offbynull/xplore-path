@@ -15,6 +15,9 @@ class SqliteFileLoader(FileLoader):
         except IOError:
             return False
 
+    def is_cachable(self, p: pathlib.Path) -> bool:
+        return False
+
     def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
         return SqliteObjectPath
 

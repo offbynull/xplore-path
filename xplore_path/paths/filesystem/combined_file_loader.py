@@ -13,6 +13,9 @@ class CombinedFileLoader(FileLoader):
     def is_loadable(self, p: pathlib.Path) -> bool:
         return any(l.is_loadable(p) for l in self.loaders)
 
+    def is_cachable(self, p: pathlib.Path) -> bool:
+        return next(l.is_cachable(p) for l in self.loaders if l.is_loadable(p))
+
     def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
         return next(l.path_creator(p) for l in self.loaders if l.is_loadable(p))
 

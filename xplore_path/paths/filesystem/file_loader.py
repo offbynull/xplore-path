@@ -15,6 +15,9 @@ class FileLoader(ABC):
     def is_loadable(self, p: pathlib.Path) -> bool:
         ...
 
+    def is_cachable(self, p: pathlib.Path) -> bool:
+        return True
+
     def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
         return PythonObjectPath
 

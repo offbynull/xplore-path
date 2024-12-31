@@ -138,7 +138,7 @@ class FileSystemPath(Path):
                         except Exception:
                             self._notify(NoticeType.DATA_LOAD_FULL_ERROR, c)
                         # its loaded now - put it in cache
-                        if data is not None:
+                        if data is not None and self.ctx.file_loader.is_cachable(c):
                             self._notify(NoticeType.DATA_CACHE_START, c)
                             self.ctx.cache.cache(cache_lookup_key, data)
                             # TODO: fsync to make sure its rewritten in the event of an OS crash?

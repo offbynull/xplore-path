@@ -1,9 +1,19 @@
 from __future__ import annotations
 
 import types
+from dataclasses import dataclass
 from typing import Any, Hashable
 
 from xplore_path.path.path import Path
+from xplore_path.paths.python_object.python_object_path import PythonObjectPath
+
+
+@dataclass
+class XmlTag:
+    name: str
+    attrs: dict[str, Any]
+    text: str | None
+    values: list[XmlTag]
 
 
 class XmlObjectPath(Path):
@@ -11,18 +21,17 @@ class XmlObjectPath(Path):
             self,
             parent: Path | None,
             label: Hashable | None,  # None for root - None is also a hashable type
-            data: dict[Any, Any]
+            data: XmlTag
     ):
-        super().__init__(parent, label, data['.text'] if isinstance(data, dict) and '.text' in data else data)
+        super().__init__(parent, label, data.text if data.text is not None else None)
         self.data = data
 
     def all_children(self) -> list[Path]:
         ret = []
-        if isinstance(self.data, dict):
-            for k in self.data.keys():
-                if k == '.text':
-                    continue
-                ret += [XmlObjectPath(self, k, self.data[k])]
+        for attr_name, attr in self.data.attrs.items():
+            ret += [PythonObjectPath(self, f'{attr_name}', attr)]
+        for tag in self.data.values:
+            ret += [XmlObjectPath(self, tag.name, tag)]
         return ret
 
     @staticmethod
@@ -31,7 +40,7 @@ class XmlObjectPath(Path):
 
 
 if __name__ == '__main__':
-    x = { 1: 'z', '.text': 'hi', 'a': { 'b': { '.text': 'bye', 'c': 1, 'd': 2 } } }
+    x = XmlTag('root', {'id': 'z'}, 'hi', [XmlTag('b', {}, 'bye', [])])
     path = XmlObjectPath.create_root_path(x)
     for inner_path in path.all_descendants(max_level=6):
         print(f'{inner_path}')

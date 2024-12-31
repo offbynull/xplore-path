@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 
 from xplore_path.paths.filesystem.html_file_loader import HtmlFileLoader
+from xplore_path.paths.filesystem.xml_object_path import XmlTag
 
 
 class TestCase(unittest.TestCase):
@@ -9,20 +10,19 @@ class TestCase(unittest.TestCase):
         actual = HtmlFileLoader().load(
             Path(__file__).parent / 'test.html'
         )
-        expected = {
-            'html': {
-                1: {'head': {1: {'title': {0: 'Example HTML'}}}},
-                3: {'body': {
-                    1: {'h1': {0: 'Hello, World!'}},
-                    3: {'p': {0: 'This is a paragraph.'}},
-                    5: {'div': {0: 'A div'}},
-                    7: {'p': {0: 'Another paragraph'}},
-                    9: {'a': {'@href': 'https://example.com', 0: 'Example Link'}}
-                }}
-            }
-        }
-
-
+        print(f'{actual}')
+        expected = XmlTag(name='html', attrs={}, text=None, values=[
+            XmlTag(name='head', attrs={}, text=None, values=[
+                XmlTag(name='title', attrs={}, text='Example HTML', values=[])
+            ]),
+            XmlTag(name='body', attrs={}, text=None, values=[
+                XmlTag(name='h1', attrs={}, text='Hello, World!', values=[]),
+                XmlTag(name='p', attrs={}, text='This is a paragraph.', values=[]),
+                XmlTag(name='div', attrs={}, text='A div', values=[]),
+                XmlTag(name='p', attrs={}, text='Another paragraph', values=[]),
+                XmlTag(name='a', attrs={'@href': 'https://example.com'}, text='Example Link', values=[])
+            ])
+        ])
         self.assertEqual(expected, actual)
 
 

@@ -107,15 +107,6 @@ class XPath31GrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XPath31GrammarParser#ExprRange.
-    def enterExprRange(self, ctx:XPath31GrammarParser.ExprRangeContext):
-        pass
-
-    # Exit a parse tree produced by XPath31GrammarParser#ExprRange.
-    def exitExprRange(self, ctx:XPath31GrammarParser.ExprRangeContext):
-        pass
-
-
     # Enter a parse tree produced by XPath31GrammarParser#ExprAdditive.
     def enterExprAdditive(self, ctx:XPath31GrammarParser.ExprAdditiveContext):
         pass

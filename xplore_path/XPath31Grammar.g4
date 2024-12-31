@@ -58,7 +58,6 @@ KW_PARENT                 : 'parent';
 KW_PRECEDING              : 'preceding';
 KW_PRECEDING_SIBLING      : 'preceding-sibling';
 KW_SELF                   : 'self';
-KW_TO                     : 'to';
 KW_UNION                  : 'union';
 KW_ANY                    : 'any';
 KW_ALL                    : 'all';
@@ -149,7 +148,6 @@ expr
     | expr COMMA expr                                   # ExprConcatenate
     | expr (KW_INTERSECT | KW_EXCEPT) expr              # ExprSetIntersect
     | expr (KW_UNION | P) expr                          # ExprSetUnion
-    | expr KW_TO expr                                   # ExprRange
     | KW_LABEL expr                                     # ExprExtractLabel
     | expr orOp expr coerceFallback?                    # ExprOr
     | expr andOp expr coerceFallback?                   # ExprAnd

@@ -5,7 +5,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 from xplore_path.paths.filesystem.file_loader import FileLoader, PATH_LOADER
-from xplore_path.paths.filesystem.xml_object_path import XmlObjectPath
+from xplore_path.paths.filesystem.xml_object_path import XmlObjectPath, XmlTag
 
 
 class XmlFileLoader(FileLoader):
@@ -16,15 +16,17 @@ class XmlFileLoader(FileLoader):
         return XmlObjectPath
 
     def load(self, p: pathlib.Path) -> Any:
-        def xml_to_dict_with_attributes(element):
-            node = {}
+        def xml_to_tags(element):
+            attrs = {}
+            text = None
+            values = []
             for k, v in element.attrib.items():
-                node[f'@{k}'] = v
+                attrs[f'@{k}'] = str(v)
             if list(element):
-                node |= {i: {child.tag: xml_to_dict_with_attributes(child)} for i, child in enumerate(element)}
+                values = [xml_to_tags(child) for child in element]
             elif element.text and element.text.strip():
-                node['.text'] = element.text.strip()
-            return node
+                text = element.text.strip()
+            return XmlTag(element.tag, attrs, text, values)
 
         root = ElementTree.parse(p).getroot()
-        return {root.tag: xml_to_dict_with_attributes(root)}
+        return xml_to_tags(root)

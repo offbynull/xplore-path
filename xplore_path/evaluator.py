@@ -305,19 +305,6 @@ class _EvaluatorVisitor(XPath31GrammarVisitor):
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l + _r, str, coercer_fallback)
         raise ValueError('Unexpected')
 
-    def visitExprRange(self, ctx: XPath31GrammarParser.ExprRangeContext):
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
-        if type(l) is list and len(l) > 0:
-            l = l[0]
-        if type(r) is list and len(r) > 0:
-            r = r[0]
-        l = coerce_single_value(l, int)
-        r = coerce_single_value(r, int)
-        if l is None or r is None:
-            return []
-        return [v for v in range(l, r+1)]
-
     def visitExprExtractLabel(self, ctx: XPath31GrammarParser.ExprExtractLabelContext):
         l = self.visit(ctx.expr())
         if type(l) is list:
