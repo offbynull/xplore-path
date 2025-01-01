@@ -27,10 +27,11 @@
 * ~~TODO: REPL should autocomplete variable names~~
 * ~~TODO: test matchers when used in = and !=~~
 * ~~TODO: test paths~~
-* TODO: test paths with predicates
-* TODO: test matchers when used in path predicates
+* ~~TODO: test paths with predicates~~
+* ~~TODO: test matchers when used in path predicates~~
 * TODO: test complex math (order of operations)
 * ~~TODO: test label directive~~
+* TODO: ../* doesn't work because th parser doesn't recognize it
 * TODO: test function invocations syntax
     BUG comma misinterpreted func(a,b) interpretes args as a single argument of [a,b]
 * TODO: test code in the invocables package

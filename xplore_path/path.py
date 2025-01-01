@@ -9,12 +9,14 @@ class Path(ABC):
     def __init__(
             self,
             parent: Path | None,
+            position_in_parent: int | None,
             label: Hashable | None,  # None for root - None is also a hashable type
             value: Any
     ):
         self._parent = parent
         self._label = label
         self._value = value
+        self._position_in_parent = position_in_parent
 
     @abstractmethod
     def all_children(self) -> list[Path]:
@@ -55,10 +57,9 @@ class Path(ABC):
         return self._parent
 
     def position_in_parent(self) -> int:
-        p = self.parent()
-        if p is None:
+        if self._position_in_parent is None:
             raise ValueError('No parent')
-        return [c.label() for c in p.all_children()].index(self.label())
+        return self._position_in_parent
 
     def all_ancestors(self) -> list[Path]:
         ret = []

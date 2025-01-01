@@ -76,7 +76,7 @@ class FileSystemPathContext:
         self.cache = Cache(workspace)
         self.cache_only_access = cache_only_access
         if cache_notifier is None:
-            cache_notifier = lambda _: None
+            cache_notifier = lambda _, __: None
         self.cache_notifier = cache_notifier
         self.mem_cache = WeakValueDictionary()
 
@@ -85,11 +85,12 @@ class FileSystemPath(Path):
     def __init__(
             self,
             parent: Path | None,
+            position_in_parent: int | None,
             label: Hashable | None,  # None for root - None is also a hashable type
             value: pathlib.Path,
             ctx: FileSystemPathContext
     ):
-        super().__init__(parent, label, value)
+        super().__init__(parent, position_in_parent, label, value)
         self.ctx = ctx
 
     def _notify(self, type_: NoticeType, path: pathlib.Path) -> None:
@@ -118,7 +119,7 @@ class FileSystemPath(Path):
     def all_children(self) -> list[Path]:
         ret = []
         path: pathlib.Path = self.value()
-        for c in path.iterdir():
+        for c_idx, c in enumerate(sorted(path.iterdir())):
             c: pathlib.Path = c
             if c.is_file():
                 c_stat = c.stat()
@@ -148,28 +149,28 @@ class FileSystemPath(Path):
                     # done
                     if data is not None:
                         path_creator = self.ctx.file_loader.path_creator(c)
-                        ret.append(path_creator(self, c.name, data))
+                        ret.append(path_creator(self, c_idx, c.name, data))
                     else:
-                        ret.append(PythonObjectPath(self, c.name, None))
+                        ret.append(PythonObjectPath(self, c_idx, c.name, None))
                 elif c.suffix == '.zip':  # skip it if set to only access cached
                     cache_path = self.ctx.cache.to_path(cache_lookup_key)
                     if not cache_path.exists() and not self.ctx.cache_only_access:  # skip unpack if cache only access
                         self._unpack_archive(lambda c: zipfile.ZipFile(c, 'r'), c, cache_path)
-                    ret.append(FileSystemPath(self, c.name, cache_path, self.ctx))
+                    ret.append(FileSystemPath(self, c_idx, c.name, cache_path, self.ctx))
                 elif c.suffix == '.tar':  # skip it if set to only access cached
                     cache_path = self.ctx.cache.to_path(cache_lookup_key)
                     if not cache_path.exists() and not self.ctx.cache_only_access:  # skip unpack if cache only access
                         self._unpack_archive(lambda c: tarfile.open(c, 'r'), c, cache_path)
-                    ret.append(FileSystemPath(self, c.name, cache_path, self.ctx))
+                    ret.append(FileSystemPath(self, c_idx, c.name, cache_path, self.ctx))
                 elif c.suffixes[-2:] == ['.tar', '.gz']:
                     cache_path = self.ctx.cache.to_path(cache_lookup_key)
                     if not cache_path.exists() and not self.ctx.cache_only_access:  # skip unpack if cache only access
                         self._unpack_archive(lambda c: tarfile.open(c, 'r:gz'), c, cache_path)
-                    ret.append(FileSystemPath(self, c.name, cache_path, self.ctx))
+                    ret.append(FileSystemPath(self, c_idx, c.name, cache_path, self.ctx))
                 else:
-                    ret.append(PythonObjectPath(self, c.name, None))
+                    ret.append(PythonObjectPath(self, c_idx, c.name, None))
             elif c.is_dir():
-                ret.append(FileSystemPath(self, c.name, c, self.ctx))
+                ret.append(FileSystemPath(self, c_idx, c.name, c, self.ctx))
         return ret
 
     @staticmethod
@@ -183,7 +184,7 @@ class FileSystemPath(Path):
             raise ValueError('Must be a directory')
         if ctx is None:
             ctx = FileSystemPathContext()
-        return FileSystemPath(None, None, dir, ctx)
+        return FileSystemPath(None, None, None, dir, ctx)
 
 
 if __name__ == '__main__':

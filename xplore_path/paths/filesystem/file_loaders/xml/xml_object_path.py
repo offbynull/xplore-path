@@ -19,23 +19,27 @@ class XmlObjectPath(Path):
     def __init__(
             self,
             parent: Path | None,
+            position_in_parent: int | None,
             label: Hashable | None,  # None for root - None is also a hashable type
             data: XmlTag
     ):
-        super().__init__(parent, label, data.text if data.text is not None else None)
+        super().__init__(parent, position_in_parent, label, data.text if data.text is not None else None)
         self.data = data
 
     def all_children(self) -> list[Path]:
         ret = []
+        i = 0
         for attr_name, attr in self.data.attrs.items():
-            ret += [PythonObjectPath(self, f'{attr_name}', attr)]
+            ret += [PythonObjectPath(self, i, f'{attr_name}', attr)]
+            i += 1
         for tag in self.data.values:
-            ret += [XmlObjectPath(self, tag.name, tag)]
+            ret += [XmlObjectPath(self, i, tag.name, tag)]
+            i += 1
         return ret
 
     @staticmethod
     def create_root_path(obj: Any) -> XmlObjectPath:
-        return XmlObjectPath(None, None, obj)
+        return XmlObjectPath(None, None, None, obj)
 
 
 if __name__ == '__main__':

@@ -17,9 +17,10 @@ class AbiAcronymPath(Path):
     def __init__(
             self,
             parent: Path | None,
+            position_in_parent: int | None,
             label: Hashable | None,  # None for root - None is also a hashable type
     ):
-        super().__init__(parent, label, None)
+        super().__init__(parent, position_in_parent, label, None)
 
     def all_children(self) -> list[Path]:
         params = {
@@ -30,7 +31,7 @@ class AbiAcronymPath(Path):
             with urllib.request.urlopen(query_url) as response:
                 data = json.loads(response.read().decode())
                 if 'msg' in data:
-                    return [PythonObjectPath(self, 'data', data['msg'])]
+                    return [PythonObjectPath(self, 0, 'data', data['msg'])]
                 return []
         except Exception as e:
             return []
@@ -42,16 +43,17 @@ class AbiRootPath(Path):
     def __init__(
             self,
             parent: Path | None,
+            position_in_parent: int | None,
             label: Hashable | None,  # None for root - None is also a hashable type
             codes: set[str]
     ):
-        super().__init__(parent, label, None)
+        super().__init__(parent, position_in_parent, label, None)
         self.codes = codes
 
     def all_children(self) -> list[Path]:
-        return [AbiAcronymPath(self, c) for c in self.codes]
+        return [AbiAcronymPath(self, i, c) for i, c in enumerate(self.codes)]
 
 
 if __name__ == '__main__':
-    x = AbiRootPath(None, None, {'NAT2'})
+    x = AbiRootPath(None, None, None, {'NAT2'})
     print(f'{x.all_descendants()}')

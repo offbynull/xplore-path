@@ -6,39 +6,40 @@ from typing import Any, Hashable
 from xplore_path.path import Path
 
 
+def _valid_obj_attr(obj, k):
+    return not k.startswith('_') and \
+        type(getattr(obj, k)) not in {str, int, float, bool, types.BuiltinFunctionType, types.BuiltinMethodType}
+
+
 class PythonObjectPath(Path):
     def __init__(
             self,
             parent: Path | None,
+            position_in_parent: int | None,
             label: Hashable | None,  # None for root - None is also a hashable type
             value: Any
     ):
-        super().__init__(parent, label, value)
+        super().__init__(parent, position_in_parent, label, value)
 
     def all_children(self) -> list[Path]:
         parent = self.value()
         ret = []
         if isinstance(parent, dict):
-            for k in parent.keys():
-                ret += [PythonObjectPath(self, k, parent[k])]
+            for i, k in enumerate(parent.keys()):
+                ret += [PythonObjectPath(self, i, k, parent[k])]
         elif isinstance(parent, set):
-            for k in parent:
-                return [PythonObjectPath(self, k, k in parent)]
+            for i, v in enumerate(parent):
+                return [PythonObjectPath(self, i, i, v)]
         elif isinstance(parent, (list, tuple)):
-            for k in range(len(parent)):
-                ret += [PythonObjectPath(self, k, parent[k])]
-        for k in dir(parent):
-            if k.startswith('_'):
-                continue
-            v = getattr(parent, k)
-            if type(v) in {str, int, float, bool, types.BuiltinFunctionType, types.BuiltinMethodType}:
-                continue
-            ret += [PythonObjectPath(self, k, v)]
+            for i, v in enumerate(parent):
+                ret += [PythonObjectPath(self, i, i, v)]
+        for i, k in enumerate(k_ for k_ in dir(parent) if _valid_obj_attr(parent, k_)):
+            ret += [PythonObjectPath(self, i, k, getattr(parent, k))]
         return ret
 
     @staticmethod
     def create_root_path(obj: Any) -> PythonObjectPath:
-        return PythonObjectPath(None, None, obj)
+        return PythonObjectPath(None, None, None, obj)
 
 
 if __name__ == '__main__':

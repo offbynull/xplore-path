@@ -12,10 +12,11 @@ class SqliteTablePath(Path):
     def __init__(
             self,
             parent: Path | None,
+            position_in_parent: int | None,
             label: Hashable | None,  # None for root - None is also a hashable type
             fs_path: pathlib.Path,
     ):
-        super().__init__(parent, label, None)
+        super().__init__(parent, position_in_parent, label, None)
         self.fs_path = fs_path
 
     def all_children(self) -> list[Path]:
@@ -25,9 +26,9 @@ class SqliteTablePath(Path):
             rows = cursor.fetchall()
             names = [description[0] for description in cursor.description]
             ret = []
-            for i, row in enumerate(rows):
+            for i, row in enumerate(sorted(rows)):
                 row = {k: v for k, v in zip(names, row)}
-                ret.append(PythonObjectPath(self, i, row))
+                ret.append(PythonObjectPath(self, i, i, row))
         return ret
 
 
@@ -35,10 +36,11 @@ class SqliteObjectPath(Path):
     def __init__(
             self,
             parent: Path | None,
+            position_in_parent: int | None,
             label: Hashable | None,  # None for root - None is also a hashable type
             fs_path: pathlib.Path
     ):
-        super().__init__(parent, label, None)
+        super().__init__(parent, position_in_parent, label, None)
         self.fs_path = fs_path
 
     def all_children(self) -> list[Path]:
@@ -47,6 +49,6 @@ class SqliteObjectPath(Path):
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = cursor.fetchall()
-            for table, in tables:
-                ret.append(SqliteTablePath(self, table, self.fs_path))
+            for i, (table, ) in enumerate(sorted(tables)):
+                ret.append(SqliteTablePath(self, i, table, self.fs_path))
         return ret

@@ -20,6 +20,7 @@ class TestCase(unittest.TestCase):
             fsp = FileSystemPath(
                 None,
                 None,
+                None,
                 files_dir_path,
                 FileSystemPathContext(
                     workspace=workspace_dir_path
