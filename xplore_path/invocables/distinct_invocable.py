@@ -1,7 +1,7 @@
 from typing import Any
 
-from xplore_path.invocable.invocable import Invocable
-from xplore_path.path.path import Path
+from xplore_path.invocable import Invocable
+from xplore_path.path import Path
 
 
 class DistinctInvocable(Invocable):

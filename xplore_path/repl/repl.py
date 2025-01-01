@@ -11,19 +11,17 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 
-import xplore_path.path.path
+import xplore_path.path
 from xplore_path.evaluator import Evaluator
-from xplore_path.raise_parse_error_listener import ParseException
 from xplore_path.repl.query_completer import QueryCompleter
 from xplore_path.repl.utils import print_line, fix_label_for_expression
-from xplore_path.evaluator import evaluate
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext, NoticeType
 from xplore_path.raise_parse_error_listener import ParseException
 
 
 def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
     ret = []
-    if isinstance(v, xplore_path.path.path.Path):
+    if isinstance(v, xplore_path.path.Path):
         if not full_labels:
             ret += [('fg:ansiwhite bold', f'{v.label()}')]
         else:

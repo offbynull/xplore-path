@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from xplore_path.path.path import Path
+from xplore_path.path import Path
 
 
 class DummyPath(Path):

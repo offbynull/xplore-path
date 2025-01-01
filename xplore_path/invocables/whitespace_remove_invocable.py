@@ -1,10 +1,8 @@
 import re
-from collections import Counter
 from typing import Any
 
-from xplore_path.invocable.invocable import Invocable
-from xplore_path.path.path import Path
-from xplore_path.paths.python_object.python_object_path import PythonObjectPath
+from xplore_path.invocable import Invocable
+from xplore_path.path import Path
 
 
 class WhitespaceRemoveInvocable(Invocable):

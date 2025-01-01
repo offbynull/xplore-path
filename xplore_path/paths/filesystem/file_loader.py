@@ -4,7 +4,7 @@ import pathlib
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
-from xplore_path.path.path import Path
+from xplore_path.path import Path
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 
 PATH_LOADER = Callable[[Path, Any, Any], Path]  # path, label, data

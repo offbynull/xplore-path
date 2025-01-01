@@ -1,6 +1,6 @@
 from difflib import SequenceMatcher
 
-from xplore_path.matcher.matcher import Matcher
+from xplore_path.matcher import Matcher
 from xplore_path.coercions import LABEL_TYPE, coerce_single_value
 
 

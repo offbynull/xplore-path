@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from xplore_path.path.path import Path
+from xplore_path.path import Path
 
 
 class MirrorPath(Path):

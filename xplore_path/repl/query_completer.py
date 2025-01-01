@@ -1,7 +1,7 @@
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 
-import xplore_path.path.path
+import xplore_path.path
 from xplore_path.evaluator import Evaluator
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
 from xplore_path.repl.utils import TOKENS, fix_label_for_expression
@@ -70,7 +70,7 @@ class QueryCompleter(Completer):
             yield Completion('//*', start_position=inject_offset)
             for p in res:
                 for child_p in p.all_children():
-                    if isinstance(child_p, xplore_path.path.path.Path) and str(child_p.label()).startswith(unfinished_token):
+                    if isinstance(child_p, xplore_path.path.Path) and str(child_p.label()).startswith(unfinished_token):
                         # add style to debug: style='bg:ansiyellow fg:ansiblack'
                         label = fix_label_for_expression(child_p.label())
                         yield Completion(f'/{label}/*', start_position=inject_offset)
@@ -78,7 +78,7 @@ class QueryCompleter(Completer):
                         yield Completion(f'/{label}', start_position=inject_offset)
             for p in res:
                 for child_p in p.all_children():
-                    if isinstance(child_p, xplore_path.path.path.Path):
+                    if isinstance(child_p, xplore_path.path.Path):
                         label = fix_label_for_expression(child_p.label())
                         yield Completion(f'/{label}/*', start_position=inject_offset)
                         yield Completion(f'/{label}/', start_position=inject_offset)

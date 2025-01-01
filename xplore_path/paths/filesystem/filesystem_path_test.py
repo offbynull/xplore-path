@@ -12,7 +12,7 @@ class TestCase(unittest.TestCase):
             # copy to tempdir
             files_dir_path = pathlib.Path(files_dir)
             current_path = pathlib.Path(__file__).parent
-            files_to_copy = current_path.glob("test.*")
+            files_to_copy = current_path.glob("**/test.*")
             for file_path in files_to_copy:
                 shutil.copy(file_path, files_dir_path)
             # create

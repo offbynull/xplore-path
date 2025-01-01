@@ -7,7 +7,7 @@ from typing import Any, Callable, Type
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
 
-from xplore_path.invocable.invocable import Invocable
+from xplore_path.invocable import Invocable
 from xplore_path.invocables.count_invocable import CountInvocable
 from xplore_path.invocables.distinct_invocable import DistinctInvocable
 from xplore_path.invocables.frequency_count_invocable import FrequencyCountInvocable
@@ -20,15 +20,15 @@ from xplore_path.XplorePathGrammarLexer import XplorePathGrammarLexer
 from xplore_path.XplorePathGrammarParser import XplorePathGrammarParser
 from xplore_path.XplorePathGrammarVisitor import XplorePathGrammarVisitor
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext
-from xplore_path.path.path import Path
+from xplore_path.path import Path
 from xplore_path.paths.mirror.mirror_path import MirrorPath
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
-from xplore_path.coercer_fallback.coercer_fallback import CoercerFallback
+from xplore_path.coercer_fallback import CoercerFallback
 from xplore_path.coercer_fallbacks.default_coercer_fallback import DefaultCoercerFallback
 from xplore_path.coercer_fallbacks.discard_coercer_fallback import DiscardCoercerFallback
 from xplore_path.coercer_fallbacks.fail_coercer_fallback import FailCoerecerFallback
 from xplore_path.coercions import coerce_single_value, coerce_to_list, coerce_for_set_operation
-from xplore_path.matcher.matcher import Matcher
+from xplore_path.matcher import Matcher
 from xplore_path.matchers.combined_matcher import CombinedMatcher
 from xplore_path.matchers.fuzzy_matcher import FuzzyMatcher
 from xplore_path.matchers.glob_matcher import GlobMatcher
@@ -562,7 +562,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
             root = self.context.entities[0]
             self.context.entities = [root] + root.all_descendants()
-            return self.visit(ctx.relPath())
+            return [root] + self.visit(ctx.relPath())
         finally:
             self.context.restore_entities()
 
@@ -639,6 +639,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         for e in self.context:
             if isinstance(e, Path):
                 new_paths += e.all_ancestors()
+        new_paths = new_paths[::-1]
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
@@ -664,6 +665,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             if isinstance(e, Path):
                 new_paths.append(e)
                 new_paths += e.all_ancestors()
+        new_paths = new_paths[::-1]
         self.context.reset_entities(new_paths)
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 

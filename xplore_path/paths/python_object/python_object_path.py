@@ -3,7 +3,7 @@ from __future__ import annotations
 import types
 from typing import Any, Hashable
 
-from xplore_path.path.path import Path
+from xplore_path.path import Path
 
 
 class PythonObjectPath(Path):

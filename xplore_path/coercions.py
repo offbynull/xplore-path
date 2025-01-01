@@ -1,7 +1,7 @@
 from math import isnan
 from typing import ForwardRef, TypeVar, Type, Any, Literal, Hashable
 
-from xplore_path.path.path import Path
+from xplore_path.path import Path
 
 LABEL_TYPE = str | int | float | bool
 SINGLE_ENTRY_TYPE = str | int | float | bool | ForwardRef('matcher.matcher.Matcher')

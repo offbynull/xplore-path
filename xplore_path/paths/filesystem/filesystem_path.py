@@ -8,21 +8,21 @@ from tempfile import TemporaryDirectory, gettempdir
 from typing import Hashable, Callable, Any
 from weakref import WeakValueDictionary
 
-from xplore_path.path.path import Path
-from xplore_path.paths.filesystem.abi_file_loader import AbiFileLoader
+from xplore_path.path import Path
+from xplore_path.paths.filesystem.file_loaders.allen_brain_institute_api.abi_file_loader import AbiFileLoader
 from xplore_path.paths.filesystem.cache import Cache
-from xplore_path.paths.filesystem.combined_file_loader import CombinedFileLoader
-from xplore_path.paths.filesystem.csv_file_loader import CsvFileLoader
-from xplore_path.paths.filesystem.docx_file_loader import DocxFileLoader
+from xplore_path.paths.filesystem.file_loaders.combined.combined_file_loader import CombinedFileLoader
+from xplore_path.paths.filesystem.file_loaders.csv.csv_file_loader import CsvFileLoader
+from xplore_path.paths.filesystem.file_loaders.docx.docx_file_loader import DocxFileLoader
 from xplore_path.paths.filesystem.file_loader import FileLoader
-from xplore_path.paths.filesystem.html_file_loader import HtmlFileLoader
-from xplore_path.paths.filesystem.json_file_loader import JsonFileLoader
-from xplore_path.paths.filesystem.pdf_file_loader import PdfFileLoader
-from xplore_path.paths.filesystem.sqlite_file_loader import SqliteFileLoader
-from xplore_path.paths.filesystem.text_file_loader import TextFileLoader
-from xplore_path.paths.filesystem.xlsx_file_loader import XlsxFileLoader
-from xplore_path.paths.filesystem.xml_file_loader import XmlFileLoader
-from xplore_path.paths.filesystem.yaml_file_loader import YamlFileLoader
+from xplore_path.paths.filesystem.file_loaders.html.html_file_loader import HtmlFileLoader
+from xplore_path.paths.filesystem.file_loaders.json.json_file_loader import JsonFileLoader
+from xplore_path.paths.filesystem.file_loaders.pdf.pdf_file_loader import PdfFileLoader
+from xplore_path.paths.filesystem.file_loaders.sqlite.sqlite_file_loader import SqliteFileLoader
+from xplore_path.paths.filesystem.file_loaders.txt.text_file_loader import TextFileLoader
+from xplore_path.paths.filesystem.file_loaders.xlsx.xlsx_file_loader import XlsxFileLoader
+from xplore_path.paths.filesystem.file_loaders.xml.xml_file_loader import XmlFileLoader
+from xplore_path.paths.filesystem.file_loaders.yaml.yaml_file_loader import YamlFileLoader
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 
 _DEFAULT_FILE_LOADER = CombinedFileLoader([
