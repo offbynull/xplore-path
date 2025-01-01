@@ -6,6 +6,7 @@ class StrictMatcher(Matcher):
     def __init__(self, pattern: LABEL_TYPE):
         self.pattern = pattern
 
+    # MATCHES STRICTLY, WITHOUT COERCION
     def match(self, value: LABEL_TYPE) -> bool:
         if type(self.pattern) in {int, float} and type(value) in {int, float}:
             return self.pattern == value  # special case - treat numbers as equal

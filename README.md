@@ -25,10 +25,10 @@
 * ~~TODO: xml and html parser - tag value should be returned directly as opposed to going inside .text child~~
 * ~~TODO: test matchers raw~~
 * ~~TODO: REPL should autocomplete variable names~~
-* TODO: test matchers when used in path predicates
-* TODO: test matchers when used in = and !=
-* TODO: test paths
+* ~~TODO: test matchers when used in = and !=~~
+* ~~TODO: test paths~~
 * TODO: test paths with predicates
+* TODO: test matchers when used in path predicates
 * TODO: test complex math (order of operations)
 * TODO: test label directive
 * TODO: test function invocations syntax
