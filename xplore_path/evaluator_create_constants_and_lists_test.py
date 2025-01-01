@@ -47,13 +47,13 @@ class EvaluatorTest(unittest.TestCase):
         self.assertIsInstance(evaluate(DummyPath(), '~1@0.001'), NumericRangeMatcher)
 
     def test_must_wrap_literals_as_list_when_using_square_brackets(self):
-        self.assertEqual(evaluate(DummyPath(), '[]'), [])
-        self.assertEqual(evaluate(DummyPath(), '[a]'), ['a'])
-        self.assertEqual(evaluate(DummyPath(), '["a"]'), ['a'])
-        self.assertEqual(evaluate(DummyPath(), '[0]'), [0])
-        self.assertEqual(evaluate(DummyPath(), '[0.5]'), [0.5])
-        self.assertEqual(evaluate(DummyPath(), '[true]'), [True])
-        self.assertEqual(evaluate(DummyPath(), '[a,1, 2.5,true,false]'), ['a', 1, 2.5, True, False])
+        self.assertEqual(evaluate(DummyPath(), '{}'), [])
+        self.assertEqual(evaluate(DummyPath(), '{a}'), ['a'])
+        self.assertEqual(evaluate(DummyPath(), '{"a"}'), ['a'])
+        self.assertEqual(evaluate(DummyPath(), '{0}'), [0])
+        self.assertEqual(evaluate(DummyPath(), '{0.5}'), [0.5])
+        self.assertEqual(evaluate(DummyPath(), '{true}'), [True])
+        self.assertEqual(evaluate(DummyPath(), '{a,1, 2.5,true,false}'), ['a', 1, 2.5, True, False])
 
     def test_must_keep_literals_as_is_when_using_parenthesis(self):
         self.assertRaises(ParseException, evaluate, DummyPath(), '()')

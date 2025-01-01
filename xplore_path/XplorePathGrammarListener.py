@@ -278,21 +278,21 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#PathFromRoot.
-    def enterPathFromRoot(self, ctx:XplorePathGrammarParser.PathFromRootContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#PathFromRoot.
-    def exitPathFromRoot(self, ctx:XplorePathGrammarParser.PathFromRootContext):
-        pass
-
-
     # Enter a parse tree produced by XplorePathGrammarParser#PathRootExact.
     def enterPathRootExact(self, ctx:XplorePathGrammarParser.PathRootExactContext):
         pass
 
     # Exit a parse tree produced by XplorePathGrammarParser#PathRootExact.
     def exitPathRootExact(self, ctx:XplorePathGrammarParser.PathRootExactContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromRoot.
+    def enterPathFromRoot(self, ctx:XplorePathGrammarParser.PathFromRootContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromRoot.
+    def exitPathFromRoot(self, ctx:XplorePathGrammarParser.PathFromRootContext):
         pass
 
 
@@ -311,6 +311,15 @@ class XplorePathGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XplorePathGrammarParser#PathFromRelative.
     def exitPathFromRelative(self, ctx:XplorePathGrammarParser.PathFromRelativeContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromRelativeAny.
+    def enterPathFromRelativeAny(self, ctx:XplorePathGrammarParser.PathFromRelativeAnyContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromRelativeAny.
+    def exitPathFromRelativeAny(self, ctx:XplorePathGrammarParser.PathFromRelativeAnyContext):
         pass
 
 

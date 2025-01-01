@@ -12,10 +12,10 @@ class TestCase(unittest.TestCase):
             DocxFileLoader(),
             JsonFileLoader()
         ])
-        actual = loader.load(Path(__file__).parent / 'test.docx')
+        actual = loader.load(Path(__file__).parent.parent / 'docx' / 'test.docx')
         expected = 'Test doc'
         self.assertEqual(expected, actual)
-        actual = loader.load(Path(__file__).parent / 'test.json')
+        actual = loader.load(Path(__file__).parent.parent / 'json' / 'test.json')
         expected = 'John Doe'
         self.assertEqual(expected, actual['name'])  # good enough to test for a field in the JSON, not the entire JSON
         actual = loader.load(Path(__file__).parent / 'NON_EXISTANT')

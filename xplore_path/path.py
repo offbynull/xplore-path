@@ -21,9 +21,10 @@ class Path(ABC):
         ...
 
     def all_descendants(self, max_level: int = 100000) -> list[Path]:
-        ret = self.all_children()
+        ret = []
         if max_level > 0:
             for pe in self.all_children():
+                ret += [pe]
                 ret += [p for p in pe.all_descendants(max_level - 1)]
         return ret
 

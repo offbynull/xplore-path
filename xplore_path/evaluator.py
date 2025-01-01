@@ -562,13 +562,24 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
             root = self.context.entities[0]
             self.context.entities = [root] + root.all_descendants()
-            return [root] + self.visit(ctx.relPath())
+            return [root] + self.visit(ctx.relPath())  # BUG: //* must return in document order, use position_in_parent of each path in the output to sort?
         finally:
             self.context.restore_entities()
 
     def visitPathFromRelative(self, ctx: XplorePathGrammarParser.PathFromRelativeContext):
         try:
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
+            return self.visit(ctx.relPath())
+        finally:
+            self.context.restore_entities()
+
+    def visitPathFromRelativeAny(self, ctx: XplorePathGrammarParser.PathFromRelativeAnyContext):
+        try:
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
+            new_entities = []
+            for p in self.context.entities:
+                new_entities += [p] + p.all_descendants()
+            self.context.entities = new_entities
             return self.visit(ctx.relPath())
         finally:
             self.context.restore_entities()
@@ -762,14 +773,41 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             for idx, e in enumerate(entities):
                 self.context.reset_entities([e])
                 result = self.visit(ctx.expr())
-                # /a/b[bool] - return if true
-                # /a/b[int]  - return if coerces to true (non-zero + not nan)
-                # /a/b[str]  - return if coerces to true (non-empty)
-                # /a/b[list] - return if any coerce to true? (in original xpath it returns true if non-empty)
-                if (type(result) == bool and result == True) \
-                        or (type(result) == list and any(coerce_single_value(v, bool) for v in result)) \
-                        or (type(result) in {float, int} and result == idx) \
-                        or (type(result) == str and result == coerce_single_value(e, str)):
+
+                if type(result) == bool and result == True:  # /a/b[bool] - return if true
+                    ret.append(e)
+                elif type(result) in {float, int} and result == idx:  # /a/b[int] - return if index in the result set matches int
+                    ret.append(e)
+                elif type(result) == NumericRangeMatcher and result.match(idx):  # /a/b[numericrangematcher] - return if index in the result set is in range
+                    ret.append(e)
+                elif type(result) == list and len(result) > 0:  # /a/b[list] - return if non-empty (e.g. result was a list of paths looking for children, and some were found - e.g. /a/b[./c]
+                     ret.append(e)
+                elif isinstance(result, Matcher) and not isinstance(e, Path) \
+                        and result.match(e):  # (a,b,c)[matcher] - if list of non paths, matcher should match against value directly
+                    ret.append(e)
+                elif isinstance(result, Matcher) and isinstance(e, Path) \
+                        and any(result.match(c.label()) for c in e.all_children()):  # /a/b[matcher] - ir a path,  return if has child with name matching label, if numericrangematcher above didn't match, it might match now
+                    ret.append(e)
+                elif isinstance(e, Path) and any(
+                        self._apply_binary_boolean_op(
+                            l=[c.label() for c in e.all_children()],
+                            r=result,
+                            combine_op=zip,
+                            test_op=lambda l, r: l == r,
+                            required_type=None,
+                            coercer_fallback=DiscardCoercerFallback()
+                        )
+                ):  # /a/b[str_or_other]  - return if has child with label (coerced to match if possible)
+                    ret.append(e)
+                elif not isinstance(e, Path) and \
+                        self._apply_binary_boolean_op(
+                            l=e,
+                            r=result,
+                            combine_op=zip,
+                            test_op=lambda l, r: l == r,
+                            required_type=None,
+                            coercer_fallback=DiscardCoercerFallback()
+                        ):  # if not a path - return if values match (coerced to match if possible)
                     ret.append(e)
             return ret
         finally:

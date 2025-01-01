@@ -30,12 +30,13 @@
 * TODO: test paths with predicates
 * TODO: test matchers when used in path predicates
 * TODO: test complex math (order of operations)
-* TODO: test label directive
+* ~~TODO: test label directive~~
 * TODO: test function invocations syntax
     BUG comma misinterpreted func(a,b) interpretes args as a single argument of [a,b]
 * TODO: test code in the invocables package
-* TODO: path.py label tests are no good because multiple children can have same same
+* BUG: path.py label tests are no good because multiple children can have same mame
      if p.label() == self.label()    CHANGE THIS TO    if p.position_in_parent() == self.position_in_parent()
+* BUG: //* must be returned in DOCUMENT ORDER, right now its not
 * ~~TODO: test filesystem file loaders~~
 * TODO: make use of variables in REPL - store results in var names and use those var names in queries
 * ~~TODO: ANTLR grammar rule names must be fixed - make rules camelcase~~

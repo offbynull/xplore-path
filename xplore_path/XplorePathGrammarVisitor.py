@@ -159,13 +159,13 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromRoot.
-    def visitPathFromRoot(self, ctx:XplorePathGrammarParser.PathFromRootContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#PathRootExact.
+    def visitPathRootExact(self, ctx:XplorePathGrammarParser.PathRootExactContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathRootExact.
-    def visitPathRootExact(self, ctx:XplorePathGrammarParser.PathRootExactContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromRoot.
+    def visitPathFromRoot(self, ctx:XplorePathGrammarParser.PathFromRootContext):
         return self.visitChildren(ctx)
 
 
@@ -176,6 +176,11 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#PathFromRelative.
     def visitPathFromRelative(self, ctx:XplorePathGrammarParser.PathFromRelativeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromRelativeAny.
+    def visitPathFromRelativeAny(self, ctx:XplorePathGrammarParser.PathFromRelativeAnyContext):
         return self.visitChildren(ctx)
 
 

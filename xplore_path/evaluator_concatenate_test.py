@@ -14,20 +14,20 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(DummyPath(), '5,"5"'), [5, '5'])
 
     def test_must_concatenate_single_vs_seq(self):
-        self.assertEqual(evaluate(DummyPath(), '5,[5,1,9]'), [5, 5, 1, 9])
-        self.assertEqual(evaluate(DummyPath(), '5,[5,1,"9"]'), [5, 5, 1, '9'])
-        self.assertEqual(evaluate(DummyPath(), '5,[]'), [5])
+        self.assertEqual(evaluate(DummyPath(), '5,{5,1,9}'), [5, 5, 1, 9])
+        self.assertEqual(evaluate(DummyPath(), '5,{5,1,"9"}'), [5, 5, 1, '9'])
+        self.assertEqual(evaluate(DummyPath(), '5,{}'), [5])
 
     def test_must_concatenate_seq_vs_single(self):
-        self.assertEqual(evaluate(DummyPath(), '[5,1,9],5'), [5, 1, 9, 5])
-        self.assertEqual(evaluate(DummyPath(), '[5,1,"9"],5'), [5, 1, '9', 5])
-        self.assertEqual(evaluate(DummyPath(), '[],5'), [5])
+        self.assertEqual(evaluate(DummyPath(), '{5,1,9},5'), [5, 1, 9, 5])
+        self.assertEqual(evaluate(DummyPath(), '{5,1,"9"},5'), [5, 1, '9', 5])
+        self.assertEqual(evaluate(DummyPath(), '{},5'), [5])
 
     def test_must_concatenate_seq_vs_seq(self):
-        self.assertEqual(evaluate(DummyPath(), '[5,7,9],[5,1,9]'), [5, 7, 9, 5, 1, 9])
-        self.assertEqual(evaluate(DummyPath(), '[5,7,9],[5,1,"9"]'), [5, 7, 9, 5, 1, '9'])  # THIS IS WHAT XPATH DOES - no coercing before matching - concatenates with just data and type
-        self.assertEqual(evaluate(DummyPath(), '[5,7,9],[]'), [5, 7, 9])
-        self.assertEqual(evaluate(DummyPath(), '[],[5,7,9]'), [5, 7, 9])
+        self.assertEqual(evaluate(DummyPath(), '{5,7,9},{5,1,9}'), [5, 7, 9, 5, 1, 9])
+        self.assertEqual(evaluate(DummyPath(), '{5,7,9},{5,1,"9"}'), [5, 7, 9, 5, 1, '9'])  # THIS IS WHAT XPATH DOES - no coercing before matching - concatenates with just data and type
+        self.assertEqual(evaluate(DummyPath(), '{5,7,9},{}'), [5, 7, 9])
+        self.assertEqual(evaluate(DummyPath(), '{},{5,7,9}'), [5, 7, 9])
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from xplore_path.paths.filesystem.file_loaders.default.default_file_loader impor
 class TestCase(unittest.TestCase):
     def test_must_load_example_sanity_test(self):
         actual = DefaultFileLoader().load(
-            Path(__file__).parent / 'test.txt'
+            Path(__file__).parent.parent / 'txt' / 'test.txt'
         )
         expected = 'hello world!'
         self.assertEqual(expected, actual)

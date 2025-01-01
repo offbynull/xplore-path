@@ -72,6 +72,7 @@ KW_LEFT                   : 'left';
 KW_RIGHT                  : 'right';
 KW_INNER                  : 'inner';
 KW_JOIN                   : 'join';
+KW_CONCATENATE            : 'concat';
 
 // A.2.1. TERMINAL SYMBOLS
 // This isn't a complete list of tokens in the language.
@@ -166,7 +167,7 @@ expr
 atomicOrEncapsulate
     : (MINUS | PLUS) atomicOrEncapsulate coerceFallback?  # ExprUnary
     | OP expr CP filter?                                  # ExprWrap
-    | OB expr? CB filter?                                 # ExprWrapForceList
+    | OC expr? CC filter?                                 # ExprWrapForceList
     | atomicOrEncapsulate argumentList coerceFallback?    # ExprFunctionCall
     | matcher                                             # ExprMatcher
     | varRef                                              # ExprVariable
@@ -212,10 +213,11 @@ orOp
     ;
 
 path
-    : SLASH relPath    # PathFromRoot
-    | SLASH            # PathRootExact
+    : SLASH            # PathRootExact
+    | SLASH relPath    # PathFromRoot
     | SS relPath       # PathFromAny
     | D SLASH relPath  # PathFromRelative
+    | D SS relPath     # PathFromRelativeAny
     | D                # PathSelf
     | DD               # PathParent
     ;
