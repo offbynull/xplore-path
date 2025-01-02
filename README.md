@@ -34,6 +34,7 @@
 * TODO: ../* doesn't work because th parser doesn't recognize it
 * TODO: test function invocations syntax
     BUG comma misinterpreted func(a,b) interpretes args as a single argument of [a,b]
+* TODO: function invocation 
 * TODO: test code in the invocables package
 * BUG: path.py label tests are no good because multiple children can have same mame
      if p.label() == self.label()    CHANGE THIS TO    if p.position_in_parent() == self.position_in_parent()

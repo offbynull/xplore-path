@@ -44,6 +44,11 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprExtractPosition.
+    def visitExprExtractPosition(self, ctx:XplorePathGrammarParser.ExprExtractPositionContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XplorePathGrammarParser#ExprOr.
     def visitExprOr(self, ctx:XplorePathGrammarParser.ExprOrContext):
         return self.visitChildren(ctx)
@@ -51,11 +56,6 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#ExprMultiplicative.
     def visitExprMultiplicative(self, ctx:XplorePathGrammarParser.ExprMultiplicativeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprConcatenate.
-    def visitExprConcatenate(self, ctx:XplorePathGrammarParser.ExprConcatenateContext):
         return self.visitChildren(ctx)
 
 
@@ -71,11 +71,6 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
     def visitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapForceList.
-    def visitExprWrapForceList(self, ctx:XplorePathGrammarParser.ExprWrapForceListContext):
         return self.visitChildren(ctx)
 
 
@@ -111,6 +106,26 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#ExprVariable.
     def visitExprVariable(self, ctx:XplorePathGrammarParser.ExprVariableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapSingle.
+    def visitExprWrapSingle(self, ctx:XplorePathGrammarParser.ExprWrapSingleContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapSingleAsList.
+    def visitExprWrapSingleAsList(self, ctx:XplorePathGrammarParser.ExprWrapSingleAsListContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapConcatentateList.
+    def visitExprWrapConcatentateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatentateListContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprEmptyList.
+    def visitExprEmptyList(self, ctx:XplorePathGrammarParser.ExprEmptyListContext):
         return self.visitChildren(ctx)
 
 

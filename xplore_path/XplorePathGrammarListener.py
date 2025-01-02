@@ -71,6 +71,15 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprExtractPosition.
+    def enterExprExtractPosition(self, ctx:XplorePathGrammarParser.ExprExtractPositionContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprExtractPosition.
+    def exitExprExtractPosition(self, ctx:XplorePathGrammarParser.ExprExtractPositionContext):
+        pass
+
+
     # Enter a parse tree produced by XplorePathGrammarParser#ExprOr.
     def enterExprOr(self, ctx:XplorePathGrammarParser.ExprOrContext):
         pass
@@ -86,15 +95,6 @@ class XplorePathGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XplorePathGrammarParser#ExprMultiplicative.
     def exitExprMultiplicative(self, ctx:XplorePathGrammarParser.ExprMultiplicativeContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprConcatenate.
-    def enterExprConcatenate(self, ctx:XplorePathGrammarParser.ExprConcatenateContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprConcatenate.
-    def exitExprConcatenate(self, ctx:XplorePathGrammarParser.ExprConcatenateContext):
         pass
 
 
@@ -122,15 +122,6 @@ class XplorePathGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
     def exitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrapForceList.
-    def enterExprWrapForceList(self, ctx:XplorePathGrammarParser.ExprWrapForceListContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrapForceList.
-    def exitExprWrapForceList(self, ctx:XplorePathGrammarParser.ExprWrapForceListContext):
         pass
 
 
@@ -194,6 +185,42 @@ class XplorePathGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XplorePathGrammarParser#ExprVariable.
     def exitExprVariable(self, ctx:XplorePathGrammarParser.ExprVariableContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrapSingle.
+    def enterExprWrapSingle(self, ctx:XplorePathGrammarParser.ExprWrapSingleContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrapSingle.
+    def exitExprWrapSingle(self, ctx:XplorePathGrammarParser.ExprWrapSingleContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrapSingleAsList.
+    def enterExprWrapSingleAsList(self, ctx:XplorePathGrammarParser.ExprWrapSingleAsListContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrapSingleAsList.
+    def exitExprWrapSingleAsList(self, ctx:XplorePathGrammarParser.ExprWrapSingleAsListContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrapConcatentateList.
+    def enterExprWrapConcatentateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatentateListContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrapConcatentateList.
+    def exitExprWrapConcatentateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatentateListContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprEmptyList.
+    def enterExprEmptyList(self, ctx:XplorePathGrammarParser.ExprEmptyListContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprEmptyList.
+    def exitExprEmptyList(self, ctx:XplorePathGrammarParser.ExprEmptyListContext):
         pass
 
 

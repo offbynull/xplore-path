@@ -259,11 +259,6 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                     matching_paths.append(_create_join_obj_left_only(l_item))
         return matching_paths
 
-    def visitExprConcatenate(self, ctx: XplorePathGrammarParser.ExprConcatenateContext):
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
-        return coerce_to_list(l) + coerce_to_list(r)
-
     def visitExprSetIntersect(self, ctx: XplorePathGrammarParser.ExprSetIntersectContext):
         l = coerce_for_set_operation(self.visit(ctx.expr(0)))
         r = coerce_for_set_operation(self.visit(ctx.expr(1)))
@@ -379,6 +374,14 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             return [l_.label() for l_ in l if isinstance(l_, Path)]
         elif isinstance(l, Path):
             return l.label()
+        return []
+
+    def visitExprExtractPosition(self, ctx: XplorePathGrammarParser.ExprExtractPositionContext):
+        l = self.visit(ctx.expr())
+        if type(l) is list:
+            return [l_.position_in_parent() for l_ in l if isinstance(l_, Path)]
+        elif isinstance(l, Path):
+            return l.position_in_parent()
         return []
 
     def _apply_binary_boolean_op(
@@ -530,18 +533,28 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         return agg_op, ret
 
     def visitExprWrap(self, ctx: XplorePathGrammarParser.ExprWrapContext):
-        entities = self.visit(ctx.expr())
+        entities = self.visit(ctx.wrap())
         if ctx.filter_():
             entities = self._apply_filter(entities, ctx.filter_())
         return entities
 
-    def visitExprWrapForceList(self, ctx: XplorePathGrammarParser.ExprWrapForceListContext):
+    def visitExprWrapSingle(self, ctx: XplorePathGrammarParser.ExprWrapSingleContext):
+        return self.visit(ctx.expr())
+
+    def visitExprWrapSingleAsList(self, ctx: XplorePathGrammarParser.ExprWrapSingleAsListContext):
         entities = []
         if ctx.expr():
             entities = coerce_to_list(self.visit(ctx.expr()))
-            if ctx.filter_():
-                entities = self._apply_filter(entities, ctx.filter_())
         return entities
+
+    def visitExprWrapConcatentateList(self, ctx: XplorePathGrammarParser.ExprWrapConcatentateListContext):
+        entities = []
+        for e in ctx.expr():
+            entities += coerce_to_list(self.visit(e))
+        return entities
+
+    def visitExprEmptyList(self, ctx: XplorePathGrammarParser.ExprEmptyListContext):
+        return []
 
     def visitPathFromRoot(self, ctx: XplorePathGrammarParser.PathFromRootContext):
         try:

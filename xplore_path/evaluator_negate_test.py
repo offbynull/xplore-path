@@ -13,13 +13,13 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(DummyPath(), '-x'), [])
 
     def test_must_negate_seq(self):
-        self.assertEqual(evaluate(DummyPath(), '-{5, 6}'), [-5.0, -6.0])
-        self.assertEqual(evaluate(DummyPath(), '-{5.0, 6}'), [-5.0, -6.0])
-        self.assertEqual(evaluate(DummyPath(), '-{"5", 6}'), [-5.0, -6.0])
-        self.assertEqual(evaluate(DummyPath(), '-{"-5", 6}'), [5.0, -6.0])
-        self.assertEqual(evaluate(DummyPath(), '-{x, 6}'), [-6.0])
-        self.assertEqual(evaluate(DummyPath(), '-{x}'), [])
-        self.assertEqual(evaluate(DummyPath(), '-{}'), [])
+        self.assertEqual(evaluate(DummyPath(), '-(5, 6)'), [-5.0, -6.0])
+        self.assertEqual(evaluate(DummyPath(), '-(5.0, 6)'), [-5.0, -6.0])
+        self.assertEqual(evaluate(DummyPath(), '-("5", 6)'), [-5.0, -6.0])
+        self.assertEqual(evaluate(DummyPath(), '-("-5", 6)'), [5.0, -6.0])
+        self.assertEqual(evaluate(DummyPath(), '-(x, 6)'), [-6.0])
+        self.assertEqual(evaluate(DummyPath(), '-(x)'), [])
+        self.assertEqual(evaluate(DummyPath(), '-()'), [])
 
 
 if __name__ == '__main__':

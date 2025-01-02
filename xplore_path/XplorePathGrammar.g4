@@ -68,6 +68,7 @@ KW_FAIL                   : 'fail';
 KW_NAN                    : 'nan';
 KW_INF                    : 'inf';
 KW_LABEL                  : 'label';
+KW_POSITION               : 'position';
 KW_LEFT                   : 'left';
 KW_RIGHT                  : 'right';
 KW_INNER                  : 'inner';
@@ -147,11 +148,11 @@ xplorePath
 
 expr
     : (KW_ANY | KW_ALL) expr coerceFallback?            # ExprBoolAggregate
-    | expr COMMA expr                                   # ExprConcatenate
     | expr joinOp expr joinCond                         # ExprJoin
     | expr (KW_INTERSECT | KW_EXCEPT) expr              # ExprSetIntersect
     | expr (KW_UNION | P) expr                          # ExprSetUnion
     | KW_LABEL expr                                     # ExprExtractLabel
+    | KW_POSITION expr                                  # ExprExtractPosition
     | expr orOp expr coerceFallback?                    # ExprOr
     | expr andOp expr coerceFallback?                   # ExprAnd
     | expr relOp expr coerceFallback?                   # ExprComparison
@@ -166,13 +167,19 @@ expr
 // current grammar.
 atomicOrEncapsulate
     : (MINUS | PLUS) atomicOrEncapsulate coerceFallback?  # ExprUnary
-    | OP expr CP filter?                                  # ExprWrap
-    | OC expr? CC filter?                                 # ExprWrapForceList
+    | wrap filter?                                        # ExprWrap
     | atomicOrEncapsulate argumentList coerceFallback?    # ExprFunctionCall
     | matcher                                             # ExprMatcher
     | varRef                                              # ExprVariable
     | literal                                             # ExprLiteral
     | path filter?                                        # ExprPath
+    ;
+
+wrap
+    : OP expr CP                                          # ExprWrapSingle
+    | OP expr COMMA CP                                    # ExprWrapSingleAsList
+    | OP expr COMMA expr (COMMA expr)* COMMA? CP          # ExprWrapConcatentateList
+    | OP CP                                               # ExprEmptyList
     ;
 
 argumentList

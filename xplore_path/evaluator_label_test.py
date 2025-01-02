@@ -11,8 +11,8 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(root, 'label //*'), [None, 'a', 'y', 'z', 'ptrs', 'b', 'c', 'd', 'e', 'f', 'd_ptr', 'f_ptr'])
 
     def test_must_extract_nothing_of_not_paths(self):
-        self.assertEqual(evaluate(DummyPath(), 'label {0,1,2,3}'), [])
-        self.assertEqual(evaluate(DummyPath(), 'label {}'), [])
+        self.assertEqual(evaluate(DummyPath(), 'label (0,1,2,3)'), [])
+        self.assertEqual(evaluate(DummyPath(), 'label ()'), [])
         self.assertEqual(evaluate(DummyPath(), 'label 0'), [])
         self.assertEqual(evaluate(DummyPath(), 'label "0"'), [])
         self.assertEqual(evaluate(DummyPath(), 'label "0"'), [])
