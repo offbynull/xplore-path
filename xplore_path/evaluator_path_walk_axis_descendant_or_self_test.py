@@ -17,7 +17,7 @@ class EvaluatorTest(unittest.TestCase):
         )
         self.assertEqual(
             sorted([e.full_label() for e in evaluate(root, '/descendant-or-self::*')]),
-            sorted([e.full_label() for e in evaluate(root, '//*')])  # self already included with //*, so you don't have to include / like you included /a above
+            sorted([e.full_label() for e in evaluate(root, '.')] + [e.full_label() for e in evaluate(root, '//*')])
         )
 
 

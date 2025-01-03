@@ -33,7 +33,7 @@ class EvaluatorTest(unittest.TestCase):
         )
         self.assertEqual(
             sorted([e.full_label() for e in evaluate(root, '/descendant::*')]),
-            sorted([e.full_label() for e in evaluate(root, '//*')][1:])  # descendant::* doesn't return self, so pop self from //*
+            sorted([e.full_label() for e in evaluate(root, '//*')])
         )
         # TODO: This sorting shouldn't be happening - results should always be getting returned in document order according ot xpath spec?
 

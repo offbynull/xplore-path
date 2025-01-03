@@ -174,8 +174,8 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathRootExact.
-    def visitPathRootExact(self, ctx:XplorePathGrammarParser.PathRootExactContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#PathAtRoot.
+    def visitPathAtRoot(self, ctx:XplorePathGrammarParser.PathAtRootContext):
         return self.visitChildren(ctx)
 
 
@@ -184,28 +184,48 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromAny.
-    def visitPathFromAny(self, ctx:XplorePathGrammarParser.PathFromAnyContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromRootAny.
+    def visitPathFromRootAny(self, ctx:XplorePathGrammarParser.PathFromRootAnyContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromRelative.
-    def visitPathFromRelative(self, ctx:XplorePathGrammarParser.PathFromRelativeContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#PathAtSelf.
+    def visitPathAtSelf(self, ctx:XplorePathGrammarParser.PathAtSelfContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromRelativeAny.
-    def visitPathFromRelativeAny(self, ctx:XplorePathGrammarParser.PathFromRelativeAnyContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromSelf.
+    def visitPathFromSelf(self, ctx:XplorePathGrammarParser.PathFromSelfContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathSelf.
-    def visitPathSelf(self, ctx:XplorePathGrammarParser.PathSelfContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromSelfAny.
+    def visitPathFromSelfAny(self, ctx:XplorePathGrammarParser.PathFromSelfAnyContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathParent.
-    def visitPathParent(self, ctx:XplorePathGrammarParser.PathParentContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#PathAtParent.
+    def visitPathAtParent(self, ctx:XplorePathGrammarParser.PathAtParentContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromParent.
+    def visitPathFromParent(self, ctx:XplorePathGrammarParser.PathFromParentContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromParentAny.
+    def visitPathFromParentAny(self, ctx:XplorePathGrammarParser.PathFromParentAnyContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromNested.
+    def visitPathFromNested(self, ctx:XplorePathGrammarParser.PathFromNestedContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#PathFromNestedAny.
+    def visitPathFromNestedAny(self, ctx:XplorePathGrammarParser.PathFromNestedAnyContext):
         return self.visitChildren(ctx)
 
 

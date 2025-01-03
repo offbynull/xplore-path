@@ -15,6 +15,7 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual([e.label() for e in evaluate(root, '/*[1]')], ['y'])
         self.assertEqual([e.label() for e in evaluate(root, '/*[2]')], ['z'])
         self.assertEqual([e.label() for e in evaluate(root, '/*[3]')], ['ptrs'])
+        self.assertEqual([e.label() for e in evaluate(root, '/a[0]/b[0]/*[1]')], ['d'])
 
 
 if __name__ == '__main__':

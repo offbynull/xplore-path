@@ -1,4 +1,4 @@
-* TODO: add join syntax - inner, left, right
+* ~~TODO: add join syntax - inner, left, right~~
 * ~~TODO: add distinct/unique syntax - just coerce it into a set~~
 * ~~TODO: add count syntax - just coerce it into a set~~~~
 * ~~TODO: add 'frequency count' syntax to count value collisions?~~
@@ -31,16 +31,17 @@
 * ~~TODO: test matchers when used in path predicates~~
 * TODO: test complex math (order of operations)
 * ~~TODO: test label directive~~
-* TODO: ../* doesn't work because th parser doesn't recognize it
+* ~~TODO: ../* doesn't work because th parser doesn't recognize it~~
 * TODO: test function invocations syntax
     BUG comma misinterpreted func(a,b) interpretes args as a single argument of [a,b]
 * TODO: function invocation 
 * TODO: test code in the invocables package
-* BUG: path.py label tests are no good because multiple children can have same mame
-     if p.label() == self.label()    CHANGE THIS TO    if p.position_in_parent() == self.position_in_parent()
+* ~~BUG: path.py label tests are no good because multiple children can have same mame~~
+     ~~if p.label() == self.label()    CHANGE THIS TO    if p.position_in_parent() == self.position_in_parent()~~
 * BUG: //* must be returned in DOCUMENT ORDER, right now its not
 * ~~TODO: test filesystem file loaders~~
 * TODO: make use of variables in REPL - store results in var names and use those var names in queries
+* ~~TODO: test join syntax~~
 * ~~TODO: ANTLR grammar rule names must be fixed - make rules camelcase~~
 * ~~TODO: REPL/CLI filesystem add option to pre-cache on launch - just get //* and output results after the fact~~
 * ~~TODO: filesystem notify of caching/loadings ops~~

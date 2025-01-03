@@ -35,7 +35,7 @@ class Path(ABC):
         if parent_p is None:
             return []
         siblings = parent_p.all_children()
-        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.label() == self.label())
+        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position_in_parent() == self.position_in_parent())
         siblings = siblings[self_idx_in_siblings+1:]
         ret = []
         for p in siblings:
@@ -49,7 +49,7 @@ class Path(ABC):
         if parent_p is None:
             return []
         siblings = parent_p.all_children()
-        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.label() == self.label())
+        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position_in_parent() == self.position_in_parent())
         siblings = siblings[self_idx_in_siblings+1:]
         return siblings
 
@@ -74,7 +74,7 @@ class Path(ABC):
         if parent_p is None:
             return []
         siblings = parent_p.all_children()
-        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.label() == self.label())
+        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position_in_parent() == self.position_in_parent())
         siblings = siblings[:self_idx_in_siblings]
         ret = parent_p.preceding() + [parent_p]
         for p in siblings:
@@ -87,15 +87,9 @@ class Path(ABC):
         if parent_p is None:
             return []
         siblings = parent_p.all_children()
-        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.label() == self.label())
+        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position_in_parent() == self.position_in_parent())
         siblings = siblings[:self_idx_in_siblings]
         return siblings
-    #
-    # def first(self) -> PathElement:
-    #     top_p = self
-    #     while top_p.parent() is not None:
-    #         top_p = top_p.parent()
-    #     return top_p._element
 
     def value(self) -> Any:
         return self._value
@@ -110,15 +104,6 @@ class Path(ABC):
             p_list.append(p)
             p = p.parent()
         return [p.label() for p in reversed(p_list)]
-
-    # def __contains__(self, item):
-    #     return item in self._elements
-    #
-    # def __iter__(self):
-    #     return iter(self._elements)
-    #
-    # def __getitem__(self, index):
-    #     return self._elements[index]
 
     def __str__(self):
         return f'{self.full_label()}: {self.value()}'

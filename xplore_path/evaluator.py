@@ -1,3 +1,4 @@
+import itertools
 import math
 from dataclasses import dataclass
 from enum import Enum
@@ -203,23 +204,35 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     #       sequence.
     def visitExprJoin(self, ctx: XplorePathGrammarParser.ExprJoinContext):
         def _create_join_obj(l_item, r_item):
-            test_path = SimplePath(None, None, None)
-            mirrored_l_item = MirrorPath(l_item, test_path, 1) if isinstance(l_item, Path) else l_item
-            mirrored_r_item = MirrorPath(r_item, test_path, 2) if isinstance(r_item, Path) else r_item
-            test_path.add_child(mirrored_l_item)
-            test_path.add_child(mirrored_r_item)
+            test_path = SimplePath(None, None, None, None)
+            l_path = SimplePath(test_path, 0, 'l', None)
+            l_path.add_child(
+                MirrorPath(l_item, l_path, 0) if isinstance(l_item, Path) else l_item
+            )
+            test_path.add_child(l_path)
+            r_path = SimplePath(test_path, 1, 'r', None)
+            r_path.add_child(
+                MirrorPath(r_item, r_path, 0) if isinstance(r_item, Path) else r_item
+            )
+            test_path.add_child(r_path)
             return test_path
 
         def _create_join_obj_left_only(l_item):
-            test_path = SimplePath(None, None, None)
-            mirrored_l_item = MirrorPath(l_item, test_path, 1) if isinstance(l_item, Path) else l_item
-            test_path.add_child(mirrored_l_item)
+            test_path = SimplePath(None, None, None, None)
+            l_path = SimplePath(test_path, 0, 'l', None)
+            l_path.add_child(
+                MirrorPath(l_item, l_path, 0) if isinstance(l_item, Path) else l_item
+            )
+            test_path.add_child(l_path)
             return test_path
 
         def _create_join_obj_right_only(r_item):
-            test_path = SimplePath(None, None, None)
-            mirrored_r_item = MirrorPath(r_item, test_path, 2) if isinstance(r_item, Path) else r_item
-            test_path.add_child(mirrored_r_item)
+            test_path = SimplePath(None, None, None, None)
+            r_path = SimplePath(test_path, 0, 'r', None)
+            r_path.add_child(
+                MirrorPath(r_item, r_path, 0) if isinstance(r_item, Path) else r_item
+            )
+            test_path.add_child(r_path)
             return test_path
 
         l = coerce_to_list(self.visit(ctx.expr(0)))
@@ -334,9 +347,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         # default to zip if both are lists, otherwise use product as default - that's what xpath does
         combine_op = zip if type(l) == list and type(r) == list else product
         if ctx.mulOp().KW_ZIP():
-            combine_op = zip
+            combine_op = lambda a,b: zip(a, b)
         elif ctx.mulOp().KW_PRODUCT():
-            combine_op = product
+            combine_op = lambda a,b: product(a, b)
         if ctx.mulOp().STAR():
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l * _r, float, coercer_fallback)
         elif ctx.mulOp().KW_DIV():
@@ -357,9 +370,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         # default to zip if both are lists, otherwise use product as default - that's what xpath does
         combine_op = zip if type(l) == list and type(r) == list else product
         if ctx.addOp().KW_ZIP():
-            combine_op = zip
+            combine_op = lambda a,b: zip(a, b)
         elif ctx.addOp().KW_PRODUCT():
-            combine_op = product
+            combine_op = lambda a,b: product(a, b)
         if ctx.addOp().PLUS():
             return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l + _r, float, coercer_fallback)
         elif ctx.addOp().MINUS():
@@ -556,58 +569,124 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitExprEmptyList(self, ctx: XplorePathGrammarParser.ExprEmptyListContext):
         return []
 
+    def visitPathAtRoot(self, ctx: XplorePathGrammarParser.PathAtRootContext):
+        try:
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
+            new_entities = self.context.entities[:]
+            if ctx.filter_():
+                new_entities = self._apply_filter(new_entities, ctx.filter_())
+            return new_entities
+        finally:
+            self.context.restore_entities()
+
     def visitPathFromRoot(self, ctx: XplorePathGrammarParser.PathFromRootContext):
         try:
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
+            new_entities = self.context.entities[:]
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
+            self.context.entities = new_entities  # will not include p, only descendants of p
             return self.visit(ctx.relPath())
         finally:
             self.context.restore_entities()
 
-    def visitPathRootExact(self, ctx: XplorePathGrammarParser.PathRootExactContext):
+    def visitPathFromRootAny(self, ctx: XplorePathGrammarParser.PathFromRootAnyContext):
         try:
-            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
-            return self.context.entities[:]
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_EMPTY)
+            root = self.context.original_root
+            new_entities = root.all_descendants()
+            # if the query was //*, you need to include root in the result set as well
+            # if ctx.relPath():
+            #     if isinstance(ctx.relPath(), XplorePathGrammarParser.RelPathStepContext) and ctx.relPath().forwardStep():
+            #         if ctx.relPath().forwardStep().atomicOrEncapsulate():
+            #             if isinstance(ctx.relPath().forwardStep().atomicOrEncapsulate(), XplorePathGrammarParser.ExprMatcherContext):
+            #                 matcher_ctx = ctx.relPath().forwardStep().atomicOrEncapsulate().matcher()
+            #                 if isinstance(matcher_ctx, XplorePathGrammarParser.MatcherWildcardContext):
+            #                     new_entities = [root] + new_entities
+            new_entities = [root] + new_entities
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
+            self.context.entities = new_entities
+            return self.visit(ctx.relPath())  # BUG: //* must return in document order, use position_in_parent of each path in the output to sort?
         finally:
             self.context.restore_entities()
 
-    def visitPathFromAny(self, ctx: XplorePathGrammarParser.PathFromAnyContext):
-        try:
-            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_ROOT)
-            root = self.context.entities[0]
-            self.context.entities = [root] + root.all_descendants()
-            return [root] + self.visit(ctx.relPath())  # BUG: //* must return in document order, use position_in_parent of each path in the output to sort?
-        finally:
-            self.context.restore_entities()
+    def visitPathAtSelf(self, ctx: XplorePathGrammarParser.PathAtSelfContext):
+        return self.context.entities[:]
 
-    def visitPathFromRelative(self, ctx: XplorePathGrammarParser.PathFromRelativeContext):
+    def visitPathFromSelf(self, ctx: XplorePathGrammarParser.PathFromSelfContext):
         try:
             self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
-            return self.visit(ctx.relPath())
-        finally:
-            self.context.restore_entities()
-
-    def visitPathFromRelativeAny(self, ctx: XplorePathGrammarParser.PathFromRelativeAnyContext):
-        try:
-            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
-            new_entities = []
-            for p in self.context.entities:
-                new_entities += [p] + p.all_descendants()
+            new_entities = self.context.entities
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
             self.context.entities = new_entities
             return self.visit(ctx.relPath())
         finally:
             self.context.restore_entities()
 
-    def visitPathSelf(self, ctx: XplorePathGrammarParser.PathSelfContext):
-        return self.context.entities[:]
+    def visitPathFromSelfAny(self, ctx: XplorePathGrammarParser.PathFromSelfAnyContext):
+        try:
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
+            new_entities = list(itertools.chain(*(p.all_descendants() for p in self.context.entities)))
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
+            self.context.entities = new_entities  # will not include p, only descendants of p
+            return self.visit(ctx.relPath())
+        finally:
+            self.context.restore_entities()
 
-    def visitPathParent(self, ctx: XplorePathGrammarParser.PathParentContext):
-        new_paths = []
-        for e in self.context:
-            if isinstance(e, Path):
-                parent_path = e.parent()
-                if parent_path is not None:
-                    new_paths.append(parent_path)
-        return new_paths
+    def visitPathAtParent(self, ctx: XplorePathGrammarParser.PathAtParentContext):
+        try:
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
+            new_entities = [e.parent() for e in self.context]
+            new_entities = [e for e in new_entities if e is not None]
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
+            return new_entities
+        finally:
+            self.context.restore_entities()
+
+    def visitPathFromParent(self, ctx: XplorePathGrammarParser.PathFromParentContext):
+        try:
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
+            new_entities = [e.parent() for e in self.context]
+            new_entities = [e for e in new_entities if e is not None]
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
+            self.context.entities = new_entities
+            return self.visit(ctx.relPath())
+        finally:
+            self.context.restore_entities()
+
+    def visitPathFromParentAny(self, ctx: XplorePathGrammarParser.PathFromParentAnyContext):
+        try:
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
+            new_entities = [e.parent() for e in self.context]
+            new_entities = [e for e in new_entities if e is not None]
+            new_entities = list(itertools.chain(*(p.all_descendants() for p in new_entities)))
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
+            self.context.entities = new_entities  # will not include p's parent, only descendants of p's parent
+            return self.visit(ctx.relPath())
+        finally:
+            self.context.restore_entities()
+
+    def visitPathFromNested(self, ctx: XplorePathGrammarParser.PathFromNestedContext):
+        try:
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
+            new_entities = self.visit(ctx.wrap())
+            new_entities = [e for e in new_entities if isinstance(e, Path)]
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
+            self.context.entities = new_entities
+            return self.visit(ctx.relPath())
+        finally:
+            self.context.restore_entities()
+
+    def visitPathFromNestedAny(self, ctx: XplorePathGrammarParser.PathFromNestedAnyContext):
+        try:
+            self.context.save_entities(new_paths=PrimeMode.PRIME_WITH_SELF)
+            new_entities = self.visit(ctx.wrap())
+            new_entities = [e for e in new_entities if isinstance(e, Path)]
+            new_entities = list(itertools.chain(*(p.all_descendants() for p in new_entities)))
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
+            self.context.entities = new_entities
+            return self.visit(ctx.relPath())
+        finally:
+            self.context.restore_entities()
 
     def visitRelPathChain(self, ctx: XplorePathGrammarParser.RelPathChainContext):
         # TODO: Pushing / popping state not required?
@@ -646,6 +725,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             ret = self.visit(ctx.reverseStep())
         else:
             raise ValueError('Unexpected')
+        if ctx.filter_():
+            ret = self._apply_filter(ret, ctx.filter_())
         return ret
 
     def visitReverseStepParent(self, ctx: XplorePathGrammarParser.ReverseStepParentContext):
@@ -779,7 +860,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 ret.append(e)
         return ret
 
-    def _apply_filter(self, entities: list[EntityType], ctx: XplorePathGrammarParser.FilterContext):
+    def _apply_filter(self, entities: list[EntityType], ctx: XplorePathGrammarParser.FilterContext | None):
+        if ctx is None:
+            return entities
         self.context.save_entities(PrimeMode.PRIME_WITH_EMPTY)
         try:
             ret = []
@@ -805,7 +888,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                         self._apply_binary_boolean_op(
                             l=[c.label() for c in e.all_children()],
                             r=result,
-                            combine_op=zip,
+                            combine_op=lambda a,b: zip(a, b),
                             test_op=lambda l, r: l == r,
                             required_type=None,
                             coercer_fallback=DiscardCoercerFallback()
@@ -816,7 +899,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                         self._apply_binary_boolean_op(
                             l=e,
                             r=result,
-                            combine_op=zip,
+                            combine_op=lambda a,b: zip(a, b),
                             test_op=lambda l, r: l == r,
                             required_type=None,
                             coercer_fallback=DiscardCoercerFallback()
@@ -845,8 +928,10 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             return float(ctx.getText())
         elif ctx.StringLiteral():
             return self._decode_str(ctx.getText())
-        elif ctx.BooleanLiteral():
-            return ctx.getText() == 'true'
+        elif ctx.KW_TRUE():
+            return True
+        elif ctx.KW_FALSE():
+            return False
         elif ctx.KW_NAN():
             return math.nan
         elif ctx.KW_INF():

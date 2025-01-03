@@ -41,6 +41,12 @@ class EvaluatorTest(unittest.TestCase):
                 [None, 'a']
             ]
         )
+        self.assertEqual(
+            [e.full_label() for e in evaluate(root, '/a[./b]/b[./e]/d')],
+            [
+                [None, 'a', 'b', 'd']
+            ]
+        )
 
 
 if __name__ == '__main__':

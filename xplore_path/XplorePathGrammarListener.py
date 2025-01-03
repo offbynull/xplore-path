@@ -305,12 +305,12 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#PathRootExact.
-    def enterPathRootExact(self, ctx:XplorePathGrammarParser.PathRootExactContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#PathAtRoot.
+    def enterPathAtRoot(self, ctx:XplorePathGrammarParser.PathAtRootContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#PathRootExact.
-    def exitPathRootExact(self, ctx:XplorePathGrammarParser.PathRootExactContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#PathAtRoot.
+    def exitPathAtRoot(self, ctx:XplorePathGrammarParser.PathAtRootContext):
         pass
 
 
@@ -323,48 +323,84 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#PathFromAny.
-    def enterPathFromAny(self, ctx:XplorePathGrammarParser.PathFromAnyContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromRootAny.
+    def enterPathFromRootAny(self, ctx:XplorePathGrammarParser.PathFromRootAnyContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#PathFromAny.
-    def exitPathFromAny(self, ctx:XplorePathGrammarParser.PathFromAnyContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#PathFromRelative.
-    def enterPathFromRelative(self, ctx:XplorePathGrammarParser.PathFromRelativeContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#PathFromRelative.
-    def exitPathFromRelative(self, ctx:XplorePathGrammarParser.PathFromRelativeContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromRootAny.
+    def exitPathFromRootAny(self, ctx:XplorePathGrammarParser.PathFromRootAnyContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#PathFromRelativeAny.
-    def enterPathFromRelativeAny(self, ctx:XplorePathGrammarParser.PathFromRelativeAnyContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#PathAtSelf.
+    def enterPathAtSelf(self, ctx:XplorePathGrammarParser.PathAtSelfContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#PathFromRelativeAny.
-    def exitPathFromRelativeAny(self, ctx:XplorePathGrammarParser.PathFromRelativeAnyContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#PathSelf.
-    def enterPathSelf(self, ctx:XplorePathGrammarParser.PathSelfContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#PathSelf.
-    def exitPathSelf(self, ctx:XplorePathGrammarParser.PathSelfContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#PathAtSelf.
+    def exitPathAtSelf(self, ctx:XplorePathGrammarParser.PathAtSelfContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#PathParent.
-    def enterPathParent(self, ctx:XplorePathGrammarParser.PathParentContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromSelf.
+    def enterPathFromSelf(self, ctx:XplorePathGrammarParser.PathFromSelfContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#PathParent.
-    def exitPathParent(self, ctx:XplorePathGrammarParser.PathParentContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromSelf.
+    def exitPathFromSelf(self, ctx:XplorePathGrammarParser.PathFromSelfContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromSelfAny.
+    def enterPathFromSelfAny(self, ctx:XplorePathGrammarParser.PathFromSelfAnyContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromSelfAny.
+    def exitPathFromSelfAny(self, ctx:XplorePathGrammarParser.PathFromSelfAnyContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#PathAtParent.
+    def enterPathAtParent(self, ctx:XplorePathGrammarParser.PathAtParentContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#PathAtParent.
+    def exitPathAtParent(self, ctx:XplorePathGrammarParser.PathAtParentContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromParent.
+    def enterPathFromParent(self, ctx:XplorePathGrammarParser.PathFromParentContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromParent.
+    def exitPathFromParent(self, ctx:XplorePathGrammarParser.PathFromParentContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromParentAny.
+    def enterPathFromParentAny(self, ctx:XplorePathGrammarParser.PathFromParentAnyContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromParentAny.
+    def exitPathFromParentAny(self, ctx:XplorePathGrammarParser.PathFromParentAnyContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromNested.
+    def enterPathFromNested(self, ctx:XplorePathGrammarParser.PathFromNestedContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromNested.
+    def exitPathFromNested(self, ctx:XplorePathGrammarParser.PathFromNestedContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#PathFromNestedAny.
+    def enterPathFromNestedAny(self, ctx:XplorePathGrammarParser.PathFromNestedAnyContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#PathFromNestedAny.
+    def exitPathFromNestedAny(self, ctx:XplorePathGrammarParser.PathFromNestedAnyContext):
         pass
 
 

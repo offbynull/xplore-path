@@ -1,4 +1,4 @@
-// ORIGINALLY FORKED FROM https://github.com/antlr/grammars-v4/tree/master/xpath/xpath31 ON Dec15 2024
+// FORKED FROM https://github.com/antlr/grammars-v4/tree/master/xpath/xpath31 ON Dec15 2024 and heavily modified/refactored
 grammar XplorePathGrammar;
 
 
@@ -35,7 +35,6 @@ SLASH      : '/';
 SS         : '//';
 STAR       : '*';
 
-// KEYWORDS
 KW_ANCESTOR               : 'ancestor';
 KW_ANCESTOR_OR_SELF       : 'ancestor-or-self';
 KW_AND                    : 'and';
@@ -74,10 +73,8 @@ KW_RIGHT                  : 'right';
 KW_INNER                  : 'inner';
 KW_JOIN                   : 'join';
 KW_CONCATENATE            : 'concat';
-
-// A.2.1. TERMINAL SYMBOLS
-// This isn't a complete list of tokens in the language.
-// Keywords and symbols are terminals.
+KW_TRUE                   : 'true';
+KW_FALSE                   : 'false';
 
 RegexMatcher      : 'r' FragStringLiteral;
 GlobMatcher       : 'g' FragStringLiteral;
@@ -88,15 +85,11 @@ IntegerLiteral    : FragDigits;
 DecimalLiteral    : '.' FragDigits | FragDigits '.' [0-9]*;
 DoubleLiteral     : ('.' FragDigits | FragDigits ('.' [0-9]*)?) [eE] [+-]? FragDigits;
 StringLiteral     : FragStringLiteral;
-BooleanLiteral    : 'true' | 'false';
 fragment FragStringLiteral : '"' (~["] | FragEscapeQuot)* '"' | '\'' (~['] | FragEscapeApos)* '\'';
 fragment FragEscapeQuot : '""';
 fragment FragEscapeApos : '\'\'';
-Name   : FragmentName;
-// Error in spec: Char is not a terminal!
-fragment Char            : FragChar;
+Name   : FragNameStartChar FragNameChar*;
 fragment FragDigits      : [0-9]+;
-fragment CommentContents : Char;
 // https://www.w3.org/TR/REC-xml-names/#NT-QName
 fragment FragNameStartChar:
     'A' ..'Z'
@@ -124,20 +117,7 @@ fragment FragNameChar:
     | '\u0300' ..'\u036F'
     | '\u203F' ..'\u2040'
 ;
-fragment FragmentName: FragNameStartChar FragNameChar*;
 
-// https://www.w3.org/TR/REC-xml/#NT-Char
-
-fragment FragChar:
-    '\u0009'
-    | '\u000a'
-    | '\u000d'
-    | '\u0020' ..'\ud7ff'
-    | '\ue000' ..'\ufffd'
-    | '\u{10000}' ..'\u{10ffff}'
-;
-
-// https://github.com/antlr/grammars-v4/blob/17d3db3fd6a8fc319a12176e0bb735b066ec0616/xpath/xpath31/XPath31.g4#L389
 Whitespace: ('\u000d' | '\u000a' | '\u0020' | '\u0009')+ -> skip;
 
 
@@ -220,18 +200,22 @@ orOp
     ;
 
 path
-    : SLASH            # PathRootExact
-    | SLASH relPath    # PathFromRoot
-    | SS relPath       # PathFromAny
-    | D SLASH relPath  # PathFromRelative
-    | D SS relPath     # PathFromRelativeAny
-    | D                # PathSelf
-    | DD               # PathParent
+    : SLASH filter?                # PathAtRoot
+    | SLASH filter? relPath        # PathFromRoot
+    | SS filter? relPath           # PathFromRootAny
+    | D filter?                    # PathAtSelf
+    | D filter? SLASH relPath      # PathFromSelf
+    | D filter? SS relPath         # PathFromSelfAny
+    | DD filter?                   # PathAtParent
+    | DD filter? SLASH relPath     # PathFromParent
+    | DD filter? SS relPath        # PathFromParentAny
+    | wrap filter? SLASH relPath   # PathFromNested
+    | wrap filter? SS relPath      # PathFromNestedAny
     ;
 
 relPath
-    : relPath (SLASH | SS) relPath  # RelPathChain
-    | (reverseStep | forwardStep)   # RelPathStep
+    : relPath (SLASH | SS) relPath         # RelPathChain
+    | (reverseStep | forwardStep) filter?  # RelPathStep
     ;
 
 forwardStep
@@ -259,7 +243,7 @@ literal
     | DecimalLiteral
     | DoubleLiteral
     | StringLiteral
-    | BooleanLiteral
+    | (KW_TRUE | KW_FALSE)
     | KW_NAN
     | KW_INF
     | Name

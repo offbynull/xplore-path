@@ -63,6 +63,12 @@ class EvaluatorTest(unittest.TestCase):
                 [None]
             ]
         )
+        self.assertEqual(
+            [e.full_label() for e in evaluate(root, '/a[b]/b[c]/e')],
+            [
+                [None, 'a', 'b', 'e']
+            ]
+        )
 
     def test_must_filter_based_on_label_using_matchers(self):
         root = PythonObjectPath.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}, '99': 'bye'})
@@ -99,6 +105,12 @@ class EvaluatorTest(unittest.TestCase):
             [e.full_label() for e in evaluate(root, '/[~98:100]')],  # BECAUSE INDEX IS OUT OF RANGE, RETURNS IF CHILD WITH LABEL EXISTS
             [
                 [None]
+            ]
+        )
+        self.assertEqual(
+            [e.full_label() for e in evaluate(root, '/a[g"b"]/b[r"c"]/e')],
+            [
+                [None, 'a', 'b', 'e']
             ]
         )
 
