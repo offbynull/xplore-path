@@ -17,6 +17,7 @@ from xplore_path.repl.query_completer import QueryCompleter
 from xplore_path.repl.utils import print_line, fix_label_for_expression
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext, NoticeType
 from xplore_path.raise_parse_error_listener import ParseException
+from xplore_path.sequence import Sequence, SingleWrapSequence
 
 
 def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
@@ -102,8 +103,8 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
         if query_res is None:
             toolbar_text = 'Type query and hit enter'
         else:
-            if isinstance(query_res, list):
-                toolbar_text = f'{len(query_res)} result' + ('s' if query_res else '')
+            if isinstance(query_res, Sequence):
+                toolbar_text = f'{sum(1 for _ in query_res)} result' + ('s' if query_res else '')
             else:
                 toolbar_text = f'1 result'
         toolbar_text += '  ' + ('[FULL LABELS]' if full_labels else '[LOCAL LABELS]')
@@ -175,8 +176,8 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
             break
         try:
             query_res = evaluator.evaluate(p, expr)
-            if not isinstance(query_res, list):
-                query_res = [query_res]
+            if not isinstance(query_res, Sequence):
+                query_res = SingleWrapSequence(query_res)
             for v in query_res:
                 print_line(session, _single_result_to_line(v, full_labels), truncate_long_lines)
         except ParseException as e:

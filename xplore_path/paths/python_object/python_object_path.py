@@ -19,10 +19,11 @@ class PythonObjectPath(Path):
             label: Hashable | None,  # None for root - None is also a hashable type
             value: Any
     ):
-        super().__init__(parent, position_in_parent, label, value)
+        super().__init__(parent, position_in_parent, label, value if type(value) in {bool, int, float, str} else None)
+        self._data = value
 
     def all_children(self) -> list[Path]:
-        this = self.value()
+        this = self._data
         ret = []
         if isinstance(this, dict):
             for i, k in enumerate(this.keys()):

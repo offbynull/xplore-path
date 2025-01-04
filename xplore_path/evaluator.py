@@ -13,6 +13,7 @@ from xplore_path.invocable import Invocable
 from xplore_path.invocables.count_invocable import CountInvocable
 from xplore_path.invocables.distinct_invocable import DistinctInvocable
 from xplore_path.invocables.frequency_count_invocable import FrequencyCountInvocable
+from xplore_path.invocables.regex_extract_invocable import RegexExtractInvocable
 from xplore_path.invocables.whitespace_collapse_invocable import WhitespaceCollapseInvocable
 from xplore_path.invocables.whitespace_remove_invocable import WhitespaceRemoveInvocable
 from xplore_path.invocables.whitespace_strip_invocable import WhitespaceStripInvocable
@@ -165,7 +166,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             return None
 
         invocable = self.visit(ctx.atomicOrEncapsulate())
-        args = [self.visit(n) for n in ctx.argumentList().atomicOrEncapsulate()]
+        args = [self.visit(n) for n in ctx.argumentList().expr()]
         if isinstance(invocable, Sequence):
             ret = TransformSequence(invocable, lambda _, i: op(i, args), fallback)
             return ret
@@ -1068,7 +1069,8 @@ class Evaluator:
         'frequency_count': FrequencyCountInvocable(),
         'whitespace_collapse': WhitespaceCollapseInvocable(),
         'whitespace_strip': WhitespaceStripInvocable(),
-        'whitespace_remove': WhitespaceRemoveInvocable()
+        'whitespace_remove': WhitespaceRemoveInvocable(),
+        'regex_extract': RegexExtractInvocable()
     }
 
     def __init__(
@@ -1245,18 +1247,20 @@ if __name__ == '__main__':
     # _test_with_fs_path('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs_path('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
 
-    profiler = cProfile.Profile()
-    profiler.enable()
-    try:
-        fs_path = FileSystemPath.create_root_path(
-            '~/Downloads',
-            FileSystemPathContext(
-                cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
-            )
-        )
-        ret = Evaluator().evaluate(fs_path, "/uniprotkb_mouse_601_to_800_seqlen.json/results//*[. = g'EC*']")
-        print(f'{len(ret)=}')
-    except KeyboardInterrupt:
-        ...
-    profiler.disable()
-    profiler.print_stats(sort='time')
+    _test(root, '$regex_extract((hello, yellow, mellow), "low?")')
+
+    # profiler = cProfile.Profile()
+    # profiler.enable()
+    # try:
+    #     fs_path = FileSystemPath.create_root_path(
+    #         '~/Downloads',
+    #         FileSystemPathContext(
+    #             cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
+    #         )
+    #     )
+    #     ret = Evaluator().evaluate(fs_path, "/uniprotkb_mouse_601_to_800_seqlen.json/results//*[. = g'EC*']")
+    #     print(f'{len(ret)=}')
+    # except KeyboardInterrupt:
+    #     ...
+    # profiler.disable()
+    # profiler.print_stats(sort='time')
