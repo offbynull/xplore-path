@@ -158,7 +158,7 @@ atomicOrEncapsulate
 wrap
     : OP expr CP                                          # ExprWrapSingle
     | OP expr COMMA CP                                    # ExprWrapSingleAsList
-    | OP expr COMMA expr (COMMA expr)* COMMA? CP          # ExprWrapConcatentateList
+    | OP expr COMMA expr (COMMA expr)* COMMA? CP          # ExprWrapConcatenateList
     | OP CP                                               # ExprEmptyList
     ;
 

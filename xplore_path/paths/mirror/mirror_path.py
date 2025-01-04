@@ -24,6 +24,6 @@ class MirrorPath(Path):
     def all_children(self) -> list[Path]:
         ret = []
         for child_p in self.backing_path.all_children():
-            child_p = MirrorPath(child_p, self, child_p.position_in_parent())
+            child_p = MirrorPath(child_p, self, child_p.position())
             ret.append(child_p)
         return ret

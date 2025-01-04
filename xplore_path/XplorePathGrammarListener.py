@@ -206,12 +206,12 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrapConcatentateList.
-    def enterExprWrapConcatentateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatentateListContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrapConcatenateList.
+    def enterExprWrapConcatenateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatenateListContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrapConcatentateList.
-    def exitExprWrapConcatentateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatentateListContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrapConcatenateList.
+    def exitExprWrapConcatenateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatenateListContext):
         pass
 
 

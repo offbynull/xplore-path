@@ -119,8 +119,8 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapConcatentateList.
-    def visitExprWrapConcatentateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatentateListContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapConcatenateList.
+    def visitExprWrapConcatenateList(self, ctx:XplorePathGrammarParser.ExprWrapConcatenateListContext):
         return self.visitChildren(ctx)
 
 

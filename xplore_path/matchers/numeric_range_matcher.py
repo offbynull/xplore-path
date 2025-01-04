@@ -1,5 +1,7 @@
+from typing import Hashable
+
+from xplore_path.coercions import coerce_single_value
 from xplore_path.matcher import Matcher
-from xplore_path.coercions import LABEL_TYPE, coerce_single_value
 
 
 class NumericRangeMatcher(Matcher):
@@ -9,7 +11,7 @@ class NumericRangeMatcher(Matcher):
         self.max_ = max_
         self.max_inclusive = max_inclusive
 
-    def match(self, value: LABEL_TYPE) -> bool:
+    def match(self, value: Hashable) -> bool:
         value = coerce_single_value(value, float)
         if value is None:
             return False

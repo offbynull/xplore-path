@@ -1449,6 +1449,43 @@ class XplorePathGrammarParser ( Parser ):
                 return visitor.visitChildren(self)
 
 
+    class ExprWrapConcatenateListContext(WrapContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.WrapContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def OP(self):
+            return self.getToken(XplorePathGrammarParser.OP, 0)
+        def expr(self, i:int=None):
+            if i is None:
+                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
+            else:
+                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
+
+        def COMMA(self, i:int=None):
+            if i is None:
+                return self.getTokens(XplorePathGrammarParser.COMMA)
+            else:
+                return self.getToken(XplorePathGrammarParser.COMMA, i)
+        def CP(self):
+            return self.getToken(XplorePathGrammarParser.CP, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterExprWrapConcatenateList" ):
+                listener.enterExprWrapConcatenateList(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitExprWrapConcatenateList" ):
+                listener.exitExprWrapConcatenateList(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExprWrapConcatenateList" ):
+                return visitor.visitExprWrapConcatenateList(self)
+            else:
+                return visitor.visitChildren(self)
+
+
     class ExprWrapSingleContext(WrapContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.WrapContext
@@ -1474,43 +1511,6 @@ class XplorePathGrammarParser ( Parser ):
         def accept(self, visitor:ParseTreeVisitor):
             if hasattr( visitor, "visitExprWrapSingle" ):
                 return visitor.visitExprWrapSingle(self)
-            else:
-                return visitor.visitChildren(self)
-
-
-    class ExprWrapConcatentateListContext(WrapContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.WrapContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def OP(self):
-            return self.getToken(XplorePathGrammarParser.OP, 0)
-        def expr(self, i:int=None):
-            if i is None:
-                return self.getTypedRuleContexts(XplorePathGrammarParser.ExprContext)
-            else:
-                return self.getTypedRuleContext(XplorePathGrammarParser.ExprContext,i)
-
-        def COMMA(self, i:int=None):
-            if i is None:
-                return self.getTokens(XplorePathGrammarParser.COMMA)
-            else:
-                return self.getToken(XplorePathGrammarParser.COMMA, i)
-        def CP(self):
-            return self.getToken(XplorePathGrammarParser.CP, 0)
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterExprWrapConcatentateList" ):
-                listener.enterExprWrapConcatentateList(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitExprWrapConcatentateList" ):
-                listener.exitExprWrapConcatentateList(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitExprWrapConcatentateList" ):
-                return visitor.visitExprWrapConcatentateList(self)
             else:
                 return visitor.visitChildren(self)
 
@@ -1550,7 +1550,7 @@ class XplorePathGrammarParser ( Parser ):
                 pass
 
             elif la_ == 3:
-                localctx = XplorePathGrammarParser.ExprWrapConcatentateListContext(self, localctx)
+                localctx = XplorePathGrammarParser.ExprWrapConcatenateListContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 146
                 self.match(XplorePathGrammarParser.OP)

@@ -14,17 +14,22 @@ class SimplePath(Path):
             value: Any
     ):
         super().__init__(parent, position_in_parent, label, value)
-        self.children = []
+        self._children = []
+        self._sealed = False
 
     def add_child(self, child_p: Path):
+        if self._sealed:
+            raise ValueError('Once sealed children can no longer be updated')
         if child_p.parent() != self:
             raise ValueError('Child must have this path as its parent')
-        if child_p.position_in_parent() != len(self.children):
-            raise ValueError(f'Child must have position {len(self.children)}')
-        self.children.append(child_p)
-
-    def clear_children(self):
-        self.children = []
+        if child_p.position() != len(self._children):
+            raise ValueError(f'Child must have position {len(self._children)}')
+        self._children.append(child_p)
 
     def all_children(self) -> list[Path]:
-        return self.children
+        if not self._sealed:
+            raise ValueError('Must seal to use')
+        return self._children
+
+    def seal(self) -> None:
+        self._sealed = True

@@ -38,7 +38,10 @@
 * TODO: test code in the invocables package
 * ~~BUG: path.py label tests are no good because multiple children can have same mame~~
      ~~if p.label() == self.label()    CHANGE THIS TO    if p.position_in_parent() == self.position_in_parent()~~
-* BUG: //* must be returned in DOCUMENT ORDER, right now its not
+* ~~BUG: //* must be returned in DOCUMENT ORDER, right now its not~~
+   ~~instead using list as the collection holding paths, use a custom type Sequence? just to help differentiate / reason better~~
+   ~~MUST ALSO DEDUPLICATE if not concatenating~~
+* TODO: cache all_children() in PythonObjectPath + stream all_children() in other paths + take in max argument to cap number of children
 * ~~TODO: test filesystem file loaders~~
 * TODO: make use of variables in REPL - store results in var names and use those var names in queries
 * ~~TODO: test join syntax~~
@@ -66,4 +69,3 @@
     ~~add context object to new class - repl can use context object to access variables~~
     ~~repl can use this context obj to autocomplete variables~~
 * ~~TODO: sqlite support~~
-* TODO: instead using list as the collection holding paths, use a custom type Sequence? just to help differentiate / reason better

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Any, Hashable
 
 
@@ -35,7 +34,7 @@ class Path(ABC):
         if parent_p is None:
             return []
         siblings = parent_p.all_children()
-        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position_in_parent() == self.position_in_parent())
+        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position() == self.position())
         siblings = siblings[self_idx_in_siblings+1:]
         ret = []
         for p in siblings:
@@ -49,17 +48,25 @@ class Path(ABC):
         if parent_p is None:
             return []
         siblings = parent_p.all_children()
-        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position_in_parent() == self.position_in_parent())
+        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position() == self.position())
         siblings = siblings[self_idx_in_siblings+1:]
         return siblings
 
     def parent(self) -> Path | None:
         return self._parent
 
-    def position_in_parent(self) -> int:
+    def position(self) -> int:
         if self._position_in_parent is None:
             raise ValueError('No parent')
         return self._position_in_parent
+
+    def full_position(self) -> list[int]:
+        p_list = []
+        p = self
+        while p is not None:
+            p_list.append(p)
+            p = p.parent()
+        return [p.position() for p in reversed(p_list[:-1])]
 
     def all_ancestors(self) -> list[Path]:
         ret = []
@@ -74,7 +81,7 @@ class Path(ABC):
         if parent_p is None:
             return []
         siblings = parent_p.all_children()
-        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position_in_parent() == self.position_in_parent())
+        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position() == self.position())
         siblings = siblings[:self_idx_in_siblings]
         ret = parent_p.preceding() + [parent_p]
         for p in siblings:
@@ -87,7 +94,7 @@ class Path(ABC):
         if parent_p is None:
             return []
         siblings = parent_p.all_children()
-        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position_in_parent() == self.position_in_parent())
+        self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position() == self.position())
         siblings = siblings[:self_idx_in_siblings]
         return siblings
 

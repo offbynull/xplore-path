@@ -1,7 +1,8 @@
+from typing import Hashable
+
 from xplore_path.matcher import Matcher
-from xplore_path.coercions import LABEL_TYPE
 
 
 class WildcardMatcher(Matcher):
-    def match(self, value: LABEL_TYPE) -> bool:
+    def match(self, value: Hashable) -> bool:
         return True

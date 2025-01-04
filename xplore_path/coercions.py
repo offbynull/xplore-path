@@ -1,56 +1,13 @@
 from math import isnan
-from typing import ForwardRef, TypeVar, Type, Any, Literal, Hashable
+from typing import TypeVar, Type, Any
 
 from xplore_path.path import Path
 
-LABEL_TYPE = str | int | float | bool
-SINGLE_ENTRY_TYPE = str | int | float | bool | ForwardRef('matcher.matcher.Matcher')
-ENTRY_TYPE = SINGLE_ENTRY_TYPE | list[SINGLE_ENTRY_TYPE]
+
+T = TypeVar('T')
 
 
-T = TypeVar('T', bool, int, float, str)
-
-
-
-
-
-
-
-
-
-
-
-def coerce_for_set_operation(value: Any) -> dict[tuple[Literal['PATH', 'RAW'], Hashable], Any]:
-    value = coerce_to_list(value)
-    ret = {}
-    for v in value:
-        if isinstance(v, Path):
-            k = 'PATH', tuple(v.full_label())
-        else:
-            k = 'RAW', v
-        try:
-            ret[k] = v
-        except TypeError:
-            ...  # type is unhashable? silently discard it and move on
-    return ret  # noqa
-
-
-def coerce_to_list(value: Any) -> list[Any]:
-    if isinstance(value, list):
-        return value
-    return [value]
-
-
-def coerce_to_single(value: Any) -> Any:
-    if isinstance(value, list):
-        if len(value) > 0:
-            return value
-        else:
-            return None
-    return value
-
-
-def coerce_single_value(v: bool | int | float | str | Path, new_t: Type[T]) -> T | None:
+def coerce_single_value(v: Any, new_t: Type[T]) -> T | None:
     if type(v) == new_t:
         return v
     elif new_t == bool:

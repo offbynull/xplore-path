@@ -24,8 +24,8 @@ class EvaluatorTest(unittest.TestCase):
 
     def test_must_walk_to_descendant_using_wildcard(self):
         root = PythonObjectPath.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}})
-        self.assertEqual([e.label() for e in evaluate(root, '//*')], ['a', 'y', 'z', 'ptrs', 'b', 'c', 'd', 'e', 'f', 'd_ptr', 'f_ptr'])
-        self.assertEqual([e.label() for e in evaluate(root, '/.//*')], ['a', 'y', 'z', 'ptrs', 'b', 'c', 'd', 'e', 'f', 'd_ptr', 'f_ptr'])
+        self.assertEqual([e.label() for e in evaluate(root, '//*')], ['a', 'b', 'c', 'd', 'e', 'f', 'y', 'z', 'ptrs', 'd_ptr', 'f_ptr'])
+        self.assertEqual([e.label() for e in evaluate(root, '/.//*')], ['a', 'b', 'c', 'd', 'e', 'f', 'y', 'z', 'ptrs', 'd_ptr', 'f_ptr'])
         self.assertEqual([e.label() for e in evaluate(root, '//a//*')], ['b', 'c', 'd', 'e', 'f'])
         self.assertEqual([e.label() for e in evaluate(root, '//b//*')], ['c', 'd', 'e', 'f'])
         self.assertEqual([e.label() for e in evaluate(root, '//c//*')], [])
