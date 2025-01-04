@@ -19,14 +19,14 @@ class Cache:
     def to_path(self, key: Any) -> Path:
         return self._disk_cache_path / self._to_hash(key)
 
-    def load(self, key: Any) -> Any:
+    def load(self, key: Any) -> tuple[bool, Any]:
         key_hash = self._to_hash(key)
         # try loading it from in-memory cache
-        value = self._mem_cache.get(key_hash)
-        if value is not None:
+        if key_hash in self._mem_cache:
             # print('from mem')
+            value = self._mem_cache.get(key_hash)
             self._mem_cache.move_to_end(key_hash)
-            return value
+            return True, value
         # if fail - try loading it from disk cache
         cache_path = self._disk_cache_path / key_hash
         if cache_path.exists():
@@ -36,10 +36,10 @@ class Cache:
                 self._mem_cache[key_hash] = value  # its loaded, save it in-memory
                 if len(self._mem_cache) > self._mem_cache_capacity:
                     self._mem_cache.popitem(last=False)
+                return True, value
             except Exception as e:
                 cache_path.unlink(missing_ok=True)
-        return value
-
+        return False, None
 
     def cache(self, key: Any, value: Any) -> None:
         key_hash = self._to_hash(key)

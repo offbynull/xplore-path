@@ -1,3 +1,4 @@
+import cProfile
 import itertools
 import math
 from dataclasses import dataclass
@@ -884,7 +885,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 elif isinstance(result, Matcher) and isinstance(e, Path) \
                         and any(result.match(c.label()) for c in e.all_children()):  # /a/b[matcher] - ir a path,  return if has child with name matching label, if numericrangematcher above didn't match, it might match now
                     ret.append(e)
-                elif isinstance(e, Path) and any(
+                elif type(result) in {str, int} and isinstance(e, Path) and any(
                         self._apply_binary_boolean_op(
                             l=[c.label() for c in e.all_children()],
                             r=result,
@@ -893,7 +894,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                             required_type=None,
                             coercer_fallback=DiscardCoercerFallback()
                         )
-                ):  # /a/b[str_or_other]  - return if has child with label (coerced to match if possible)
+                ):  # /a/b[str_or_int]  - return if has child with label (coerced to match if possible)
+                    # you don't want to do /a/b[bool] because bool can get coerced to 0 - imagine /a/b[./c = some_val], if b is a list (labels with 0, 1, 2, 3, ...) and ./c = some_val evaluates to False, that False will coerce to int=0 for comparison and it'll always be True on first element?
                     ret.append(e)
                 elif not isinstance(e, Path) and \
                         self._apply_binary_boolean_op(
@@ -1224,4 +1226,19 @@ if __name__ == '__main__':
     # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
     # _test_with_fs_path('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs_path('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
-    # _test_with_fs_path('~/Downloads', "$whitespace_strip([' hello world ', ' hello world', 'hello world '])")
+    _test_with_fs_path('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
+
+    # profiler = cProfile.Profile()
+    # profiler.enable()
+    # fs_path = FileSystemPath.create_root_path(
+    #     '~/Downloads',
+    #     FileSystemPathContext(
+    #         cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
+    #     )
+    # )
+    # ret = Evaluator().evaluate(fs_path, "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes//geneName/value")
+    # ret = Evaluator().evaluate(fs_path, "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes//geneName/value")
+    # ret = Evaluator().evaluate(fs_path, "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes//geneName/value")
+    # print(f'{len(ret)=}')
+    # profiler.disable()
+    # profiler.print_stats(sort='time')

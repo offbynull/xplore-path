@@ -127,27 +127,28 @@ class FileSystemPath(Path):
                 if self.ctx.file_loader.is_loadable(c):
                     # try loading it from cache
                     self._notify(NoticeType.DATA_LOAD_CACHE_START, c)
-                    data = self.ctx.cache.load(cache_lookup_key)
-                    if data is None:
-                        self._notify(NoticeType.DATA_LOAD_CACHE_ABSENT, c)
-                    else:
+                    loaded, data = self.ctx.cache.load(cache_lookup_key)
+                    if loaded:
                         self._notify(NoticeType.DATA_LOAD_CACHE_SUCCESS, c)
+                    else:
+                        self._notify(NoticeType.DATA_LOAD_CACHE_ABSENT, c)
                     # if fail - try loading it directly - skip load+cache if cache only access
-                    if data is None and not self.ctx.cache_only_access:
+                    if not loaded and not self.ctx.cache_only_access:
                         self._notify(NoticeType.DATA_LOAD_FULL_START, c)
                         try:
                             data = self.ctx.file_loader.load(c)
                             self._notify(NoticeType.DATA_LOAD_FULL_COMPLETE, c)
                         except Exception:
                             self._notify(NoticeType.DATA_LOAD_FULL_ERROR, c)
-                        # its loaded now - put it in cache
-                        if data is not None and self.ctx.file_loader.is_cachable(c):
+                        # data may failed to load - treat as loaded + cache anyways because it'll probably fail to load next time as well
+                        loaded = True
+                        if self.ctx.file_loader.is_cachable(c):
                             self._notify(NoticeType.DATA_CACHE_START, c)
                             self.ctx.cache.cache(cache_lookup_key, data)
                             # TODO: fsync to make sure its rewritten in the event of an OS crash?
                             self._notify(NoticeType.DATA_CACHE_COMPLETE, c)
                     # done
-                    if data is not None:
+                    if loaded and data is not None:
                         path_creator = self.ctx.file_loader.path_creator(c)
                         ret.append(path_creator(self, c_idx, c.name, data))
                     else:

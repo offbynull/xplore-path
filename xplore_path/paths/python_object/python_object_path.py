@@ -22,19 +22,20 @@ class PythonObjectPath(Path):
         super().__init__(parent, position_in_parent, label, value)
 
     def all_children(self) -> list[Path]:
-        parent = self.value()
+        this = self.value()
         ret = []
-        if isinstance(parent, dict):
-            for i, k in enumerate(parent.keys()):
-                ret += [PythonObjectPath(self, i, k, parent[k])]
-        elif isinstance(parent, set):
-            for i, v in enumerate(parent):
+        if isinstance(this, dict):
+            for i, k in enumerate(this.keys()):
+                ret += [PythonObjectPath(self, i, k, this[k])]
+        elif isinstance(this, set):
+            for i, v in enumerate(this):
                 return [PythonObjectPath(self, i, i, v)]
-        elif isinstance(parent, (list, tuple)):
-            for i, v in enumerate(parent):
+        elif isinstance(this, (list, tuple)):
+            for i, v in enumerate(this):
                 ret += [PythonObjectPath(self, i, i, v)]
-        for i, k in enumerate(k_ for k_ in dir(parent) if _valid_obj_attr(parent, k_)):
-            ret += [PythonObjectPath(self, i, k, getattr(parent, k))]
+        # Don't allow it to dive into Python objects - very expensive and not useful for now
+        # for i, k in enumerate(k_ for k_ in dir(this) if _valid_obj_attr(this, k_)):
+        #     ret += [PythonObjectPath(self, i, k, getattr(this, k))]
         return ret
 
     @staticmethod
