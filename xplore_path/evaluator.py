@@ -200,6 +200,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     #       binary search.
     #
     #       Maybe, instead of passing around lists of Paths (and singular values), create a Sequence class that holds
+    #       Maybe, instead of passing around lists of Paths (and singular values), create a Sequence class that holds
     #       these values. The Sequence class can generate an index (e.g. hash or sorted) based on the values within the
     #       sequence.
     def visitExprJoin(self, ctx: XplorePathGrammarParser.ExprJoinContext):
@@ -672,7 +673,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
             new_entities = FullSequence(
-                itertools.chain(*(p.all_descendants() for p in self.context.entities))
+                itertools.chain(*([p] + p.all_descendants() for p in self.context.entities))
             )
             new_entities = self._apply_filter(new_entities, ctx.filter_())
             self.context.entities = new_entities  # will not include p, only descendants of p
@@ -1288,11 +1289,13 @@ if __name__ == '__main__':
     # _test_with_fs_path('~/Downloads', "$frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
     # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))/*")
     # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))//*")
-    # _test_with_fs_path('~/Downloads', "$distinct($regex_extract(/Fake_Mouse_Assays_200.zip/*/0/GO_Term, '\d{7}'))")
+    # _test_with_fs_path('~/Downloads', "$distinct($regex_extract(/mouse_assays.zip/*/0/GO_Term, '\d{7}'))")
     # _test_with_fs_path('~/Downloads', "/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*")
     # _test_with_fs_path('~/Downloads', "$regex_extract(/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*, '\\d{7}')")
-    _test_with_fs_path('~/Downloads', "$distinct(/Fake_Mouse_Assays_200.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\\d{7}') = $regex_extract(//r//id, '\\d{7}')]")
+    # _test_with_fs_path('~/Downloads', "$distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\\d{7}') = $regex_extract(//r//id, '\\d{7}')]")
     # _test_with_fs_path('~/Downloads', "//*")
+    _test_with_fs_path('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[./*=Well]")
+    _test_with_fs_path('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]")
     # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
     # _test_with_fs_path('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs_path('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")

@@ -1,3 +1,56 @@
+YOU CAN INTEGRATE YOUR OWN FILE TYPES: scene graphs, flow cytometry data, custom APIs
+
+1. ensure you have python and poetry installed
+2. git clone the repository: `git clone https://github.com/offbynull/xplore-path.git`
+3. navigate to cloned project: `cd xplore-path`
+4. `poetry intall`
+5. `poetry shell`
+6. `xplore-path --path ./playground`
+pip install poetry
+poetry install
+poetry shell
+cd playground
+xplore-path
+
+# Inspect root
+/*          # List all files
+$count(/*)  # Count number of files
+
+# Inspect mouse assays
+/mouse_assays.zip/*                                           # List individual mouse assays
+/mouse_assays.zip/Mouse_Assay_001.csv//*                      # List first mouse assay's data
+/mouse_assays.zip/r'.*001.csv'//*                             # List first mouse assay's data, using regex
+/mouse_assays.zip/g'*001.csv'//*                              # List first mouse assay's data, using glob
+label /mouse_assays.zip/Mouse_Assay_001.csv/0/*               # List first mouse assay's headers (labels in first row)
+/mouse_assays.zip//*/GO_Term                                  # For each assay, list all values under the GO terms column
+/mouse_assays.zip//*/GO_Term[. = g'GO:*']                     # For each assay, list all values under the GO terms column starting with "GO:" (these are the actual GO terms)
+/mouse_assays.zip//0/GO_Term                                  # For each assay, list first value under the GO terms column (these are the actual GO terms)
+$distinct(/mouse_assays.zip//0/GO_Term)                       # Across all assays, list distinct GO terms
+$frequency_count(/mouse_assays.zip//0/GO_Term)//*             # Across all assays, count how often each GO term appears
+
+
+# Well data
+position /mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]   # Get row where Well data starts
+label /mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]      # Get row where Well data starts (using label instead of position)
+/mouse_assays.zip/Mouse_Assay_001.csv/*[position . > position /mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]]//* # Truncate rows to those after Well
+
+
+# Inspect mouse GO terms
+/goslim_mouse.json//*                                                         # List all
+/goslim_mouse.json//*[./meta//val = g'*neuro*']//*                            # List only related to neuro
+/goslim_mouse.json//*[./meta//val = g'*neuro*']//id                           # List only related to neuro, ids only
+/goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl                          # List only related to neuro, labels only
+/goslim_mouse.json//*[./meta//val = g'*neuro*']//(id, lbl)                    # List only related to neuro, ids and labels
+/goslim_mouse.json//*[./meta//val = g'*neuro*']//r'id|lbl'                    # List only related to neuro, ids and labels using regex
+$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\d{7}')  # List only related to neuro, cleaned ids only
+
+
+# Get GO terms in assays related to neuro
+$distinct(/mouse_assays.zip/*/0/GO_Term)                 # List GO terms in assays
+/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']  # List GO terms related to neuro
+($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\d{7}') = $regex_extract(//r//id, '\d{7}')]) # List GO terms in assays related to neuro
+
+
 * ~~TODO: add join syntax - inner, left, right~~
 * ~~TODO: add distinct/unique syntax - just coerce it into a set~~
 * ~~TODO: add count syntax - just coerce it into a set~~~~

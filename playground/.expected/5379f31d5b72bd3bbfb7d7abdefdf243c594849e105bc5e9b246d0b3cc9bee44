@@ -1,0 +1,1 @@
+["$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\\d{7}')", "0005102", "0045202"]
