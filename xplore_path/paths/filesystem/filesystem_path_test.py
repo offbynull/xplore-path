@@ -3,7 +3,8 @@ import shutil
 import tempfile
 import unittest
 
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext
+from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
+from xplore_path.paths.filesystem.context import FileSystemContext
 
 
 class TestCase(unittest.TestCase):
@@ -22,13 +23,13 @@ class TestCase(unittest.TestCase):
                 None,
                 None,
                 files_dir_path,
-                FileSystemPathContext(
+                FileSystemContext(
                     workspace=workspace_dir_path
                 )
             )
             # walk
             fsp_descendants = fsp.all_descendants()
-        self.assertEqual(185, len(fsp_descendants))  # just check length - too lazy to check everything
+        self.assertEqual(201, len(fsp_descendants))  # just check length - too lazy to check everything
 
 
 if __name__ == '__main__':

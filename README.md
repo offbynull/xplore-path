@@ -33,7 +33,7 @@
 * ~~TODO: test label directive~~
 * ~~TODO: ../* doesn't work because th parser doesn't recognize it~~
 * TODO: test function invocations syntax
-    BUG comma misinterpreted func(a,b) interpretes args as a single argument of [a,b]
+    ~~BUG comma misinterpreted func(a,b) interpretes args as a single argument of [a,b]~~
 * TODO: function invocation 
 * TODO: test code in the invocables package
 * TODO: cache all_children() in PythonObjectPath + stream all_children() in other paths + take in max argument to cap number of children

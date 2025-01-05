@@ -15,7 +15,8 @@ import xplore_path.path
 from xplore_path.evaluator import Evaluator
 from xplore_path.repl.query_completer import QueryCompleter
 from xplore_path.repl.utils import print_line, fix_label_for_expression
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext, NoticeType
+from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
+from xplore_path.paths.filesystem.context import NoticeType, FileSystemContext
 from xplore_path.raise_parse_error_listener import ParseException
 from xplore_path.sequence import Sequence, SingleWrapSequence
 
@@ -114,14 +115,14 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
 
     p = FileSystemPath.create_root_path(
         query_path,
-        FileSystemPathContext(
+        FileSystemContext(
             workspace=cache_path,
             cache_notifier=_cache_notifier
         )
     )
     p_cached_only = FileSystemPath.create_root_path(
         query_path,
-        FileSystemPathContext(
+        FileSystemContext(
             workspace=cache_path,
             cache_only_access=True
         )
@@ -188,7 +189,7 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
 def precache(evaluator: Evaluator, query_path: Path, cache_path: Path) -> None:
     p = FileSystemPath.create_root_path(
         query_path,
-        FileSystemPathContext(
+        FileSystemContext(
             workspace=cache_path,
             cache_notifier=_cache_notifier
         )

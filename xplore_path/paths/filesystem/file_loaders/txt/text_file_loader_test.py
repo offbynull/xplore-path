@@ -9,7 +9,7 @@ class TestCase(unittest.TestCase):
         actual = TextFileLoader().load(
             Path(__file__).parent / 'test.txt'
         )
-        expected = 'hello world!'
+        expected = {'content': 'hello world!'}
 
         self.assertEqual(expected, actual)
 

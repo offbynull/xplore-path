@@ -11,4 +11,4 @@ class TextFileLoader(FileLoader):
         return p.suffix == '.txt'
 
     def load(self, p: pathlib.Path) -> Any:
-        return p.read_text(encoding='utf-8')
+        return {'content': p.read_text(encoding='utf-8')}

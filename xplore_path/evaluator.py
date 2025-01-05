@@ -22,7 +22,8 @@ from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
 from xplore_path.XplorePathGrammarLexer import XplorePathGrammarLexer
 from xplore_path.XplorePathGrammarParser import XplorePathGrammarParser
 from xplore_path.XplorePathGrammarVisitor import XplorePathGrammarVisitor
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath, FileSystemPathContext
+from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
+from xplore_path.paths.filesystem.context import FileSystemContext
 from xplore_path.path import Path
 from xplore_path.paths.mirror.mirror_path import MirrorPath
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
@@ -1097,7 +1098,7 @@ def _test_with_fs_path(dir, expr):
     print(f'---- res for {expr}')
     fs_path = FileSystemPath.create_root_path(
         dir,
-        FileSystemPathContext(
+        FileSystemContext(
             cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
         )
     )
