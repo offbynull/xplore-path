@@ -1,6 +1,6 @@
 # Xplore Path
 
-Xplore Path is a tool for quick-and-dirty data exploration, designed for messy data spread across disparate files and formats.
+Xplore Path is a tool for quick-and-dirty data exploration, built for messy, untidy data scattered across disparate files and formats.
 
  * **Simple syntax**: Query data with an intuitive, XPath-like syntax.
  * **Broad format support**: Search through CSVs, XLSXs, JSONs, YAMLs, DOCXs, PDFs, XMLs, HTMLs, ...
@@ -8,7 +8,14 @@ Xplore Path is a tool for quick-and-dirty data exploration, designed for messy d
  * **Unified environment**: Search through disparate files and formats within a single context.
  * **Extendable**: Add functions and formats to customize to your use case (e.g. 3D scene graphs, flow cytometry, ...).
 
-Xplore Path aims to be the first tool you reach for when inspecting / exploring new data "thrown over the wall" by a colleague or partner. It does not aim to be a database or a storage engine.
+Xplore Path aims to be the first tool you reach for when inspecting / exploring new data "thrown over the fence" by a colleague or partner. It does not aim to be a database or a storage engine.
+
+<details>
+  <summary>:warning: Xplore Path is not a database :warning:</summary>
+
+  Xplore Path does not index data, optimize storage, or optimize queries as a traditional database does. Xplore Path works best when doing quick-and-dirty inspection / exploration on reasonable amounts of data.
+
+</details>
 
 ## Quick-Start Guide
 
@@ -30,7 +37,6 @@ Queries use a syntax inspired by XPath, where the start of the hierarchy is the 
 <details><summary>Example queries</summary>
 
 * `/*` - List top-level files.
-* `$count(/*)` - Count top-level files.
 * `//*` - List all data.
 * `/mouse_assays.zip/*` - List mouse assays.
 * `/mouse_assays.zip/Mouse_Assay_001.csv//*` - List first mouse assay's data.
@@ -46,10 +52,18 @@ Queries use a syntax inspired by XPath, where the start of the hierarchy is the 
 
 <details><summary>Example queries with filtering</summary>
 
+* `/mouse_assays.zip/*[.//Target_Gene_Protein = 'Mouse Cd40 (Immune Receptor)']` - List mouse assays targeting gene Cd40.
 * `/mouse_assays.zip//*/GO_Term[. = g'GO:*']` - For each mouse assay, list the gene ontology terms used.
-* `$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\d{7}')` - List mouse gene ontology related to neuro, cleaned ids only.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//id` - List mouse gene ontology related to neuro, cleaned ids only.
+
+</details>
+
+<details><summary>Example queries fed into function</summary>
+
+* `$count(/*)` - Count top-level files.
 * `$distinct(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])` - Across all mouse assays, list distinct gene ontology terms used.
 * `$frequency_count(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])//*` - Across all mouse assays,  count how often each gene ontology term appears.
+* `$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\d{7}')` - List mouse gene ontology related to neuro, cleaned ids only.
 
 </details>
 
@@ -75,61 +89,9 @@ If you've used XPath before, the queries above should feel familiar as Xplore Pa
 * Variables are denoted by a `$` followed by a word (e.g. `$distinct`), and may be called / searched.
 * Queries are joinable using `inner join`, `left join`, and `right join`.
 
-The example queries above utilize some of this new functionality. The full grammar is available at [XplorePathGrammar.g4](xplore_path/XplorePathGrammar.g4).
+The Xplore Path grammar is available at [XplorePathGrammar.g4](xplore_path/XplorePathGrammar.g4).
 
-<details>
-  <summary>:warning: Xplore Path is not a database</summary>
-
-  Xplore Path is not a database. That is, it doesn't index data, optimize storage, or optimize queries as a traditional database does. Xplore Path works best when doing quick-and-dirty inspection/exploration on reasonable amounts of data. For example, imagine you're a scientist/analyst and a partner (e.g. university lab / contract research organization) has sent you a ZIP containing experiment results / assays, Xplore Path can act as an initial step to inspect the data.
-
-</details>
-
-<details>
-  <summary>More queries to play around with</summary>
-
-  ```
-  # Inspect root
-  /*          # List all files
-  $count(/*)  # Count number of files
-  
-  # Inspect mouse assays
-  /mouse_assays.zip/*                                           # List individual mouse assays
-  /mouse_assays.zip/Mouse_Assay_001.csv//*                      # List first mouse assay's data
-  /mouse_assays.zip/r'.*001.csv'//*                             # List first mouse assay's data, using regex
-  /mouse_assays.zip/g'*001.csv'//*                              # List first mouse assay's data, using glob
-  label /mouse_assays.zip/Mouse_Assay_001.csv/0/*               # List first mouse assay's headers (labels in first row)
-  /mouse_assays.zip//*/GO_Term                                  # For each assay, list all values under the GO terms column
-  /mouse_assays.zip//*/GO_Term[. = g'GO:*']                     # For each assay, list all values under the GO terms column starting with "GO:" (these are the actual GO terms)
-  /mouse_assays.zip//0/GO_Term                                  # For each assay, list first value under the GO terms column (these are the actual GO terms)
-  $distinct(/mouse_assays.zip//0/GO_Term)                       # Across all assays, list distinct GO terms
-  $frequency_count(/mouse_assays.zip//0/GO_Term)//*             # Across all assays, count how often each GO term appears
-  
-  
-  # Well data
-  position /mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]   # Get row where Well data starts
-  label /mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]      # Get row where Well data starts (using label instead of position)
-  /mouse_assays.zip/Mouse_Assay_001.csv/*[position . > position /mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]]//* # Truncate rows to those after Well
-  
-  
-  # Inspect mouse GO terms
-  /goslim_mouse.json//*                                                         # List all
-  /goslim_mouse.json//*[./meta//val = g'*neuro*']//*                            # List only related to neuro
-  /goslim_mouse.json//*[./meta//val = g'*neuro*']//id                           # List only related to neuro, ids only
-  /goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl                          # List only related to neuro, labels only
-  /goslim_mouse.json//*[./meta//val = g'*neuro*']//(id, lbl)                    # List only related to neuro, ids and labels
-  /goslim_mouse.json//*[./meta//val = g'*neuro*']//r'id|lbl'                    # List only related to neuro, ids and labels using regex
-  $regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\d{7}')  # List only related to neuro, cleaned ids only
-  
-  
-  # Get GO terms in assays related to neuro
-  $distinct(/mouse_assays.zip/*/0/GO_Term)                 # List GO terms in assays
-  /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']  # List GO terms related to neuro
-  ($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\d{7}') = $regex_extract(//r//id, '\d{7}')]) # List GO terms in assays related to neuro
-  ```
-
-</details>
-
-# TODO
+# TODOs
 
 * TODO: comparison operators - ADD MODIFIER THAT MAKES IT STRICT (no coercions allowed except int/float)
 * TODO: filesystem path - for each parsed file, inject invocations that can re-work the file
