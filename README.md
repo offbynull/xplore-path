@@ -27,32 +27,43 @@ The last step launches the Xplore Path REPL and sets the active directory to `./
 
 Queries use a syntax inspired by XPath, where the start of the hierarchy is the `./playground` directory. Try running a few of the example queries shown below.
 
- * General purpose queries:
-   * `/*` - List top-level files.
-   * `$count(/*)` - Count top-level files.
-   * `//*` - List all data.
- * Queries on mouse assays (`mouse_assays.zip`):
-   * `/mouse_assays.zip/*` - List mouse assays.
-   * `/mouse_assays.zip/Mouse_Assay_001.csv//*` - List first mouse assay's data.
-   * `/mouse_assays.zip/r'.*001.csv'//*` - List first mouse assay's data, but using regex to identify the first assay.
-   * `/mouse_assays.zip/g'*001.csv'//*` - List first mouse assay's data, but using glob to identify the first assay. 
-   * `/mouse_assays.zip//*/GO_Term[. = g'GO:*']` - For each mouse assay, list the gene ontology terms used. 
-   * `$distinct(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])` - Across all mouse assays, list distinct gene ontology terms used.
-   * `$frequency_count(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])//*` - Across all mouse assays,  count how often each gene ontology term appears.
- * Queries on gene ontology terms (`goslim_mouse.json`)
-   * `/goslim_mouse.json//*` - List all.
-   * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//*` - List only related to neuro.
-   * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//id` - List only related to neuro, ids only.
-   * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl` - List only related to neuro, labels only.
-   * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//(id, lbl)` - List only related to neuro, ids and labels.
-   * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//r'id|lbl'` - List only related to neuro, ids and labels using regex.
-   * `$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\d{7}')` - List only related to neuro, cleaned ids only.
- * Queries combining mouse assays (`mouse_assays.zip`) and gene ontology terms (`goslim_mouse.json`):
-   * `$distinct(/mouse_assays.zip/*/0/GO_Term)` -  List GO terms in assays 
-   * `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']` - List GO terms related to neuro
-   * `($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\d{7}') = $regex_extract(//r//id, '\d{7}')])` - List GO terms in assays related to neuro
+<details><summary>Example queries</summary>
 
-If you've used XPath before, the queries above should feel familiar as Xplore Path's query language is heavily inspired by XPath. In addition to basic XPath syntax, Xplore Path provides the following major additions:
+* `/*` - List top-level files.
+* `$count(/*)` - Count top-level files.
+* `//*` - List all data.
+* `/mouse_assays.zip/*` - List mouse assays.
+* `/mouse_assays.zip/Mouse_Assay_001.csv//*` - List first mouse assay's data.
+* `/mouse_assays.zip/r'.*001.csv'//*` - List first mouse assay's data, but using regex to identify the first assay.
+* `/mouse_assays.zip/g'*001.csv'//*` - List first mouse assay's data, but using glob to identify the first assay.
+* `/goslim_mouse.json//*` - List mouse gene ontology entries.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//*` - List mouse gene ontology entries related to neuro.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//id` - List mouse gene ontology entries related to neuro, ids only.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl` - List mouse gene ontology entries related to neuro, labels only.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//(id, lbl)` - List mouse gene ontology entries related to neuro, ids and labels.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//r'id|lbl'` - List mouse gene ontology entries related to neuro, ids and labels using regex.
+</details>
+
+<details><summary>Example queries with filtering</summary>
+
+* `/mouse_assays.zip//*/GO_Term[. = g'GO:*']` - For each mouse assay, list the gene ontology terms used.
+* `$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\d{7}')` - List mouse gene ontology related to neuro, cleaned ids only.
+* `$distinct(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])` - Across all mouse assays, list distinct gene ontology terms used.
+* `$frequency_count(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])//*` - Across all mouse assays,  count how often each gene ontology term appears.
+
+</details>
+
+<details><summary>Example queries with joins</summary>
+
+* `($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\d{7}') = $regex_extract(//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
+
+The query above is made up of thw two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` amd `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists grabs the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
+
+:warning: **Xplore Path joins are currently slow.** At the moment, the joining logic hasn't been optimized. Expect joins to be incredibly slow: O(n^2).
+</details>
+
+
+If you've used XPath before, the queries above should feel familiar as Xplore Path's query language is heavily inspired by XPath. In addition to basic XPath syntax, Xplore Path provides several major updates:
 
 * Fuzzy matching is available in various forms.
   * Prefix a string with `g` for glob matching (e.g. `g'hello*'`).
@@ -61,17 +72,10 @@ If you've used XPath before, the queries above should feel familiar as Xplore Pa
   * Prefix a string with `s` for strict matching, as in not fuzzy/approximate in any way (e.g. `s'hello world'`).
   * `~number:number` for number ranges, optionally using brackets to define open/closed-ness (e.g. `~[4:9)`)
   * `~number@tolerance` for number within some tolerance (e.g. `~3.14@0.0001`)
-* Variables are denoted by a `$` followed by a word (e.g. `$distinct`), and may be callable / searchable.
+* Variables are denoted by a `$` followed by a word (e.g. `$distinct`), and may be called / searched.
 * Queries are joinable using `inner join`, `left join`, and `right join`.
 
 The example queries above utilize some of this new functionality. The full grammar is available at [XplorePathGrammar.g4](xplore_path/XplorePathGrammar.g4).
-
-<details>
-  <summary>:warning: Xplore Path joins are currently slow.</summary>
-
-  At the moment, the joining logic hasn't been optimized. Expect joins to be incredibly slow: O(n^2). 
-
-</details>
 
 <details>
   <summary>:warning: Xplore Path is not a database</summary>
