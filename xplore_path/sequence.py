@@ -18,6 +18,18 @@ class Sequence(ABC):
     def to_values(self) -> Iterator[Path | Any]:
         return ((v.value() if isinstance(v, Path) else v) for v in self._walk_entities())
 
+    def to_single_value_or_empty(self) -> Any | EmptySequence:  # call when you expect single to have 0 or 1 values. 0 value means nothing, represented as an empty sequence
+        if self:
+            i = iter(self)
+            ret = next(i)
+            try:
+                next(i)
+                raise ValueError('More than 1 value in sequence')
+            except StopIteration:
+                return ret
+        else:
+            return EmptySequence()
+
     def __iter__(self):
         return self._walk_entities()
 

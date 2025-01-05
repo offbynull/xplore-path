@@ -1,4 +1,3 @@
-import cProfile
 import itertools
 import math
 from dataclasses import dataclass
@@ -67,11 +66,11 @@ class _EvaluatorVisitorContext:
         if isinstance(new_entities, Sequence):
             self.entities = new_entities
         elif new_entities == PathResetMode.RESET_WITH_ROOT:
-            self.entities = [self.root]
+            self.entities = SingleWrapSequence(self.root)
         elif new_entities == PathResetMode.RESET_WITH_SELF:
             self.entities = self.entities  # Normally it'd be a copy of the self.entities, but Sequences should be immutable
         elif new_entities == PathResetMode.RESET_WITH_EMPTY:
-            self.entities = []
+            self.entities = EmptySequence()
         else:
             raise ValueError('This should never happen')
 
@@ -113,14 +112,19 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitExprPath(self, ctx: XplorePathGrammarParser.ExprPathContext):
         entities = self.visit(ctx.path())
-        if ctx.filter_():
-            entities = self._apply_filter(entities, ctx.filter_())
+        entities = self._apply_filter(entities, ctx.filter_())
         return entities
+
+    def visitExprPathInvoke(self, ctx: XplorePathGrammarParser.ExprPathInvokeContext):
+        ret = self.visit(ctx.path())
+        ret = self._apply_filter(ret, ctx.filter_(0))
+        ret = self._invoke(ret, ctx.argumentList(), ctx.filter_(1))
+        return ret
 
     def visitExprLiteral(self, ctx: XplorePathGrammarParser.ExprLiteralContext):
         return self.visit(ctx.literal())
 
-    def visitExprVariable(self, ctx: XplorePathGrammarParser.ExprVariableContext):
+    def _get_var(self, ctx):
         if ctx.varRef().Name():
             name = ctx.varRef().Name().getText()
         elif ctx.varRef().IntegerLiteral():
@@ -129,8 +133,18 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             name = self._decode_str(ctx.varRef().StringLiteral().getText())
         else:
             raise ValueError('Unexpected')
+        return self.context.variables.get(name, EmptySequence())
 
-        return self.context.variables.get(name, None)
+    def visitExprVariable(self, ctx: XplorePathGrammarParser.ExprVariableContext):
+        ret = self._get_var(ctx)
+        ret = self._apply_filter(ret, ctx.filter_())
+        return ret
+
+    def visitExprVariableInvoke(self, ctx: XplorePathGrammarParser.ExprVariableInvokeContext):
+        ret = self._get_var(ctx)
+        ret = self._apply_filter(ret, ctx.filter_(0))
+        ret = self._invoke(ret, ctx.argumentList(), ctx.filter_(1))
+        return ret
 
     def visitExprUnary(self, ctx: XplorePathGrammarParser.ExprUnaryContext):
         if ctx.coerceFallback():
@@ -147,10 +161,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 inner = SingleWrapSequence(inner)
                 inner = TransformSequence(inner, lambda _, v: coerce_single_value(v, float), fallback)
                 inner = TransformSequence(inner, lambda _, v: -v, DoNothingFallbackMode())
-                if inner:
-                    return next(iter(inner))
-                else:
-                    return EmptySequence()
+                return inner.to_single_value_or_empty()
         elif ctx.PLUS():
             return inner  # Keep it as-is -- not required to do any manipulation here
         raise ValueError('Unexpected')
@@ -158,11 +169,12 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitExprAtomicOrEncapsulate(self, ctx: XplorePathGrammarParser.ExprAtomicOrEncapsulateContext):
         return self.visit(ctx.atomicOrEncapsulate())
 
-    def visitExprFunctionCall(self, ctx: XplorePathGrammarParser.ExprFunctionCallContext):
-        if ctx.coerceFallback():
-            fallback = self.visit(ctx.coerceFallback())
-        else:
-            fallback = DiscardFallbackMode()
+    def _invoke(self, invocable, arglist_ctx, result_filter_ctx):
+        # if ctx.coerceFallback():
+        #     fallback = self.visit(ctx.coerceFallback())
+        # else:
+        #     fallback = DiscardFallbackMode()
+        fallback = DiscardFallbackMode()
 
         def op(_invocable, _args):
             if isinstance(_invocable, Invocable):
@@ -172,18 +184,15 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                     ...  # do nothing
             return None
 
-        invocable = self.visit(ctx.atomicOrEncapsulate())
-        args = [self.visit(n) for n in ctx.argumentList().expr()]
+        args = [self.visit(n) for n in arglist_ctx.expr()]
         if isinstance(invocable, Sequence):
             ret = TransformSequence(invocable, lambda _, i: op(i, args), fallback)
-            return ret
         else:
             ret = SingleWrapSequence(invocable)
             ret = TransformSequence(ret, lambda _, i: op(i, args), fallback)
-            if ret:
-                return next(iter(ret))
-            else:
-                return EmptySequence()
+            ret = ret.to_single_value_or_empty()
+        ret = self._apply_filter(ret, result_filter_ctx)
+        return ret
 
     # TODO: Deeply inefficient - rework this to properly index before joining based on the condition. For example, if
     #       condition is == and both operands are known to be hashable, then create hash table and use that for quick
@@ -379,11 +388,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         else:
             l = TransformSequence(SingleWrapSequence(l), lambda _, v: coerce_single_value(v, expected_type), fallback)
             r = TransformSequence(SingleWrapSequence(r), lambda _, v: coerce_single_value(v, expected_type), fallback)
-            ret = FullSequence(op(l_, r_) for l_, r_ in combine_op(l, r))
-            if ret:
-                return next(iter(ret))
-            else:
-                return EmptySequence()
+            return FullSequence(op(l_, r_) for l_, r_ in combine_op(l, r)).to_single_value_or_empty()
 
     def visitExprMultiplicative(self, ctx: XplorePathGrammarParser.ExprMultiplicativeContext):
         if ctx.coerceFallback():
@@ -496,7 +501,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         else:  # single comparison regardless of mode
             ret = SingleWrapSequence(_coerce_eval_insert(l, r))
             ret = TransformSequence(ret, lambda _, v: v, fallback)
-            return next(iter(ret)) if ret else EmptySequence()
+            return ret.to_single_value_or_empty()
 
     def visitExprComparison(self, ctx: XplorePathGrammarParser.ExprComparisonContext):
         if ctx.coerceFallback():
@@ -590,11 +595,19 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             ret = SingleOrSequenceWrapSequence(ret)
             agg_op = any
         return agg_op, ret
+    
+    def visitExprWrapOrVar(self, ctx: XplorePathGrammarParser.ExprWrapOrVarContext):
+        return self.visit(ctx.wrapOrVar())
 
     def visitExprWrap(self, ctx: XplorePathGrammarParser.ExprWrapContext):
         entities = self.visit(ctx.wrap())
-        if ctx.filter_():
-            entities = self._apply_filter(entities, ctx.filter_())
+        entities = self._apply_filter(entities, ctx.filter_())
+        return entities
+
+    def visitExprWrapInvoke(self, ctx: XplorePathGrammarParser.ExprWrapInvokeContext):
+        entities = self.visit(ctx.wrap())
+        entities = self._apply_filter(entities, ctx.filter_(0))
+        entities = self._invoke(entities, ctx.argumentList(), ctx.filter_(1))
         return entities
 
     def visitExprWrapSingle(self, ctx: XplorePathGrammarParser.ExprWrapSingleContext):
@@ -616,8 +629,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_ROOT)
             new_entities = self.context.entities
-            if ctx.filter_():
-                new_entities = self._apply_filter(new_entities, ctx.filter_())
+            new_entities = self._apply_filter(new_entities, ctx.filter_())
             return new_entities
         finally:
             self.context.restore()
@@ -708,10 +720,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitPathFromNested(self, ctx: XplorePathGrammarParser.PathFromNestedContext):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = self.visit(ctx.wrap())
+            new_entities = self.visit(ctx.wrapOrVar())
             new_entities = [e for e in new_entities if isinstance(e, Path)]
             new_entities = FullSequence(new_entities)
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
             self.context.entities = new_entities
             return self.visit(ctx.relPath())
         finally:
@@ -720,12 +731,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitPathFromNestedAny(self, ctx: XplorePathGrammarParser.PathFromNestedAnyContext):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = self.visit(ctx.wrap())
+            new_entities = self.visit(ctx.wrapOrVar())
             new_entities = [e for e in new_entities if isinstance(e, Path)]
             new_entities = FullSequence(
                 itertools.chain(*([p] + p.all_descendants() for p in new_entities))
             )
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
             self.context.entities = new_entities
             return self.visit(ctx.relPath())
         finally:
@@ -768,8 +778,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             ret = self.visit(ctx.reverseStep())
         else:
             raise ValueError('Unexpected')
-        if ctx.filter_():
-            ret = self._apply_filter(ret, ctx.filter_())
+        ret = self._apply_filter(ret, ctx.filter_())
         return ret
 
     def visitReverseStepParent(self, ctx: XplorePathGrammarParser.ReverseStepParentContext):
@@ -903,7 +912,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 ret.append(e)
         return FullSequence(ret)
 
-    def _apply_filter(self, entities: Sequence, ctx: XplorePathGrammarParser.FilterContext | None):
+    def _apply_filter(self, entities: Sequence | Any, ctx: XplorePathGrammarParser.FilterContext | None):
         if ctx is None:
             return entities
 
@@ -956,11 +965,12 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             finally:
                 self.context.restore()
 
-        return TransformSequence(
-            sequence=entities,
-            transformer=transformer,
-            fallback_mode=DiscardFallbackMode()
-        )
+        if isinstance(entities, Sequence):
+            return TransformSequence(sequence=entities, transformer=transformer, fallback_mode=DiscardFallbackMode())
+        else:
+            entities = SingleWrapSequence(entities)
+            entities = TransformSequence(sequence=entities, transformer=transformer, fallback_mode=DiscardFallbackMode())
+            return entities.to_single_value_or_empty()
 
     def _decode_str(self, text: str) -> str:
         mode = text[0]

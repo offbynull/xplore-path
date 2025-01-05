@@ -1,0 +1,40 @@
+{
+  "name": "John Doe",
+  "age": 30,
+  "email": "johndoe@example.com",
+  "address": {
+    "street": "123 Main Street",
+    "city": "Anytown",
+    "state": "CA",
+    "zip": "12345"
+  },
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "555-555-5555"
+    },
+    {
+      "type": "work",
+      "number": "555-555-5556"
+    }
+  ],
+  "isEmployed": true,
+  "skills": [
+    "programming",
+    "data analysis",
+    "problem solving"
+  ],
+  "projects": [
+    {
+      "name": "Website Redesign",
+      "completed": false,
+      "deadline": "2024-12-31"
+    },
+    {
+      "name": "Data Migration",
+      "completed": true,
+      "deadline": "2023-06-15"
+    }
+  ]
+}
+

@@ -96,6 +96,12 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
         nonlocal truncate_long_lines
         truncate_long_lines = not truncate_long_lines
 
+    @bindings.add('escape')  # For this to not have a delay, you need the timeouts further down - https://github.com/prompt-toolkit/python-prompt-toolkit/issues/1901
+    def _(event):
+        buffer = event.app.current_buffer
+        buffer.text = ''
+        event.app.invalidate()
+
     query_res = None
     def get_toolbar_text():
         nonlocal query_res
@@ -140,6 +146,8 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
         history=FileHistory(Path('~/.xplore_path_history').expanduser()),
         key_bindings=bindings
     )
+    session.app.timeoutlen = 0  # Required because of key binding above
+    session.app.ttimeoutlen = 0  # Required because of key binding above
 
     session.app.print_text([
         ('            ', _ASCII_LOGO + '\n'),
@@ -151,6 +159,7 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
         ('            ', '\n'),
         ('            ', 'Keys:\n'),
         ('fg:ansiblue ', '  Enter'), ('', ' to execute\n'),
+        ('fg:ansiblue ', '  Esc'), ('', ' to clear input\n'),
         ('fg:ansiblue ', '  Tab'), ('', ' for autocomplete suggestions\n'),
         ('fg:ansiblue ', '  ↑↓'), ('', ' to navigate history\n'),
         ('fg:ansiblue ', '  Ctrl-L'), ('', ' to turn on/off full labels in outputs\n'),

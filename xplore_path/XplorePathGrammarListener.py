@@ -125,33 +125,6 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprMatcher.
-    def enterExprMatcher(self, ctx:XplorePathGrammarParser.ExprMatcherContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprMatcher.
-    def exitExprMatcher(self, ctx:XplorePathGrammarParser.ExprMatcherContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprFunctionCall.
-    def enterExprFunctionCall(self, ctx:XplorePathGrammarParser.ExprFunctionCallContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprFunctionCall.
-    def exitExprFunctionCall(self, ctx:XplorePathGrammarParser.ExprFunctionCallContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrap.
-    def enterExprWrap(self, ctx:XplorePathGrammarParser.ExprWrapContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrap.
-    def exitExprWrap(self, ctx:XplorePathGrammarParser.ExprWrapContext):
-        pass
-
-
     # Enter a parse tree produced by XplorePathGrammarParser#ExprUnary.
     def enterExprUnary(self, ctx:XplorePathGrammarParser.ExprUnaryContext):
         pass
@@ -161,12 +134,12 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprLiteral.
-    def enterExprLiteral(self, ctx:XplorePathGrammarParser.ExprLiteralContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrapOrVar.
+    def enterExprWrapOrVar(self, ctx:XplorePathGrammarParser.ExprWrapOrVarContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprLiteral.
-    def exitExprLiteral(self, ctx:XplorePathGrammarParser.ExprLiteralContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrapOrVar.
+    def exitExprWrapOrVar(self, ctx:XplorePathGrammarParser.ExprWrapOrVarContext):
         pass
 
 
@@ -179,12 +152,66 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprPathInvoke.
+    def enterExprPathInvoke(self, ctx:XplorePathGrammarParser.ExprPathInvokeContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprPathInvoke.
+    def exitExprPathInvoke(self, ctx:XplorePathGrammarParser.ExprPathInvokeContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprMatcher.
+    def enterExprMatcher(self, ctx:XplorePathGrammarParser.ExprMatcherContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprMatcher.
+    def exitExprMatcher(self, ctx:XplorePathGrammarParser.ExprMatcherContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprLiteral.
+    def enterExprLiteral(self, ctx:XplorePathGrammarParser.ExprLiteralContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprLiteral.
+    def exitExprLiteral(self, ctx:XplorePathGrammarParser.ExprLiteralContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrap.
+    def enterExprWrap(self, ctx:XplorePathGrammarParser.ExprWrapContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrap.
+    def exitExprWrap(self, ctx:XplorePathGrammarParser.ExprWrapContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprWrapInvoke.
+    def enterExprWrapInvoke(self, ctx:XplorePathGrammarParser.ExprWrapInvokeContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprWrapInvoke.
+    def exitExprWrapInvoke(self, ctx:XplorePathGrammarParser.ExprWrapInvokeContext):
+        pass
+
+
     # Enter a parse tree produced by XplorePathGrammarParser#ExprVariable.
     def enterExprVariable(self, ctx:XplorePathGrammarParser.ExprVariableContext):
         pass
 
     # Exit a parse tree produced by XplorePathGrammarParser#ExprVariable.
     def exitExprVariable(self, ctx:XplorePathGrammarParser.ExprVariableContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprVariableInvoke.
+    def enterExprVariableInvoke(self, ctx:XplorePathGrammarParser.ExprVariableInvokeContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprVariableInvoke.
+    def exitExprVariableInvoke(self, ctx:XplorePathGrammarParser.ExprVariableInvokeContext):
         pass
 
 
@@ -233,12 +260,30 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XplorePathGrammarParser#coerceFallback.
+    def enterCoerceFallback(self, ctx:XplorePathGrammarParser.CoerceFallbackContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#coerceFallback.
+    def exitCoerceFallback(self, ctx:XplorePathGrammarParser.CoerceFallbackContext):
+        pass
+
+
     # Enter a parse tree produced by XplorePathGrammarParser#filter.
     def enterFilter(self, ctx:XplorePathGrammarParser.FilterContext):
         pass
 
     # Exit a parse tree produced by XplorePathGrammarParser#filter.
     def exitFilter(self, ctx:XplorePathGrammarParser.FilterContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#varRef.
+    def enterVarRef(self, ctx:XplorePathGrammarParser.VarRefContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#varRef.
+    def exitVarRef(self, ctx:XplorePathGrammarParser.VarRefContext):
         pass
 
 
@@ -653,24 +698,6 @@ class XplorePathGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XplorePathGrammarParser#numericRangeMatcherLiteral.
     def exitNumericRangeMatcherLiteral(self, ctx:XplorePathGrammarParser.NumericRangeMatcherLiteralContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#coerceFallback.
-    def enterCoerceFallback(self, ctx:XplorePathGrammarParser.CoerceFallbackContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#coerceFallback.
-    def exitCoerceFallback(self, ctx:XplorePathGrammarParser.CoerceFallbackContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#varRef.
-    def enterVarRef(self, ctx:XplorePathGrammarParser.VarRefContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#varRef.
-    def exitVarRef(self, ctx:XplorePathGrammarParser.VarRefContext):
         pass
 
 

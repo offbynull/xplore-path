@@ -147,27 +147,41 @@ expr
 // current grammar.
 atomicOrEncapsulate
     : (MINUS | PLUS) atomicOrEncapsulate coerceFallback?  # ExprUnary
-    | wrap filter?                                        # ExprWrap
-    | atomicOrEncapsulate argumentList coerceFallback?    # ExprFunctionCall
-    | matcher                                             # ExprMatcher
-    | varRef                                              # ExprVariable
-    | literal                                             # ExprLiteral
+    | wrapOrVar                                           # ExprWrapOrVar
     | path filter?                                        # ExprPath
+    | path filter? argumentList filter?                   # ExprPathInvoke
+    | matcher                                             # ExprMatcher
+    | literal                                             # ExprLiteral
+    ;
+
+wrapOrVar
+    : wrap filter?                                        # ExprWrap
+    | wrap filter? argumentList filter?                   # ExprWrapInvoke
+    | varRef filter?                                      # ExprVariable
+    | varRef filter? argumentList filter?                 # ExprVariableInvoke
     ;
 
 wrap
-    : OP expr CP                                          # ExprWrapSingle
-    | OP expr COMMA CP                                    # ExprWrapSingleAsList
-    | OP expr COMMA expr (COMMA expr)* COMMA? CP          # ExprWrapConcatenateList
-    | OP CP                                               # ExprEmptyList
+    : OP expr CP                                           # ExprWrapSingle
+    | OP expr COMMA CP                                     # ExprWrapSingleAsList
+    | OP expr COMMA expr (COMMA expr)* COMMA? CP           # ExprWrapConcatenateList
+    | OP CP                                                # ExprEmptyList
     ;
 
 argumentList
     : OP (expr (COMMA expr)*)? CP  // BUG: COMMA also being utilized in expr, multiple params misinterpeted as wrapped list
     ;
 
+coerceFallback
+    : KW_ON KW_ERROR (KW_DISCARD | KW_FAIL | expr)
+    ;
+
 filter
     : OB expr CB
+    ;
+
+varRef
+    : DOLLAR (Name | IntegerLiteral | StringLiteral)
     ;
 
 joinOp
@@ -209,8 +223,8 @@ path
     | DD filter?                   # PathAtParent
     | DD filter? SLASH relPath     # PathFromParent
     | DD filter? SS relPath        # PathFromParentAny
-    | wrap filter? SLASH relPath   # PathFromNested
-    | wrap filter? SS relPath      # PathFromNestedAny
+    | wrapOrVar SLASH relPath      # PathFromNested
+    | wrapOrVar SS relPath         # PathFromNestedAny
     ;
 
 relPath
@@ -267,12 +281,4 @@ numericRangeMatcher
 
 numericRangeMatcherLiteral
     : MINUS? (IntegerLiteral | DecimalLiteral | DoubleLiteral | KW_INF)
-    ;
-
-coerceFallback
-    : KW_ON KW_ERROR (KW_DISCARD | KW_FAIL | expr)
-    ;
-
-varRef
-    : DOLLAR (Name | IntegerLiteral | StringLiteral)
     ;

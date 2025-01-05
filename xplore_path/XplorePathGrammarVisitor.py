@@ -74,28 +74,13 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprMatcher.
-    def visitExprMatcher(self, ctx:XplorePathGrammarParser.ExprMatcherContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprFunctionCall.
-    def visitExprFunctionCall(self, ctx:XplorePathGrammarParser.ExprFunctionCallContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrap.
-    def visitExprWrap(self, ctx:XplorePathGrammarParser.ExprWrapContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XplorePathGrammarParser#ExprUnary.
     def visitExprUnary(self, ctx:XplorePathGrammarParser.ExprUnaryContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprLiteral.
-    def visitExprLiteral(self, ctx:XplorePathGrammarParser.ExprLiteralContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapOrVar.
+    def visitExprWrapOrVar(self, ctx:XplorePathGrammarParser.ExprWrapOrVarContext):
         return self.visitChildren(ctx)
 
 
@@ -104,8 +89,38 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprPathInvoke.
+    def visitExprPathInvoke(self, ctx:XplorePathGrammarParser.ExprPathInvokeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprMatcher.
+    def visitExprMatcher(self, ctx:XplorePathGrammarParser.ExprMatcherContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprLiteral.
+    def visitExprLiteral(self, ctx:XplorePathGrammarParser.ExprLiteralContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrap.
+    def visitExprWrap(self, ctx:XplorePathGrammarParser.ExprWrapContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapInvoke.
+    def visitExprWrapInvoke(self, ctx:XplorePathGrammarParser.ExprWrapInvokeContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XplorePathGrammarParser#ExprVariable.
     def visitExprVariable(self, ctx:XplorePathGrammarParser.ExprVariableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprVariableInvoke.
+    def visitExprVariableInvoke(self, ctx:XplorePathGrammarParser.ExprVariableInvokeContext):
         return self.visitChildren(ctx)
 
 
@@ -134,8 +149,18 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XplorePathGrammarParser#coerceFallback.
+    def visitCoerceFallback(self, ctx:XplorePathGrammarParser.CoerceFallbackContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XplorePathGrammarParser#filter.
     def visitFilter(self, ctx:XplorePathGrammarParser.FilterContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#varRef.
+    def visitVarRef(self, ctx:XplorePathGrammarParser.VarRefContext):
         return self.visitChildren(ctx)
 
 
@@ -366,16 +391,6 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#numericRangeMatcherLiteral.
     def visitNumericRangeMatcherLiteral(self, ctx:XplorePathGrammarParser.NumericRangeMatcherLiteralContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#coerceFallback.
-    def visitCoerceFallback(self, ctx:XplorePathGrammarParser.CoerceFallbackContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#varRef.
-    def visitVarRef(self, ctx:XplorePathGrammarParser.VarRefContext):
         return self.visitChildren(ctx)
 
 

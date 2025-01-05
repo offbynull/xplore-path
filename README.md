@@ -38,6 +38,8 @@
   * when in condition, root MUST BE THE TEST OBJECT as opposed to the actual root (e.g. if it wasn't, //l = //r would search everything for a tag named l and r)
 * TODO: update syntax so variable calls can go into path expression without wrapping e.g. $var(a,b,c)/d/e instead of ($var(a,b,c))/d/e 
 * TODO: test complex math (order of operations)
+* TODO: evalutor context - hide direct access to context varaibles
+* TODO: evaluator: entities -> sequence
 * ~~TODO: test label directive~~
 * ~~TODO: ../* doesn't work because th parser doesn't recognize it~~
 * TODO: test function invocations syntax
