@@ -29,6 +29,14 @@
 * ~~TODO: test paths~~
 * ~~TODO: test paths with predicates~~
 * ~~TODO: test matchers when used in path predicates~~
+* TODO: test join syntax more
+  * left non-path with right path
+  * left path with right non-path
+  * left and right both path
+  * left and right both non-path
+  * left and right empty / one empty but not the other
+  * when in condition, root MUST BE THE TEST OBJECT as opposed to the actual root (e.g. if it wasn't, //l = //r would search everything for a tag named l and r)
+* TODO: update syntax so variable calls can go into path expression without wrapping e.g. $var(a,b,c)/d/e instead of ($var(a,b,c))/d/e 
 * TODO: test complex math (order of operations)
 * ~~TODO: test label directive~~
 * ~~TODO: ../* doesn't work because th parser doesn't recognize it~~

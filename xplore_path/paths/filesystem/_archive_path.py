@@ -8,6 +8,7 @@ from typing import Hashable, Any, Callable
 
 from xplore_path.path import Path
 from xplore_path.paths.filesystem.context import NoticeType, FileSystemContext
+from xplore_path.paths.filesystem._file_path import FilePath
 
 
 def _temp_dir() -> pathlib.Path:
@@ -52,6 +53,13 @@ class ArchivePath(Path):
         except Exception:
             self._notify(NoticeType.ARCHIVE_CACHE_ERROR, real_path)
 
+    def _create_children(self, cache_path):
+        for c_idx, c in enumerate(sorted(cache_path.iterdir())):
+            if c.is_dir():
+                self._children.append(self._fspath_creator(self, c_idx, c.name, c, self._ctx))
+            else:
+                self._children.append(FilePath(self, c_idx, c.name, c, self._ctx))
+
     def all_children(self) -> list[Path]:
         if self._children is not None:
             return self._children
@@ -63,18 +71,15 @@ class ArchivePath(Path):
             cache_path = self._ctx.cache.to_path(cache_lookup_key)
             if not cache_path.exists() and not self._ctx.cache_only_access:  # skip unpack if cache only access
                 self._unpack_archive(lambda c: zipfile.ZipFile(c, 'r'), c, cache_path)
-            for c_idx, c in enumerate(sorted(cache_path.iterdir())):
-                self._children.append(self._fspath_creator(self, c_idx, c.name, c, self._ctx))
+            self._create_children(cache_path)
         elif c.suffix == '.tar':  # skip it if set to only access cached
             cache_path = self._ctx.cache.to_path(cache_lookup_key)
             if not cache_path.exists() and not self._ctx.cache_only_access:  # skip unpack if cache only access
                 self._unpack_archive(lambda c: tarfile.open(c, 'r'), c, cache_path)
-            for c_idx, c in enumerate(sorted(cache_path.iterdir())):
-                self._children.append(self._fspath_creator(self, c_idx, c.name, c, self._ctx))
+            self._create_children(cache_path)
         elif c.suffixes[-2:] == ['.tar', '.gz']:
             cache_path = self._ctx.cache.to_path(cache_lookup_key)
             if not cache_path.exists() and not self._ctx.cache_only_access:  # skip unpack if cache only access
                 self._unpack_archive(lambda c: tarfile.open(c, 'r:gz'), c, cache_path)
-            for c_idx, c in enumerate(sorted(cache_path.iterdir())):
-                self._children.append(self._fspath_creator(self, c_idx, c.name, c, self._ctx))
+            self._create_children(cache_path)
         return self._children

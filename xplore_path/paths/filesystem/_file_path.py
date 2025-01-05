@@ -33,6 +33,7 @@ class FilePath(Path):
         c = self.value()
         c_stat = c.stat()
         cache_lookup_key = [str(c.absolute()), c_stat.st_mtime, c_stat.st_size]
+        self._children = []
         if self._ctx.file_loader.is_loadable(c):
             # try loading it from cache
             self._notify(NoticeType.DATA_LOAD_CACHE_START, c)
@@ -61,6 +62,4 @@ class FilePath(Path):
                 path_creator = self._ctx.file_loader.path_creator(c)
                 path = path_creator(self, 0, c.name, data)
                 self._children = [MirrorPath(p, self, i) for i, p in enumerate(path.all_children())]
-            else:
-                self._children = []
         return self._children

@@ -14,8 +14,9 @@ class FrequencyCountInvocable(Invocable):
         values = [v.value() if isinstance(v, Path) else v for v in result]
         values = [v for v in values if type(v) in {str, int, float, bool}]
         counter = Counter(values)
+        output = {value: count for value, count in counter.items()}
         return FullSequence(
-            (PythonObjectPath(None, 0, value, count) for value, count in counter.items()),
+            [PythonObjectPath(None, None, None, output)],
             order_paths=False,
             deduplicate_paths=False
         )
