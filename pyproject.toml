@@ -4,6 +4,9 @@ version = "0.1.0"
 description = ""
 authors = ["offbynull <offbynull@gmail.com>"]
 readme = "README.md"
+packages = [
+    { include = "xplore_path", from = "src" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -16,10 +19,8 @@ python-docx = "^1.1.2"
 prompt-toolkit = "^3.0.48"
 bs4 = "^0.0.2"
 
-
 [tool.poetry.group.dev.dependencies]
 antlr4-tools = "^0.2.1"
-
 
 [tool.poetry.group.test.dependencies]
 
