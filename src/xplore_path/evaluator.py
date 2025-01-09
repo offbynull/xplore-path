@@ -264,7 +264,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 for r_item in r:
                     test_path = _create_join_obj(root_path, root_path_next_child_idx, l_item, r_item)
                     entities = SingleWrapSequence(test_path)
-                    self.context.save(entities, test_path)
+                    self.context.save(entities)
                     try:
                         entities = self._apply_filter(entities, ctx.joinCond().filter_())
                     finally:
@@ -278,7 +278,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 for l_item in l:
                     test_path = _create_join_obj(root_path, root_path_next_child_idx, l_item, r_item)
                     entities = SingleWrapSequence(test_path)
-                    self.context.save(entities, test_path)
+                    self.context.save(entities)
                     try:
                         entities = self._apply_filter(entities, ctx.joinCond().filter_())
                     finally:
@@ -297,7 +297,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 for r_item in r:
                     test_path = _create_join_obj(root_path, root_path_next_child_idx, l_item, r_item)
                     entities = SingleWrapSequence(test_path)
-                    self.context.save(entities, test_path)
+                    self.context.save(entities)
                     try:
                         entities = self._apply_filter(entities, ctx.joinCond().filter_())
                     finally:

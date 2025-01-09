@@ -69,7 +69,7 @@ Queries use a syntax inspired by XPath, where the start of the hierarchy is the 
 
 <details><summary>Example queries with joins</summary>
 
-* `($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\d{7}') = $regex_extract(//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
+* `($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(.//l, '\d{7}') = $regex_extract(.//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
 
 The query above is made up of thw two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` amd `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists grabs the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
 
@@ -100,13 +100,6 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](xplore_path/Xplor
 * TODO: filesystem path - for each parsed file, inject invocations that can re-work the file
 * TODO: change syntax so keywords must be followed by ::, ENFORCE IN LEXER (so people can still use the keywords as-is)
 * TODO: add callback that notifies of what's happening when evaluation is running
-* TODO: test join syntax more
-  * left non-path with right path
-  * left path with right non-path
-  * left and right both path
-  * left and right both non-path
-  * left and right empty / one empty but not the other
-  * when in condition, root MUST BE THE TEST OBJECT as opposed to the actual root (e.g. if it wasn't, //l = //r would search everything for a tag named l and r)
 * TODO: update syntax so variable calls can go into path expression without wrapping e.g. $var(a,b,c)/d/e instead of ($var(a,b,c))/d/e 
 * TODO: test complex math (order of operations)
 * TODO: evalutor context - hide direct access to context varaibles

@@ -61,7 +61,7 @@ class EvaluatorTest(unittest.TestCase):
         # Get GO terms in assays related to neuro
         self._eval("$distinct(/mouse_assays.zip/*/0/GO_Term)")                 # List GO terms in assays
         self._eval("/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']")  # List GO terms related to neuro
-        self._eval("($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\\d{7}') = $regex_extract(//r//id, '\\d{7}')])") # List GO terms in assays related to neuro
+        self._eval("($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(.//l, '\\d{7}') = $regex_extract(.//r//id, '\\d{7}')])") # List GO terms in assays related to neuro
 
 
 if __name__ == '__main__':
