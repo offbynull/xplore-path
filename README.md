@@ -93,6 +93,9 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](xplore_path/Xplor
 
 # TODOs
 
+* TODO: path should have metadata?
+  * e.g. shell looks for a key that means that it hides the child in the output?
+  * e.g. shell looks for a key that means it can preview children in the output? (e.g. if there is no value, show first 3 children inline where value should be? or display that it has children / is terminal?)
 * TODO: comparison operators - ADD MODIFIER THAT MAKES IT STRICT (no coercions allowed except int/float)
 * TODO: filesystem path - for each parsed file, inject invocations that can re-work the file
 * TODO: change syntax so keywords must be followed by ::, ENFORCE IN LEXER (so people can still use the keywords as-is)

@@ -29,7 +29,7 @@ class TestCase(unittest.TestCase):
             )
             # walk
             fsp_descendants = fsp.all_descendants()
-        self.assertEqual(201, len(fsp_descendants))  # just check length - too lazy to check everything
+        self.assertEqual(210, len(fsp_descendants))  # just check length - too lazy to check everything
 
 
 if __name__ == '__main__':
