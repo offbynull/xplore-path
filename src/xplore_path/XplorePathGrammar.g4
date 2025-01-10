@@ -169,7 +169,7 @@ wrap
     ;
 
 argumentList
-    : OP (expr (COMMA expr)*)? CP  // BUG: COMMA also being utilized in expr, multiple params misinterpeted as wrapped list
+    : OP (expr (COMMA expr)*)? CP
     ;
 
 coerceFallback

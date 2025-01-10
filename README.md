@@ -93,6 +93,8 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](xplore_path/Xplor
 
 # TODOs
 
+* TODO: Sequence should have a Single counterpart, instead of manipulating raw objects?
+* TODO: wrap non-Path types as Entity, which enforce certain checks / handle coercions?
 * TODO: path should have metadata?
   * e.g. shell looks for a key that means that it hides the child in the output?
   * e.g. shell looks for a key that means it can preview children in the output? (e.g. if there is no value, show first 3 children inline where value should be? or display that it has children / is terminal?)

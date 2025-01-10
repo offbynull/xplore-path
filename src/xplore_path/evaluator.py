@@ -1,6 +1,5 @@
 import itertools
 import math
-from dataclasses import dataclass
 from enum import Enum
 from itertools import product
 from typing import Any, Callable, Type, Literal, Hashable
@@ -8,6 +7,10 @@ from typing import Any, Callable, Type, Literal, Hashable
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
 
+from xplore_path.XplorePathGrammarLexer import XplorePathGrammarLexer
+from xplore_path.XplorePathGrammarParser import XplorePathGrammarParser
+from xplore_path.XplorePathGrammarVisitor import XplorePathGrammarVisitor
+from xplore_path.coercions import coerce_single_value
 from xplore_path.invocable import Invocable
 from xplore_path.invocables.count_invocable import CountInvocable
 from xplore_path.invocables.distinct_invocable import DistinctInvocable
@@ -16,24 +19,20 @@ from xplore_path.invocables.regex_extract_invocable import RegexExtractInvocable
 from xplore_path.invocables.whitespace_collapse_invocable import WhitespaceCollapseInvocable
 from xplore_path.invocables.whitespace_remove_invocable import WhitespaceRemoveInvocable
 from xplore_path.invocables.whitespace_strip_invocable import WhitespaceStripInvocable
-from xplore_path.matchers.ignore_case_matcher import IgnoreCaseMatcher
-from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
-from xplore_path.XplorePathGrammarLexer import XplorePathGrammarLexer
-from xplore_path.XplorePathGrammarParser import XplorePathGrammarParser
-from xplore_path.XplorePathGrammarVisitor import XplorePathGrammarVisitor
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
-from xplore_path.paths.filesystem.context import FileSystemContext
-from xplore_path.path import Path
-from xplore_path.paths.mirror.mirror_path import MirrorPath
-from xplore_path.paths.python_object.python_object_path import PythonObjectPath
-from xplore_path.coercions import coerce_single_value
 from xplore_path.matcher import Matcher
 from xplore_path.matchers.combined_matcher import CombinedMatcher
 from xplore_path.matchers.fuzzy_matcher import FuzzyMatcher
 from xplore_path.matchers.glob_matcher import GlobMatcher
+from xplore_path.matchers.ignore_case_matcher import IgnoreCaseMatcher
+from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
 from xplore_path.matchers.regex_matcher import RegexMatcher
 from xplore_path.matchers.strict_matcher import StrictMatcher
 from xplore_path.matchers.wildcard_matcher import WildcardMatcher
+from xplore_path.path import Path
+from xplore_path.paths.filesystem.context import FileSystemContext
+from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
+from xplore_path.paths.mirror.mirror_path import MirrorPath
+from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 from xplore_path.paths.simple.simple_path import SimplePath
 from xplore_path.raise_parse_error_listener import RaiseParseErrorListener
 from xplore_path.sequence import Sequence, SingleWrapSequence, TransformSequence, FullSequence, FallbackMode, \
@@ -51,51 +50,62 @@ class RootResetMode(Enum):
     RESET_WITH_SELF = 'RESET_WITH_SELF'
 
 
-@dataclass
 class _EvaluatorVisitorContext:
-    root: Path
-    entities: Sequence
-    entities_save_stack: list[Sequence]
-    variables: dict[str, Any]
+    def __init__(
+            self,
+            root: Path
+    ):
+        self._root = root
+        self._entities = SingleWrapSequence(root)
+        self._save_stack = []
+        self._variables = {}
 
     def __post_init__(self):
-        if self.root.full_label() != [None]:
+        if self._root.full_label() != [None]:
             raise ValueError('Root path in context not root path')
 
     def reset_entities(self, new_entities: PathResetMode | Sequence):
         if isinstance(new_entities, Sequence):
-            self.entities = new_entities
+            self._entities = new_entities
         elif new_entities == PathResetMode.RESET_WITH_ROOT:
-            self.entities = SingleWrapSequence(self.root)
+            self._entities = SingleWrapSequence(self._root)
         elif new_entities == PathResetMode.RESET_WITH_SELF:
-            self.entities = self.entities  # Normally it'd be a copy of the self.entities, but Sequences should be immutable
+            self._entities = self._entities  # Normally it'd be a copy of the self.entities, but Sequences should be immutable
         elif new_entities == PathResetMode.RESET_WITH_EMPTY:
-            self.entities = EmptySequence()
+            self._entities = EmptySequence()
         else:
             raise ValueError('This should never happen')
 
     def save(self, new_paths: PathResetMode | Sequence, new_root: RootResetMode | Any = RootResetMode.RESET_WITH_SELF):
-        self.entities_save_stack.append((self.entities, self.root))
+        self._save_stack.append((self._entities, self._root))
         if new_root != RootResetMode.RESET_WITH_SELF:
-            self.root = new_root
+            self._root = new_root
         self.reset_entities(new_paths)
 
-    def restore(self) -> Sequence:
-        current_paths = self.entities
-        self.entities, self.root = self.entities_save_stack.pop()
-        return current_paths
+    def restore(self) -> None:
+        self._entities, self._root = self._save_stack.pop()
+    
+    def root(self) -> Path:
+        return self._root
+
+    def entities(self) -> Sequence:
+        return self._entities
+    
+    def get_variable(self, name: str, default: Any) -> Any:
+        return self._variables.get(name, default)
+    
+    def set_variable(self, name: str, value: Any) -> None:
+        self._variables[name] = value
 
     @staticmethod
     def prime(
             root_: Path | Any,
             variables_: dict[str, Any]
     ):
-        return _EvaluatorVisitorContext(
-            root=root_,
-            entities=SingleWrapSequence(root_),
-            entities_save_stack=[],
-            variables=variables_
-        )
+        ret = _EvaluatorVisitorContext(root_)
+        for k, v in variables_.items():
+            ret.set_variable(k, v)
+        return ret
 
 
 class _EvaluatorVisitor(XplorePathGrammarVisitor):
@@ -104,7 +114,6 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             root: Any,
             variables: dict[str, Any]
     ):
-        self.root = root
         self.context = _EvaluatorVisitorContext.prime(root, variables)
 
     def visitXplorePath(self, ctx: XplorePathGrammarParser.XplorePathContext):
@@ -133,7 +142,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             name = self._decode_str(ctx.varRef().StringLiteral().getText())
         else:
             raise ValueError('Unexpected')
-        return self.context.variables.get(name, EmptySequence())
+        return self.context.get_variable(name, EmptySequence())
 
     def visitExprVariable(self, ctx: XplorePathGrammarParser.ExprVariableContext):
         ret = self._get_var(ctx)
@@ -629,7 +638,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitPathAtRoot(self, ctx: XplorePathGrammarParser.PathAtRootContext):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_ROOT)
-            new_entities = self.context.entities
+            new_entities = self.context.entities()
             new_entities = self._apply_filter(new_entities, ctx.filter_())
             return new_entities
         finally:
@@ -638,33 +647,33 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitPathFromRoot(self, ctx: XplorePathGrammarParser.PathFromRootContext):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_ROOT)
-            new_entities = self.context.entities
+            new_entities = self.context.entities()
             new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.entities = new_entities  # will not include p, only descendants of p
+            self.context.reset_entities(new_entities)  # will not include p, only descendants of p
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
 
     def visitPathFromRootAny(self, ctx: XplorePathGrammarParser.PathFromRootAnyContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_EMPTY)
-            root = self.context.root
+            self.context.save(new_paths=PathResetMode.RESET_WITH_ROOT)
+            root = next(iter(self.context.entities()))
             new_entities = FullSequence([root] + root.all_descendants())
             new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.entities = new_entities
+            self.context.reset_entities(new_entities)
             return self.visit(ctx.relPath())  # BUG: //* must return in document order, use position_in_parent of each path in the output to sort?
         finally:
             self.context.restore()
 
     def visitPathAtSelf(self, ctx: XplorePathGrammarParser.PathAtSelfContext):
-        return self.context.entities
+        return self.context.entities()
 
     def visitPathFromSelf(self, ctx: XplorePathGrammarParser.PathFromSelfContext):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = self.context.entities
+            new_entities = self.context.entities()
             new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.entities = new_entities
+            self.context.reset_entities(new_entities)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
@@ -673,10 +682,10 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
             new_entities = FullSequence(
-                itertools.chain(*([p] + p.all_descendants() for p in self.context.entities))
+                itertools.chain(*([p] + p.all_descendants() for p in self.context.entities()))
             )
             new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.entities = new_entities  # will not include p, only descendants of p
+            self.context.reset_entities(new_entities)  # will not include p, only descendants of p
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
@@ -684,7 +693,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitPathAtParent(self, ctx: XplorePathGrammarParser.PathAtParentContext):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = [e.parent() for e in self.context.entities]
+            new_entities = [e.parent() for e in self.context.entities()]
             new_entities = [e for e in new_entities if e is not None]
             new_entities = FullSequence(new_entities)
             new_entities = self._apply_filter(new_entities, ctx.filter_())
@@ -695,11 +704,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitPathFromParent(self, ctx: XplorePathGrammarParser.PathFromParentContext):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = [e.parent() for e in self.context.entities]
+            new_entities = [e.parent() for e in self.context.entities()]
             new_entities = [e for e in new_entities if e is not None]
             new_entities = FullSequence(new_entities)
             new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.entities = new_entities
+            self.context.reset_entities(new_entities)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
@@ -707,13 +716,13 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitPathFromParentAny(self, ctx: XplorePathGrammarParser.PathFromParentAnyContext):
         try:
             self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = [e.parent() for e in self.context.entities]
+            new_entities = [e.parent() for e in self.context.entities()]
             new_entities = [e for e in new_entities if e is not None]
             new_entities = FullSequence(
                 itertools.chain(*(p.all_descendants() for p in new_entities))
             )
             new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.entities = new_entities  # will not include p's parent, only descendants of p's parent
+            self.context.reset_entities(new_entities)  # will not include p's parent, only descendants of p's parent
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
@@ -724,7 +733,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             new_entities = self.visit(ctx.wrapOrVar())
             new_entities = [e for e in new_entities if isinstance(e, Path)]
             new_entities = FullSequence(new_entities)
-            self.context.entities = new_entities
+            self.context.reset_entities(new_entities)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
@@ -737,7 +746,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             new_entities = FullSequence(
                 itertools.chain(*([p] + p.all_descendants() for p in new_entities))
             )
-            self.context.entities = new_entities
+            self.context.reset_entities(new_entities)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
@@ -784,7 +793,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitReverseStepParent(self, ctx: XplorePathGrammarParser.ReverseStepParentContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 parent_path = e.parent()
                 if parent_path is not None:
@@ -794,7 +803,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitReverseStepAncestor(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths += e.all_ancestors()
         new_paths = new_paths[::-1]
@@ -803,7 +812,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitReverseStepPreceding(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths += e.preceding()
         self.context.reset_entities(FullSequence(new_paths))
@@ -811,7 +820,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitReverseStepPrecedingSibling(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths += e.preceding_sibling()
         self.context.reset_entities(FullSequence(new_paths))
@@ -819,7 +828,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitReverseStepAncestorOrSelf(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths.append(e)
                 new_paths += e.all_ancestors()
@@ -829,7 +838,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitReverseStepDirectParent(self, ctx: XplorePathGrammarParser.ReverseStepDirectParentContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 parent_path = e.parent()
                 if parent_path is not None:
@@ -838,7 +847,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitForwardStepChild(self, ctx: XplorePathGrammarParser.ForwardStepChildContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths += e.all_children()
         self.context.reset_entities(FullSequence(new_paths))
@@ -846,7 +855,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitForwardStepDescendant(self, ctx: XplorePathGrammarParser.ForwardStepDescendantContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths += e.all_descendants()
         self.context.reset_entities(FullSequence(new_paths))
@@ -857,7 +866,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitForwardStepDescendantOrSelf(self, ctx: XplorePathGrammarParser.ForwardStepDescendantOrSelfContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths.append(e)
                 new_paths += e.all_descendants()
@@ -866,7 +875,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitForwardStepFollowingSibling(self, ctx: XplorePathGrammarParser.ForwardStepFollowingSiblingContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths += e.following_sibling()
         self.context.reset_entities(FullSequence(new_paths))
@@ -874,7 +883,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitForwardStepFollowing(self, ctx: XplorePathGrammarParser.ForwardStepFollowingContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths += e.following()
         self.context.reset_entities(FullSequence(new_paths))
@@ -882,14 +891,14 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitForwardStepValue(self, ctx: XplorePathGrammarParser.ForwardStepValueContext):
         new_paths = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 new_paths += e.all_children()
         self.context.reset_entities(FullSequence(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepDirectSelf(self, ctx: XplorePathGrammarParser.ForwardStepDirectSelfContext):
-        return self.context.entities  # Return existing
+        return self.context.entities()  # Return existing
 
     def _walk_down(self, result: Any):
         to_matcher = lambda v: v if isinstance(v, Matcher) else StrictMatcher(v)
@@ -904,7 +913,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         # test
         combined_matcher = CombinedMatcher(matchers)
         ret = []
-        for e in self.context.entities:
+        for e in self.context.entities():
             if isinstance(e, Path):
                 label = e.label()
             else:
@@ -917,8 +926,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         if ctx is None:
             return entities
 
-        root = self.context.root  # explicitly get root for use in transformer, in case it changes by the time lazy evaluation takes place (it does when this is called by join condition)
-                                  # -- simplest thing to do would be to not evaluate this lazily?
+        root = self.context.root()  # explicitly get root for use in transformer, in case it changes by the time lazy evaluation takes place (it does when this is called by join condition)
+                                    # -- simplest thing to do would be to not evaluate this lazily?
         def transformer(idx, e):
             self.context.save(
                 SingleWrapSequence(e),
