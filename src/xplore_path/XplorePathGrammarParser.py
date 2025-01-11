@@ -10,7 +10,7 @@ else:
 
 def serializedATN():
     return [
-        4,1,82,421,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,82,424,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
         2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,
         7,20,2,21,7,21,2,22,7,22,2,23,7,23,1,0,1,0,1,0,1,1,1,1,1,1,1,1,3,
@@ -36,24 +36,24 @@ def serializedATN():
         16,3,16,297,8,16,1,16,1,16,3,16,301,8,16,1,16,1,16,1,16,1,16,3,16,
         307,8,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,3,16,
         319,8,16,1,17,1,17,1,17,3,17,324,8,17,1,17,3,17,327,8,17,1,17,1,
-        17,1,17,5,17,332,8,17,10,17,12,17,335,9,17,1,18,1,18,1,18,1,18,1,
+        17,1,17,1,17,1,17,1,17,5,17,335,8,17,10,17,12,17,338,9,17,1,18,1,
         18,1,18,1,18,1,18,1,18,1,18,1,18,1,18,1,18,1,18,1,18,1,18,1,18,1,
-        18,1,18,1,18,3,18,357,8,18,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,
-        19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,3,19,375,8,19,1,20,1,
-        20,1,20,1,20,1,20,1,20,1,20,1,20,3,20,385,8,20,1,21,1,21,1,21,1,
-        21,1,21,1,21,1,21,3,21,394,8,21,1,22,1,22,1,22,1,22,1,22,1,22,1,
-        22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,3,22,412,8,22,3,
-        22,414,8,22,1,23,3,23,417,8,23,1,23,1,23,1,23,0,2,2,34,24,0,2,4,
-        6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,0,16,
-        1,0,52,53,2,0,39,39,44,44,2,0,25,25,51,51,2,0,20,20,27,27,2,0,77,
-        77,80,81,1,0,65,67,1,0,54,55,2,0,52,53,56,56,2,0,13,19,21,21,4,0,
-        31,31,38,38,42,42,45,45,2,0,20,20,26,27,1,0,29,30,1,0,70,71,2,0,
-        22,22,24,24,2,0,4,4,9,9,2,0,62,62,77,79,503,0,48,1,0,0,0,2,62,1,
+        18,1,18,1,18,1,18,1,18,1,18,3,18,360,8,18,1,19,1,19,1,19,1,19,1,
+        19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,1,19,3,19,378,
+        8,19,1,20,1,20,1,20,1,20,1,20,1,20,1,20,1,20,3,20,388,8,20,1,21,
+        1,21,1,21,1,21,1,21,1,21,1,21,3,21,397,8,21,1,22,1,22,1,22,1,22,
+        1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,3,22,
+        415,8,22,3,22,417,8,22,1,23,3,23,420,8,23,1,23,1,23,1,23,0,2,2,34,
+        24,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,
+        44,46,0,15,1,0,52,53,2,0,39,39,44,44,2,0,25,25,51,51,2,0,20,20,27,
+        27,2,0,77,77,80,81,1,0,65,67,1,0,54,55,2,0,52,53,56,56,2,0,13,19,
+        21,21,4,0,31,31,38,38,42,42,45,45,2,0,20,20,26,27,1,0,70,71,2,0,
+        22,22,24,24,2,0,4,4,9,9,2,0,62,62,77,79,507,0,48,1,0,0,0,2,62,1,
         0,0,0,4,130,1,0,0,0,6,156,1,0,0,0,8,185,1,0,0,0,10,187,1,0,0,0,12,
         200,1,0,0,0,14,207,1,0,0,0,16,211,1,0,0,0,18,215,1,0,0,0,20,219,
         1,0,0,0,22,236,1,0,0,0,24,239,1,0,0,0,26,244,1,0,0,0,28,249,1,0,
-        0,0,30,257,1,0,0,0,32,318,1,0,0,0,34,320,1,0,0,0,36,356,1,0,0,0,
-        38,374,1,0,0,0,40,384,1,0,0,0,42,393,1,0,0,0,44,413,1,0,0,0,46,416,
+        0,0,30,257,1,0,0,0,32,318,1,0,0,0,34,320,1,0,0,0,36,359,1,0,0,0,
+        38,377,1,0,0,0,40,387,1,0,0,0,42,396,1,0,0,0,44,416,1,0,0,0,46,419,
         1,0,0,0,48,49,3,2,1,0,49,50,5,0,0,1,50,1,1,0,0,0,51,52,6,1,-1,0,
         52,53,7,0,0,0,53,55,3,2,1,0,54,56,3,12,6,0,55,54,1,0,0,0,55,56,1,
         0,0,0,56,63,1,0,0,0,57,58,5,63,0,0,58,63,3,2,1,8,59,60,5,64,0,0,
@@ -142,41 +142,42 @@ def serializedATN():
         1,0,0,0,318,314,1,0,0,0,319,33,1,0,0,0,320,323,6,17,-1,0,321,324,
         3,38,19,0,322,324,3,36,18,0,323,321,1,0,0,0,323,322,1,0,0,0,324,
         326,1,0,0,0,325,327,3,14,7,0,326,325,1,0,0,0,326,327,1,0,0,0,327,
-        333,1,0,0,0,328,329,10,2,0,0,329,330,7,11,0,0,330,332,3,34,17,3,
-        331,328,1,0,0,0,332,335,1,0,0,0,333,331,1,0,0,0,333,334,1,0,0,0,
-        334,35,1,0,0,0,335,333,1,0,0,0,336,337,5,35,0,0,337,338,5,7,0,0,
-        338,357,3,4,2,0,339,340,5,36,0,0,340,341,5,7,0,0,341,357,3,4,2,0,
-        342,343,5,50,0,0,343,344,5,7,0,0,344,357,3,4,2,0,345,346,5,37,0,
-        0,346,347,5,7,0,0,347,357,3,4,2,0,348,349,5,41,0,0,349,350,5,7,0,
-        0,350,357,3,4,2,0,351,352,5,40,0,0,352,353,5,7,0,0,353,357,3,4,2,
-        0,354,357,5,10,0,0,355,357,3,4,2,0,356,336,1,0,0,0,356,339,1,0,0,
-        0,356,342,1,0,0,0,356,345,1,0,0,0,356,348,1,0,0,0,356,351,1,0,0,
-        0,356,354,1,0,0,0,356,355,1,0,0,0,357,37,1,0,0,0,358,359,5,47,0,
-        0,359,360,5,7,0,0,360,375,3,4,2,0,361,362,5,32,0,0,362,363,5,7,0,
-        0,363,375,3,4,2,0,364,365,5,49,0,0,365,366,5,7,0,0,366,375,3,4,2,
-        0,367,368,5,48,0,0,368,369,5,7,0,0,369,375,3,4,2,0,370,371,5,33,
-        0,0,371,372,5,7,0,0,372,375,3,4,2,0,373,375,5,11,0,0,374,358,1,0,
-        0,0,374,361,1,0,0,0,374,364,1,0,0,0,374,367,1,0,0,0,374,370,1,0,
-        0,0,374,373,1,0,0,0,375,39,1,0,0,0,376,385,5,77,0,0,377,385,5,78,
-        0,0,378,385,5,79,0,0,379,385,5,80,0,0,380,385,7,12,0,0,381,385,5,
-        61,0,0,382,385,5,62,0,0,383,385,5,81,0,0,384,376,1,0,0,0,384,377,
-        1,0,0,0,384,378,1,0,0,0,384,379,1,0,0,0,384,380,1,0,0,0,384,381,
-        1,0,0,0,384,382,1,0,0,0,384,383,1,0,0,0,385,41,1,0,0,0,386,394,5,
-        74,0,0,387,394,5,72,0,0,388,394,5,73,0,0,389,394,5,75,0,0,390,394,
-        5,76,0,0,391,394,3,44,22,0,392,394,5,31,0,0,393,386,1,0,0,0,393,
-        387,1,0,0,0,393,388,1,0,0,0,393,389,1,0,0,0,393,390,1,0,0,0,393,
-        391,1,0,0,0,393,392,1,0,0,0,394,43,1,0,0,0,395,396,5,1,0,0,396,397,
-        3,46,23,0,397,398,5,6,0,0,398,399,3,46,23,0,399,414,1,0,0,0,400,
-        401,5,1,0,0,401,402,7,13,0,0,402,403,3,46,23,0,403,404,5,6,0,0,404,
-        405,3,46,23,0,405,406,7,14,0,0,406,414,1,0,0,0,407,408,5,1,0,0,408,
-        411,3,46,23,0,409,410,5,3,0,0,410,412,3,46,23,0,411,409,1,0,0,0,
-        411,412,1,0,0,0,412,414,1,0,0,0,413,395,1,0,0,0,413,400,1,0,0,0,
-        413,407,1,0,0,0,414,45,1,0,0,0,415,417,5,20,0,0,416,415,1,0,0,0,
-        416,417,1,0,0,0,417,418,1,0,0,0,418,419,7,15,0,0,419,47,1,0,0,0,
-        59,55,62,79,85,91,97,103,105,107,113,118,122,126,130,134,138,142,
+        336,1,0,0,0,328,329,10,3,0,0,329,330,5,29,0,0,330,335,3,34,17,4,
+        331,332,10,2,0,0,332,333,5,30,0,0,333,335,3,34,17,3,334,328,1,0,
+        0,0,334,331,1,0,0,0,335,338,1,0,0,0,336,334,1,0,0,0,336,337,1,0,
+        0,0,337,35,1,0,0,0,338,336,1,0,0,0,339,340,5,35,0,0,340,341,5,7,
+        0,0,341,360,3,4,2,0,342,343,5,36,0,0,343,344,5,7,0,0,344,360,3,4,
+        2,0,345,346,5,50,0,0,346,347,5,7,0,0,347,360,3,4,2,0,348,349,5,37,
+        0,0,349,350,5,7,0,0,350,360,3,4,2,0,351,352,5,41,0,0,352,353,5,7,
+        0,0,353,360,3,4,2,0,354,355,5,40,0,0,355,356,5,7,0,0,356,360,3,4,
+        2,0,357,360,5,10,0,0,358,360,3,4,2,0,359,339,1,0,0,0,359,342,1,0,
+        0,0,359,345,1,0,0,0,359,348,1,0,0,0,359,351,1,0,0,0,359,354,1,0,
+        0,0,359,357,1,0,0,0,359,358,1,0,0,0,360,37,1,0,0,0,361,362,5,47,
+        0,0,362,363,5,7,0,0,363,378,3,4,2,0,364,365,5,32,0,0,365,366,5,7,
+        0,0,366,378,3,4,2,0,367,368,5,49,0,0,368,369,5,7,0,0,369,378,3,4,
+        2,0,370,371,5,48,0,0,371,372,5,7,0,0,372,378,3,4,2,0,373,374,5,33,
+        0,0,374,375,5,7,0,0,375,378,3,4,2,0,376,378,5,11,0,0,377,361,1,0,
+        0,0,377,364,1,0,0,0,377,367,1,0,0,0,377,370,1,0,0,0,377,373,1,0,
+        0,0,377,376,1,0,0,0,378,39,1,0,0,0,379,388,5,77,0,0,380,388,5,78,
+        0,0,381,388,5,79,0,0,382,388,5,80,0,0,383,388,7,11,0,0,384,388,5,
+        61,0,0,385,388,5,62,0,0,386,388,5,81,0,0,387,379,1,0,0,0,387,380,
+        1,0,0,0,387,381,1,0,0,0,387,382,1,0,0,0,387,383,1,0,0,0,387,384,
+        1,0,0,0,387,385,1,0,0,0,387,386,1,0,0,0,388,41,1,0,0,0,389,397,5,
+        74,0,0,390,397,5,72,0,0,391,397,5,73,0,0,392,397,5,75,0,0,393,397,
+        5,76,0,0,394,397,3,44,22,0,395,397,5,31,0,0,396,389,1,0,0,0,396,
+        390,1,0,0,0,396,391,1,0,0,0,396,392,1,0,0,0,396,393,1,0,0,0,396,
+        394,1,0,0,0,396,395,1,0,0,0,397,43,1,0,0,0,398,399,5,1,0,0,399,400,
+        3,46,23,0,400,401,5,6,0,0,401,402,3,46,23,0,402,417,1,0,0,0,403,
+        404,5,1,0,0,404,405,7,12,0,0,405,406,3,46,23,0,406,407,5,6,0,0,407,
+        408,3,46,23,0,408,409,7,13,0,0,409,417,1,0,0,0,410,411,5,1,0,0,411,
+        414,3,46,23,0,412,413,5,3,0,0,413,415,3,46,23,0,414,412,1,0,0,0,
+        414,415,1,0,0,0,415,417,1,0,0,0,416,398,1,0,0,0,416,403,1,0,0,0,
+        416,410,1,0,0,0,417,45,1,0,0,0,418,420,5,20,0,0,419,418,1,0,0,0,
+        419,420,1,0,0,0,420,421,1,0,0,0,421,422,7,14,0,0,422,47,1,0,0,0,
+        60,55,62,79,85,91,97,103,105,107,113,118,122,126,130,134,138,142,
         146,150,154,156,175,179,185,193,196,205,215,223,226,230,233,236,
         239,244,249,252,257,260,266,270,275,280,284,290,296,300,306,318,
-        323,326,333,356,374,384,393,411,413,416
+        323,326,334,336,359,377,387,396,414,416,419
     ]
 
 class XplorePathGrammarParser ( Parser ):
@@ -3265,6 +3266,66 @@ class XplorePathGrammarParser ( Parser ):
             super().copyFrom(ctx)
 
 
+    class RelPathChainChildContext(RelPathContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.RelPathContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def relPath(self, i:int=None):
+            if i is None:
+                return self.getTypedRuleContexts(XplorePathGrammarParser.RelPathContext)
+            else:
+                return self.getTypedRuleContext(XplorePathGrammarParser.RelPathContext,i)
+
+        def SLASH(self):
+            return self.getToken(XplorePathGrammarParser.SLASH, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterRelPathChainChild" ):
+                listener.enterRelPathChainChild(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitRelPathChainChild" ):
+                listener.exitRelPathChainChild(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitRelPathChainChild" ):
+                return visitor.visitRelPathChainChild(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class RelPathChainDescendantContext(RelPathContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.RelPathContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def relPath(self, i:int=None):
+            if i is None:
+                return self.getTypedRuleContexts(XplorePathGrammarParser.RelPathContext)
+            else:
+                return self.getTypedRuleContext(XplorePathGrammarParser.RelPathContext,i)
+
+        def SS(self):
+            return self.getToken(XplorePathGrammarParser.SS, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterRelPathChainDescendant" ):
+                listener.enterRelPathChainDescendant(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitRelPathChainDescendant" ):
+                listener.exitRelPathChainDescendant(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitRelPathChainDescendant" ):
+                return visitor.visitRelPathChainDescendant(self)
+            else:
+                return visitor.visitChildren(self)
+
+
     class RelPathStepContext(RelPathContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.RelPathContext
@@ -3296,38 +3357,6 @@ class XplorePathGrammarParser ( Parser ):
                 return visitor.visitChildren(self)
 
 
-    class RelPathChainContext(RelPathContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a XplorePathGrammarParser.RelPathContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def relPath(self, i:int=None):
-            if i is None:
-                return self.getTypedRuleContexts(XplorePathGrammarParser.RelPathContext)
-            else:
-                return self.getTypedRuleContext(XplorePathGrammarParser.RelPathContext,i)
-
-        def SLASH(self):
-            return self.getToken(XplorePathGrammarParser.SLASH, 0)
-        def SS(self):
-            return self.getToken(XplorePathGrammarParser.SS, 0)
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterRelPathChain" ):
-                listener.enterRelPathChain(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitRelPathChain" ):
-                listener.exitRelPathChain(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitRelPathChain" ):
-                return visitor.visitRelPathChain(self)
-            else:
-                return visitor.visitChildren(self)
-
-
 
     def relPath(self, _p:int=0):
         _parentctx = self._ctx
@@ -3336,7 +3365,6 @@ class XplorePathGrammarParser ( Parser ):
         _prevctx = localctx
         _startState = 34
         self.enterRecursionRule(localctx, 34, self.RULE_relPath, _p)
-        self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             localctx = XplorePathGrammarParser.RelPathStepContext(self, localctx)
@@ -3366,32 +3394,47 @@ class XplorePathGrammarParser ( Parser ):
 
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 333
+            self.state = 336
             self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,51,self._ctx)
+            _alt = self._interp.adaptivePredict(self._input,52,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    localctx = XplorePathGrammarParser.RelPathChainContext(self, XplorePathGrammarParser.RelPathContext(self, _parentctx, _parentState))
-                    self.pushNewRecursionContext(localctx, _startState, self.RULE_relPath)
-                    self.state = 328
-                    if not self.precpred(self._ctx, 2):
-                        from antlr4.error.Errors import FailedPredicateException
-                        raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                    self.state = 329
-                    _la = self._input.LA(1)
-                    if not(_la==29 or _la==30):
-                        self._errHandler.recoverInline(self)
-                    else:
-                        self._errHandler.reportMatch(self)
-                        self.consume()
-                    self.state = 330
-                    self.relPath(3) 
-                self.state = 335
+                    self.state = 334
+                    self._errHandler.sync(self)
+                    la_ = self._interp.adaptivePredict(self._input,51,self._ctx)
+                    if la_ == 1:
+                        localctx = XplorePathGrammarParser.RelPathChainChildContext(self, XplorePathGrammarParser.RelPathContext(self, _parentctx, _parentState))
+                        self.pushNewRecursionContext(localctx, _startState, self.RULE_relPath)
+                        self.state = 328
+                        if not self.precpred(self._ctx, 3):
+                            from antlr4.error.Errors import FailedPredicateException
+                            raise FailedPredicateException(self, "self.precpred(self._ctx, 3)")
+                        self.state = 329
+                        self.match(XplorePathGrammarParser.SLASH)
+                        self.state = 330
+                        self.relPath(4)
+                        pass
+
+                    elif la_ == 2:
+                        localctx = XplorePathGrammarParser.RelPathChainDescendantContext(self, XplorePathGrammarParser.RelPathContext(self, _parentctx, _parentState))
+                        self.pushNewRecursionContext(localctx, _startState, self.RULE_relPath)
+                        self.state = 331
+                        if not self.precpred(self._ctx, 2):
+                            from antlr4.error.Errors import FailedPredicateException
+                            raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
+                        self.state = 332
+                        self.match(XplorePathGrammarParser.SS)
+                        self.state = 333
+                        self.relPath(3)
+                        pass
+
+             
+                self.state = 338
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,51,self._ctx)
+                _alt = self._interp.adaptivePredict(self._input,52,self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re
@@ -3648,86 +3691,86 @@ class XplorePathGrammarParser ( Parser ):
         localctx = XplorePathGrammarParser.ForwardStepContext(self, self._ctx, self.state)
         self.enterRule(localctx, 36, self.RULE_forwardStep)
         try:
-            self.state = 356
+            self.state = 359
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,52,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,53,self._ctx)
             if la_ == 1:
                 localctx = XplorePathGrammarParser.ForwardStepChildContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 336
-                self.match(XplorePathGrammarParser.KW_CHILD)
-                self.state = 337
-                self.match(XplorePathGrammarParser.COLONCOLON)
-                self.state = 338
-                self.atomicOrEncapsulate()
-                pass
-
-            elif la_ == 2:
-                localctx = XplorePathGrammarParser.ForwardStepDescendantContext(self, localctx)
-                self.enterOuterAlt(localctx, 2)
                 self.state = 339
-                self.match(XplorePathGrammarParser.KW_DESCENDANT)
+                self.match(XplorePathGrammarParser.KW_CHILD)
                 self.state = 340
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 341
                 self.atomicOrEncapsulate()
                 pass
 
-            elif la_ == 3:
-                localctx = XplorePathGrammarParser.ForwardStepSelfContext(self, localctx)
-                self.enterOuterAlt(localctx, 3)
+            elif la_ == 2:
+                localctx = XplorePathGrammarParser.ForwardStepDescendantContext(self, localctx)
+                self.enterOuterAlt(localctx, 2)
                 self.state = 342
-                self.match(XplorePathGrammarParser.KW_SELF)
+                self.match(XplorePathGrammarParser.KW_DESCENDANT)
                 self.state = 343
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 344
                 self.atomicOrEncapsulate()
                 pass
 
-            elif la_ == 4:
-                localctx = XplorePathGrammarParser.ForwardStepDescendantOrSelfContext(self, localctx)
-                self.enterOuterAlt(localctx, 4)
+            elif la_ == 3:
+                localctx = XplorePathGrammarParser.ForwardStepSelfContext(self, localctx)
+                self.enterOuterAlt(localctx, 3)
                 self.state = 345
-                self.match(XplorePathGrammarParser.KW_DESCENDANT_OR_SELF)
+                self.match(XplorePathGrammarParser.KW_SELF)
                 self.state = 346
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 347
                 self.atomicOrEncapsulate()
                 pass
 
-            elif la_ == 5:
-                localctx = XplorePathGrammarParser.ForwardStepFollowingSiblingContext(self, localctx)
-                self.enterOuterAlt(localctx, 5)
+            elif la_ == 4:
+                localctx = XplorePathGrammarParser.ForwardStepDescendantOrSelfContext(self, localctx)
+                self.enterOuterAlt(localctx, 4)
                 self.state = 348
-                self.match(XplorePathGrammarParser.KW_FOLLOWING_SIBLING)
+                self.match(XplorePathGrammarParser.KW_DESCENDANT_OR_SELF)
                 self.state = 349
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 350
                 self.atomicOrEncapsulate()
                 pass
 
-            elif la_ == 6:
-                localctx = XplorePathGrammarParser.ForwardStepFollowingContext(self, localctx)
-                self.enterOuterAlt(localctx, 6)
+            elif la_ == 5:
+                localctx = XplorePathGrammarParser.ForwardStepFollowingSiblingContext(self, localctx)
+                self.enterOuterAlt(localctx, 5)
                 self.state = 351
-                self.match(XplorePathGrammarParser.KW_FOLLOWING)
+                self.match(XplorePathGrammarParser.KW_FOLLOWING_SIBLING)
                 self.state = 352
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 353
                 self.atomicOrEncapsulate()
                 pass
 
+            elif la_ == 6:
+                localctx = XplorePathGrammarParser.ForwardStepFollowingContext(self, localctx)
+                self.enterOuterAlt(localctx, 6)
+                self.state = 354
+                self.match(XplorePathGrammarParser.KW_FOLLOWING)
+                self.state = 355
+                self.match(XplorePathGrammarParser.COLONCOLON)
+                self.state = 356
+                self.atomicOrEncapsulate()
+                pass
+
             elif la_ == 7:
                 localctx = XplorePathGrammarParser.ForwardStepDirectSelfContext(self, localctx)
                 self.enterOuterAlt(localctx, 7)
-                self.state = 354
+                self.state = 357
                 self.match(XplorePathGrammarParser.D)
                 pass
 
             elif la_ == 8:
                 localctx = XplorePathGrammarParser.ForwardStepValueContext(self, localctx)
                 self.enterOuterAlt(localctx, 8)
-                self.state = 355
+                self.state = 358
                 self.atomicOrEncapsulate()
                 pass
 
@@ -3933,63 +3976,63 @@ class XplorePathGrammarParser ( Parser ):
         localctx = XplorePathGrammarParser.ReverseStepContext(self, self._ctx, self.state)
         self.enterRule(localctx, 38, self.RULE_reverseStep)
         try:
-            self.state = 374
+            self.state = 377
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [47]:
                 localctx = XplorePathGrammarParser.ReverseStepParentContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 358
-                self.match(XplorePathGrammarParser.KW_PARENT)
-                self.state = 359
-                self.match(XplorePathGrammarParser.COLONCOLON)
-                self.state = 360
-                self.atomicOrEncapsulate()
-                pass
-            elif token in [32]:
-                localctx = XplorePathGrammarParser.ReverseStepAncestorContext(self, localctx)
-                self.enterOuterAlt(localctx, 2)
                 self.state = 361
-                self.match(XplorePathGrammarParser.KW_ANCESTOR)
+                self.match(XplorePathGrammarParser.KW_PARENT)
                 self.state = 362
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 363
                 self.atomicOrEncapsulate()
                 pass
-            elif token in [49]:
-                localctx = XplorePathGrammarParser.ReverseStepPrecedingSiblingContext(self, localctx)
-                self.enterOuterAlt(localctx, 3)
+            elif token in [32]:
+                localctx = XplorePathGrammarParser.ReverseStepAncestorContext(self, localctx)
+                self.enterOuterAlt(localctx, 2)
                 self.state = 364
-                self.match(XplorePathGrammarParser.KW_PRECEDING_SIBLING)
+                self.match(XplorePathGrammarParser.KW_ANCESTOR)
                 self.state = 365
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 366
                 self.atomicOrEncapsulate()
                 pass
-            elif token in [48]:
-                localctx = XplorePathGrammarParser.ReverseStepPrecedingContext(self, localctx)
-                self.enterOuterAlt(localctx, 4)
+            elif token in [49]:
+                localctx = XplorePathGrammarParser.ReverseStepPrecedingSiblingContext(self, localctx)
+                self.enterOuterAlt(localctx, 3)
                 self.state = 367
-                self.match(XplorePathGrammarParser.KW_PRECEDING)
+                self.match(XplorePathGrammarParser.KW_PRECEDING_SIBLING)
                 self.state = 368
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 369
                 self.atomicOrEncapsulate()
                 pass
-            elif token in [33]:
-                localctx = XplorePathGrammarParser.ReverseStepAncestorOrSelfContext(self, localctx)
-                self.enterOuterAlt(localctx, 5)
+            elif token in [48]:
+                localctx = XplorePathGrammarParser.ReverseStepPrecedingContext(self, localctx)
+                self.enterOuterAlt(localctx, 4)
                 self.state = 370
-                self.match(XplorePathGrammarParser.KW_ANCESTOR_OR_SELF)
+                self.match(XplorePathGrammarParser.KW_PRECEDING)
                 self.state = 371
                 self.match(XplorePathGrammarParser.COLONCOLON)
                 self.state = 372
                 self.atomicOrEncapsulate()
                 pass
+            elif token in [33]:
+                localctx = XplorePathGrammarParser.ReverseStepAncestorOrSelfContext(self, localctx)
+                self.enterOuterAlt(localctx, 5)
+                self.state = 373
+                self.match(XplorePathGrammarParser.KW_ANCESTOR_OR_SELF)
+                self.state = 374
+                self.match(XplorePathGrammarParser.COLONCOLON)
+                self.state = 375
+                self.atomicOrEncapsulate()
+                pass
             elif token in [11]:
                 localctx = XplorePathGrammarParser.ReverseStepDirectParentContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
-                self.state = 373
+                self.state = 376
                 self.match(XplorePathGrammarParser.DD)
                 pass
             else:
@@ -4064,32 +4107,32 @@ class XplorePathGrammarParser ( Parser ):
         self.enterRule(localctx, 40, self.RULE_literal)
         self._la = 0 # Token type
         try:
-            self.state = 384
+            self.state = 387
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [77]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 376
+                self.state = 379
                 self.match(XplorePathGrammarParser.IntegerLiteral)
                 pass
             elif token in [78]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 377
+                self.state = 380
                 self.match(XplorePathGrammarParser.DecimalLiteral)
                 pass
             elif token in [79]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 378
+                self.state = 381
                 self.match(XplorePathGrammarParser.DoubleLiteral)
                 pass
             elif token in [80]:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 379
+                self.state = 382
                 self.match(XplorePathGrammarParser.StringLiteral)
                 pass
             elif token in [70, 71]:
                 self.enterOuterAlt(localctx, 5)
-                self.state = 380
+                self.state = 383
                 _la = self._input.LA(1)
                 if not(_la==70 or _la==71):
                     self._errHandler.recoverInline(self)
@@ -4099,17 +4142,17 @@ class XplorePathGrammarParser ( Parser ):
                 pass
             elif token in [61]:
                 self.enterOuterAlt(localctx, 6)
-                self.state = 381
+                self.state = 384
                 self.match(XplorePathGrammarParser.KW_NAN)
                 pass
             elif token in [62]:
                 self.enterOuterAlt(localctx, 7)
-                self.state = 382
+                self.state = 385
                 self.match(XplorePathGrammarParser.KW_INF)
                 pass
             elif token in [81]:
                 self.enterOuterAlt(localctx, 8)
-                self.state = 383
+                self.state = 386
                 self.match(XplorePathGrammarParser.Name)
                 pass
             else:
@@ -4316,49 +4359,49 @@ class XplorePathGrammarParser ( Parser ):
         localctx = XplorePathGrammarParser.MatcherContext(self, self._ctx, self.state)
         self.enterRule(localctx, 42, self.RULE_matcher)
         try:
-            self.state = 393
+            self.state = 396
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [74]:
                 localctx = XplorePathGrammarParser.MatcherStrictContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 386
+                self.state = 389
                 self.match(XplorePathGrammarParser.StrictMatcher)
                 pass
             elif token in [72]:
                 localctx = XplorePathGrammarParser.MatcherRegexContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 387
+                self.state = 390
                 self.match(XplorePathGrammarParser.RegexMatcher)
                 pass
             elif token in [73]:
                 localctx = XplorePathGrammarParser.MatcherGlobContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 388
+                self.state = 391
                 self.match(XplorePathGrammarParser.GlobMatcher)
                 pass
             elif token in [75]:
                 localctx = XplorePathGrammarParser.MatcherFuzzyContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 389
+                self.state = 392
                 self.match(XplorePathGrammarParser.FuzzyMatcher)
                 pass
             elif token in [76]:
                 localctx = XplorePathGrammarParser.MatcherCaseInsensitiveContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
-                self.state = 390
+                self.state = 393
                 self.match(XplorePathGrammarParser.IgnoreCaseMatcher)
                 pass
             elif token in [1]:
                 localctx = XplorePathGrammarParser.MatcherNumericRangeContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
-                self.state = 391
+                self.state = 394
                 self.numericRangeMatcher()
                 pass
             elif token in [31]:
                 localctx = XplorePathGrammarParser.MatcherWildcardContext(self, localctx)
                 self.enterOuterAlt(localctx, 7)
-                self.state = 392
+                self.state = 395
                 self.match(XplorePathGrammarParser.STAR)
                 pass
             else:
@@ -4501,41 +4544,41 @@ class XplorePathGrammarParser ( Parser ):
         self.enterRule(localctx, 44, self.RULE_numericRangeMatcher)
         self._la = 0 # Token type
         try:
-            self.state = 413
+            self.state = 416
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,57,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,58,self._ctx)
             if la_ == 1:
                 localctx = XplorePathGrammarParser.NumericRangeMatcherInclusiveContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 395
-                self.match(XplorePathGrammarParser.TILDE)
-                self.state = 396
-                self.numericRangeMatcherLiteral()
-                self.state = 397
-                self.match(XplorePathGrammarParser.COLON)
                 self.state = 398
+                self.match(XplorePathGrammarParser.TILDE)
+                self.state = 399
+                self.numericRangeMatcherLiteral()
+                self.state = 400
+                self.match(XplorePathGrammarParser.COLON)
+                self.state = 401
                 self.numericRangeMatcherLiteral()
                 pass
 
             elif la_ == 2:
                 localctx = XplorePathGrammarParser.NumericRangeMatcherBoundedContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 400
+                self.state = 403
                 self.match(XplorePathGrammarParser.TILDE)
-                self.state = 401
+                self.state = 404
                 _la = self._input.LA(1)
                 if not(_la==22 or _la==24):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-                self.state = 402
-                self.numericRangeMatcherLiteral()
-                self.state = 403
-                self.match(XplorePathGrammarParser.COLON)
-                self.state = 404
-                self.numericRangeMatcherLiteral()
                 self.state = 405
+                self.numericRangeMatcherLiteral()
+                self.state = 406
+                self.match(XplorePathGrammarParser.COLON)
+                self.state = 407
+                self.numericRangeMatcherLiteral()
+                self.state = 408
                 _la = self._input.LA(1)
                 if not(_la==4 or _la==9):
                     self._errHandler.recoverInline(self)
@@ -4547,17 +4590,17 @@ class XplorePathGrammarParser ( Parser ):
             elif la_ == 3:
                 localctx = XplorePathGrammarParser.NumericRangeMatcherToleranceContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 407
+                self.state = 410
                 self.match(XplorePathGrammarParser.TILDE)
-                self.state = 408
-                self.numericRangeMatcherLiteral()
                 self.state = 411
+                self.numericRangeMatcherLiteral()
+                self.state = 414
                 self._errHandler.sync(self)
-                la_ = self._interp.adaptivePredict(self._input,56,self._ctx)
+                la_ = self._interp.adaptivePredict(self._input,57,self._ctx)
                 if la_ == 1:
-                    self.state = 409
+                    self.state = 412
                     self.match(XplorePathGrammarParser.AT)
-                    self.state = 410
+                    self.state = 413
                     self.numericRangeMatcherLiteral()
 
 
@@ -4622,15 +4665,15 @@ class XplorePathGrammarParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 416
+            self.state = 419
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==20:
-                self.state = 415
+                self.state = 418
                 self.match(XplorePathGrammarParser.MINUS)
 
 
-            self.state = 418
+            self.state = 421
             _la = self._input.LA(1)
             if not(((((_la - 62)) & ~0x3f) == 0 and ((1 << (_la - 62)) & 229377) != 0)):
                 self._errHandler.recoverInline(self)
@@ -4693,6 +4736,10 @@ class XplorePathGrammarParser ( Parser ):
 
     def relPath_sempred(self, localctx:RelPathContext, predIndex:int):
             if predIndex == 8:
+                return self.precpred(self._ctx, 3)
+         
+
+            if predIndex == 9:
                 return self.precpred(self._ctx, 2)
          
 

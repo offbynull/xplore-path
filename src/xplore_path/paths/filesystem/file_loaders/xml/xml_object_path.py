@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Hashable
+from typing import Any
 
 from xplore_path.path import Path
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
@@ -20,7 +20,7 @@ class XmlObjectPath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,  # None for root - None is also a hashable type
+            label: str | int | float | bool | None,  # None for root
             data: XmlTag
     ):
         super().__init__(parent, position_in_parent, label, data.text if data.text is not None else None)

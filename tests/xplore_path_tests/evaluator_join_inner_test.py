@@ -30,7 +30,7 @@ class EvaluatorTest(unittest.TestCase):
         
     def test_must_inner_join_path_vs_path(self):
         root = PythonObjectPath.create_root_path(_TEST_OBJ)
-        r = evaluate(root, '/Colors/* inner join /Regions/* on [label ./l/*[0] = label ./r/*[0]]')
+        r = evaluate(root, '/Colors/* inner join /Regions/* on [label ./l/*[0] = label ./r/*[0]]').unpack
         r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [None], None)
         self._pop_first_and_assert_path(r_actual, [None, 'joined'], None)
@@ -140,7 +140,7 @@ class EvaluatorTest(unittest.TestCase):
 
     def test_must_inner_join_single_vs_path(self):
         root = PythonObjectPath.create_root_path(_TEST_OBJ)
-        r = evaluate(root, '(Cherry, Watermelon, Blueberry) inner join /Regions/* on [./l = label ./r/*[0]]')
+        r = evaluate(root, '(Cherry, Watermelon, Blueberry) inner join /Regions/* on [./l = label ./r/*[0]]').unpack
         r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [None], None)
         self._pop_first_and_assert_path(r_actual, [None, 'joined'], None)
@@ -158,7 +158,7 @@ class EvaluatorTest(unittest.TestCase):
 
     def test_must_inner_join_path_vs_single(self):
         root = PythonObjectPath.create_root_path(_TEST_OBJ)
-        r = evaluate(root, '/Colors/* inner join (Cherry, Watermelon, Blueberry) on [label ./l/*[0] = ./r]')
+        r = evaluate(root, '/Colors/* inner join (Cherry, Watermelon, Blueberry) on [label ./l/*[0] = ./r]').unpack
         r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [None], None)
         self._pop_first_and_assert_path(r_actual, [None, 'joined'], None)
@@ -172,7 +172,7 @@ class EvaluatorTest(unittest.TestCase):
 
     def test_must_inner_join_single_vs_single(self):
         root = PythonObjectPath.create_root_path(_TEST_OBJ)
-        r = evaluate(root, '(Cherry, Blueberry, Orange) inner join (Cherry, Watermelon, Blueberry) on [./l = ./r]')
+        r = evaluate(root, '(Cherry, Blueberry, Orange) inner join (Cherry, Watermelon, Blueberry) on [./l = ./r]').unpack
         r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [None], None)
         self._pop_first_and_assert_path(r_actual, [None, 'joined'], None)

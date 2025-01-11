@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import types
-from typing import Any, Hashable
+from typing import Any
 
 from xplore_path.path import Path
 
@@ -14,9 +14,9 @@ def _valid_obj_attr(obj, k):
 class PythonObjectPath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: Hashable | None,  # None for root - None is also a hashable type
+            parent: Path | None,  # None for root - None is also a hashable type
+            position_in_parent: int | None,  # None for root - None is also a hashable type
+            label: str | int | float | bool | None,  # None for root
             value: Any
     ):
         super().__init__(parent, position_in_parent, label, value if type(value) in {bool, int, float, str} else None)

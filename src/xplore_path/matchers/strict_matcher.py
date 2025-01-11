@@ -1,14 +1,12 @@
-from typing import Hashable
-
 from xplore_path.matcher import Matcher
 
 
 class StrictMatcher(Matcher):
-    def __init__(self, pattern: Hashable):
+    def __init__(self, pattern: str | int | float | bool):
         self.pattern = pattern
 
     # MATCHES STRICTLY, WITHOUT COERCION
-    def match(self, value: Hashable) -> bool:
+    def match(self, value: str | int | float | bool) -> bool:
         if type(self.pattern) in {int, float} and type(value) in {int, float}:
             return self.pattern == value  # special case - treat numbers as equal
         return type(value) == type(self.pattern) and self.pattern == value  # otherwise ensure types match

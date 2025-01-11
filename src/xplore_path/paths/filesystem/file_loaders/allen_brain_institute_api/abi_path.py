@@ -4,11 +4,9 @@ import json
 import urllib
 import urllib.parse
 import urllib.request
-from typing import Hashable
 
 from xplore_path.path import Path
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
-
 
 BASE_URL = 'http://api.brain-map.org/api/v2/data/query.json'
 
@@ -18,7 +16,7 @@ class AbiAcronymPath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,  # None for root - None is also a hashable type
+            label: str | int | float | bool | None,  # None for root
     ):
         super().__init__(parent, position_in_parent, label, None)
 
@@ -44,7 +42,7 @@ class AbiRootPath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,  # None for root - None is also a hashable type
+            label: str | int | float | bool | None,  # None for root
             codes: set[str]
     ):
         super().__init__(parent, position_in_parent, label, None)

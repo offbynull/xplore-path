@@ -1,12 +1,11 @@
-from typing import Any
+from typing import Hashable
 
+from xplore_path.collection import Collection
+from xplore_path.collections.sequence_collection import SequenceCollection
 from xplore_path.invocable import Invocable
-from xplore_path.path import Path
-from xplore_path.sequence import SingleOrSequenceWrapSequence, FullSequence
 
 
 class DistinctInvocable(Invocable):
-    def invoke(self, args: list[Any]) -> Any:
+    def invoke(self, args: list[Collection]) -> Collection:
         result, = args
-        result = SingleOrSequenceWrapSequence(result)
-        return FullSequence({v.value() if isinstance(v, Path) else v for v in result})
+        return SequenceCollection.from_unpacked({e.depath().value for e in result if isinstance(e.depath().value, Hashable)})

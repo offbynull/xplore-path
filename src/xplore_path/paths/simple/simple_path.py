@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Hashable, Any
+from typing import Any
 
 from xplore_path.path import Path
 
@@ -10,7 +10,7 @@ class SimplePath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,
+            label: str | int | float | bool | None,  # None for root
             value: Any
     ):
         super().__init__(parent, position_in_parent, label, value)

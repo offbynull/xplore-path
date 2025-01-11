@@ -8,27 +8,27 @@ class EvaluatorTest(unittest.TestCase):
     def test_must_filter_based_on_label(self):
         root = PythonObjectPath.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}, '99': 'bye'})
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a[./b/c <= 0]')],
+            [e.full_label() for e in evaluate(root, '/a[./b/c <= 0]').unpack],
             []
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a[./b/c <= 1]')],
+            [e.full_label() for e in evaluate(root, '/a[./b/c <= 1]').unpack],
             [
                 [None, 'a']
             ]
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a[./b/d = ~1:2]')],
+            [e.full_label() for e in evaluate(root, '/a[./b/d = ~1:2]').unpack],
             [
                 [None, 'a']
             ]
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a[./b/d = ~[1:2)]')],
+            [e.full_label() for e in evaluate(root, '/a[./b/d = ~[1:2)]').unpack],
             []
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a[./b/d = ~1:2]/b[./d = 2]/e')],
+            [e.full_label() for e in evaluate(root, '/a[./b/d = ~1:2]/b[./d = 2]/e').unpack],
             [
                 [None, 'a', 'b', 'e']
             ]

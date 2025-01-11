@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pathlib
 import sqlite3
-from typing import Hashable
 
 from xplore_path.path import Path
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
@@ -13,7 +12,7 @@ class SqliteTablePath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,  # None for root - None is also a hashable type
+            label: str | int | float | bool | None,  # None for root
             fs_path: pathlib.Path,
     ):
         super().__init__(parent, position_in_parent, label, None)
@@ -37,7 +36,7 @@ class SqliteObjectPath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,  # None for root - None is also a hashable type
+            label: str | int | float | bool | None,  # None for root
             fs_path: pathlib.Path
     ):
         super().__init__(parent, position_in_parent, label, None)

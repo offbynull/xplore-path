@@ -8,13 +8,13 @@ class EvaluatorTest(unittest.TestCase):
     def test_must_treat_part_after_directive_as_expression_executed_within_context_of_each_path_returned(self):
         root = PythonObjectPath.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}})
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a/descendant::f')],
+            [e.full_label() for e in evaluate(root, '/a/descendant::f').unpack],
             [
                 [None, 'a', 'b', 'f']
             ]
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a/descendant::(label .)')],
+            [e.full_label() for e in evaluate(root, '/a/descendant::(label .)').unpack],
             [
                 [None,'a', 'b'],
                 [None,'a', 'b', 'c'],
@@ -24,16 +24,16 @@ class EvaluatorTest(unittest.TestCase):
             ]
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a/descendant::*')],
-            [e.full_label() for e in evaluate(root, '/a//*')]
+            [e.full_label() for e in evaluate(root, '/a/descendant::*').unpack],
+            [e.full_label() for e in evaluate(root, '/a//*').unpack]
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a/descendant::(label .)')],
-            [e.full_label() for e in evaluate(root, '/a//*')]
+            [e.full_label() for e in evaluate(root, '/a/descendant::(label .)').unpack],
+            [e.full_label() for e in evaluate(root, '/a//*').unpack]
         )
         self.assertEqual(
-            sorted([e.full_label() for e in evaluate(root, '/descendant::*')]),
-            sorted([e.full_label() for e in evaluate(root, '//*')])
+            sorted([e.full_label() for e in evaluate(root, '/descendant::*').unpack]),
+            sorted([e.full_label() for e in evaluate(root, '//*').unpack])
         )
         # TODO: This sorting shouldn't be happening - results should always be getting returned in document order according ot xpath spec?
 

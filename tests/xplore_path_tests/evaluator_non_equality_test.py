@@ -17,15 +17,15 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(DummyPath(), '5!=x'), True)  # if it can't be coerced to be comparable, False
 
     def test_must_not_equal_single_vs_seq_using_zip_sequence(self):
-        self.assertEqual(evaluate(DummyPath(), '5 zip sequence != (5,5)'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '5.0 zip sequence != (5,5)'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '5 zip sequence != (5.0,5.0)'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '5.0 zip sequence != (5.0,5.0)'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '5.0 zip sequence != ("5","5")'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '"5" zip sequence != (5.0, 5.0)'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '"5" zip sequence != ("5", "5")'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '5 zip sequence != (x, 5)'), [True, False])
-        self.assertEqual(evaluate(DummyPath(), '5 zip sequence != (x, 1)'), [True, True])
+        self.assertEqual(evaluate(DummyPath(), '5 zip sequence != (5,5)'), [False])
+        self.assertEqual(evaluate(DummyPath(), '5.0 zip sequence != (5,5)'), [False])
+        self.assertEqual(evaluate(DummyPath(), '5 zip sequence != (5.0,5.0)'), [False])
+        self.assertEqual(evaluate(DummyPath(), '5.0 zip sequence != (5.0,5.0)'), [False])
+        self.assertEqual(evaluate(DummyPath(), '5.0 zip sequence != ("5","5")'), [False])
+        self.assertEqual(evaluate(DummyPath(), '"5" zip sequence != (5.0, 5.0)'), [False])
+        self.assertEqual(evaluate(DummyPath(), '"5" zip sequence != ("5", "5")'), [False])
+        self.assertEqual(evaluate(DummyPath(), '5 zip sequence != (x, 5)'), [True])
+        self.assertEqual(evaluate(DummyPath(), '5 zip sequence != (x, 1)'), [True])
         self.assertEqual(evaluate(DummyPath(), '5 zip sequence != ()'), [])
 
     def test_must_not_equal_single_vs_seq_using_zip_any(self):
@@ -48,7 +48,7 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(DummyPath(), '5.0 zip all != ("5","5")'), False)
         self.assertEqual(evaluate(DummyPath(), '"5" zip all != (5.0, 5.0)'), False)
         self.assertEqual(evaluate(DummyPath(), '"5" zip all != ("5", "5")'), False)
-        self.assertEqual(evaluate(DummyPath(), '5 zip all != (x, 5)'), False)
+        self.assertEqual(evaluate(DummyPath(), '5 zip all != (x, 5)'), True)
         self.assertEqual(evaluate(DummyPath(), '5 zip all != (x, 1)'), True)
         self.assertEqual(evaluate(DummyPath(), '5 zip all != ()'), True)
 
@@ -89,15 +89,15 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(DummyPath(), '5 product all != ()'), True)
 
     def test_must_not_equal_seq_vs_single_using_zip_sequence(self):
-        self.assertEqual(evaluate(DummyPath(), '(5,5) zip sequence != 5'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '(5,5) zip sequence != 5.0'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '(5.0,5.0) zip sequence != 5'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '(5.0,5.0) zip sequence != 5.0'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '("5","5") zip sequence != 5.0'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '(5.0, 5.0) zip sequence != "5"'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '("5", "5") zip sequence != "5"'), [False, False])
-        self.assertEqual(evaluate(DummyPath(), '(x, 5) zip sequence != 5'), [True, False])
-        self.assertEqual(evaluate(DummyPath(), '(x, 1) zip sequence != 5'), [True, True])
+        self.assertEqual(evaluate(DummyPath(), '(5,5) zip sequence != 5'), [False])
+        self.assertEqual(evaluate(DummyPath(), '(5,5) zip sequence != 5.0'), [False])
+        self.assertEqual(evaluate(DummyPath(), '(5.0,5.0) zip sequence != 5'), [False])
+        self.assertEqual(evaluate(DummyPath(), '(5.0,5.0) zip sequence != 5.0'), [False])
+        self.assertEqual(evaluate(DummyPath(), '("5","5") zip sequence != 5.0'), [False])
+        self.assertEqual(evaluate(DummyPath(), '(5.0, 5.0) zip sequence != "5"'), [False])
+        self.assertEqual(evaluate(DummyPath(), '("5", "5") zip sequence != "5"'), [False])
+        self.assertEqual(evaluate(DummyPath(), '(x, 5) zip sequence != 5'), [True])
+        self.assertEqual(evaluate(DummyPath(), '(x, 1) zip sequence != 5'), [True])
         self.assertEqual(evaluate(DummyPath(), '() zip sequence != 5'), [])
 
     def test_must_not_equal_seq_vs_single_using_zip_any(self):
@@ -120,7 +120,7 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(DummyPath(), '("5","5") zip all != 5.0'), False)
         self.assertEqual(evaluate(DummyPath(), '(5.0, 5.0) zip all != "5"'), False)
         self.assertEqual(evaluate(DummyPath(), '("5", "5") zip all != "5"'), False)
-        self.assertEqual(evaluate(DummyPath(), '(x, 5) zip all != 5'), False)
+        self.assertEqual(evaluate(DummyPath(), '(x, 5) zip all != 5'), True)
         self.assertEqual(evaluate(DummyPath(), '(x, 1) zip all != 5'), True)
         self.assertEqual(evaluate(DummyPath(), '() zip all != 5'), True)
 

@@ -1,6 +1,4 @@
-from typing import Hashable
-
-from xplore_path.coercions import coerce_single_value
+from xplore_path.entity import Entity
 from xplore_path.matcher import Matcher
 
 
@@ -11,8 +9,11 @@ class NumericRangeMatcher(Matcher):
         self.max_ = max_
         self.max_inclusive = max_inclusive
 
-    def match(self, value: Hashable) -> bool:
-        value = coerce_single_value(value, float)
+    def match(self, value: str | int | float | bool) -> bool:
+        value = Entity(value).coerce(float)
+        if value is None:
+            return False
+        value = value.value
         if value is None:
             return False
         if self.min_inclusive and self.max_inclusive:

@@ -30,10 +30,10 @@ class EvaluatorTest(unittest.TestCase):
 
     def test_must_allow_nesting_of_joins(self):
         root = PythonObjectPath.create_root_path(_TEST_OBJ)
-        # r = evaluate(root, '/Capitals/*')
-        # r = evaluate(root, '(/Colors/* inner join /Regions/* on [label ./l/*[0] = label ./r/*[0]])/r/*')
-        # r = evaluate(root, '(/Colors/* inner join /Regions/* on [label ./l/*[0] = label ./r/*[0]])/r')
-        r = evaluate(root, '/Capitals/* inner join (/Colors/* inner join /Regions/* on [label ./l/*[0] = label ./r/*[0]])/r/*/* on [label ./l/*[0] = ./r//*]')
+        # r = evaluate(root, '/Capitals/*').unpack
+        # r = evaluate(root, '(/Colors/* inner join /Regions/* on [label ./l/*[0] = label ./r/*[0]])/r/*').unpack
+        # r = evaluate(root, '(/Colors/* inner join /Regions/* on [label ./l/*[0] = label ./r/*[0]])/r').unpack
+        r = evaluate(root, '/Capitals/* inner join (/Colors/* inner join /Regions/* on [label ./l/*[0] = label ./r/*[0]])/r/*/* on [label ./l/*[0] = ./r//*]').unpack
         r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [None], None)
         self._pop_first_and_assert_path(r_actual, [None, 'joined'], None)

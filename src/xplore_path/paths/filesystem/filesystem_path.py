@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Hashable
 
 from xplore_path.path import Path
-from xplore_path.paths.filesystem.context import FileSystemContext
 from xplore_path.paths.filesystem._archive_path import ArchivePath
 from xplore_path.paths.filesystem._file_path import FilePath
+from xplore_path.paths.filesystem.context import FileSystemContext
 
 
 class FileSystemPath(Path):
@@ -14,7 +13,7 @@ class FileSystemPath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,  # None for root - None is also a hashable type
+            label: str | int | float | bool | None,  # None for root
             fs_path: pathlib.Path,
             ctx: FileSystemContext
     ):

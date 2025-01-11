@@ -1,1 +1,1 @@
-["$distinct(/mouse_assays.zip//0/GO_Term)", "GO:0002376", "GO:0005102", "GO:0006954", "GO:0006955", "GO:0009617", "GO:0019882", "GO:0045202"]
+["$distinct(/mouse_assays.zip//0/GO_Term)", "<entity>GO:0002376", "<entity>GO:0005102", "<entity>GO:0006954", "<entity>GO:0006955", "<entity>GO:0009617", "<entity>GO:0019882", "<entity>GO:0045202"]

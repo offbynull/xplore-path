@@ -1,1 +1,1 @@
-["$frequency_count(/mouse_assays.zip//0/GO_Term)//*", "[None, 'GO:0002376']: 22", "[None, 'GO:0005102']: 30", "[None, 'GO:0006954']: 26", "[None, 'GO:0006955']: 26", "[None, 'GO:0009617']: 32", "[None, 'GO:0019882']: 31", "[None, 'GO:0045202']: 33"]
+["$frequency_count(/mouse_assays.zip//0/GO_Term)//*", "<entity>[None, 'GO:0002376']: 22", "<entity>[None, 'GO:0005102']: 30", "<entity>[None, 'GO:0006954']: 26", "<entity>[None, 'GO:0006955']: 26", "<entity>[None, 'GO:0009617']: 32", "<entity>[None, 'GO:0019882']: 31", "<entity>[None, 'GO:0045202']: 33"]

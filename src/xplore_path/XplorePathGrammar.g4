@@ -228,7 +228,8 @@ path
     ;
 
 relPath
-    : relPath (SLASH | SS) relPath         # RelPathChain
+    : relPath SLASH relPath                # RelPathChainChild
+    | relPath SS relPath                   # RelPathChainDescendant
     | (reverseStep | forwardStep) filter?  # RelPathStep
     ;
 

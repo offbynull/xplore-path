@@ -1,1 +1,1 @@
-["Assay_Type", "Conditions", "Detection_Wavelength", "GO_Term", "Plate_Type", "Replicates", "Target_Gene_Protein", "label /mouse_assays.zip/Mouse_Assay_001.csv/0/*"]
+["<entity>Assay_Type", "<entity>Conditions", "<entity>Detection_Wavelength", "<entity>GO_Term", "<entity>Plate_Type", "<entity>Replicates", "<entity>Target_Gene_Protein", "label /mouse_assays.zip/Mouse_Assay_001.csv/0/*"]

@@ -4,11 +4,11 @@ import pathlib
 import tarfile
 import zipfile
 from tempfile import TemporaryDirectory
-from typing import Hashable, Any, Callable
+from typing import Any, Callable
 
 from xplore_path.path import Path
-from xplore_path.paths.filesystem.context import NoticeType, FileSystemContext
 from xplore_path.paths.filesystem._file_path import FilePath
+from xplore_path.paths.filesystem.context import NoticeType, FileSystemContext
 
 
 def _temp_dir() -> pathlib.Path:
@@ -20,7 +20,7 @@ class ArchivePath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,
+            label: str | int | float | bool | None,  # None for root
             fs_path: pathlib.Path,
             ctx: FileSystemContext,
             fspath_creator: Callable  # Required to avoid cyclical import

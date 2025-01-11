@@ -8,7 +8,7 @@ class EvaluatorTest(unittest.TestCase):
     def test_must_treat_part_after_directive_as_expression_executed_within_context_of_each_path_returned(self):
         root = PythonObjectPath.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}})
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a/following-sibling::*')],
+            [e.full_label() for e in evaluate(root, '/a/following-sibling::*').unpack],
             [
                 [None, 'y'],
                 [None, 'z'],
@@ -16,23 +16,23 @@ class EvaluatorTest(unittest.TestCase):
             ]
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a/b/e/following-sibling::*')],
+            [e.full_label() for e in evaluate(root, '/a/b/e/following-sibling::*').unpack],
             [
                 [None, 'a','b','f']
             ]
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a/b/e/following-sibling::(label .)')],
+            [e.full_label() for e in evaluate(root, '/a/b/e/following-sibling::(label .)').unpack],
             [
                 [None, 'a','b','f']
             ]
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/a/b/e/following-sibling::ptrs')],
+            [e.full_label() for e in evaluate(root, '/a/b/e/following-sibling::ptrs').unpack],
             []
         )
         self.assertEqual(
-            [e.full_label() for e in evaluate(root, '/following-sibling::*')],
+            [e.full_label() for e in evaluate(root, '/following-sibling::*').unpack],
             []  # nothing is following the root node
         )
 

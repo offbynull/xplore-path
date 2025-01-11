@@ -1,8 +1,7 @@
 import itertools
 import math
 from enum import Enum
-from itertools import product
-from typing import Any, Callable, Type, Literal, Hashable
+from typing import Any
 
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.InputStream import InputStream
@@ -10,7 +9,15 @@ from antlr4.InputStream import InputStream
 from xplore_path.XplorePathGrammarLexer import XplorePathGrammarLexer
 from xplore_path.XplorePathGrammarParser import XplorePathGrammarParser
 from xplore_path.XplorePathGrammarVisitor import XplorePathGrammarVisitor
-from xplore_path.coercions import coerce_single_value
+from xplore_path.collection import Collection
+from xplore_path.collection_utils import CombineMode, combine_transform_aggregate, AggregateMode
+from xplore_path.collections.sequence_collection import SequenceCollection
+from xplore_path.collections.single_value_collection import SingleValueCollection
+from xplore_path.entity import Entity
+from xplore_path.fallback_mode import FallbackMode
+from xplore_path.fallback_modes.default_fallback_mode import DefaultFallbackMode
+from xplore_path.fallback_modes.discard_fallback_mode import DiscardFallbackMode
+from xplore_path.fallback_modes.error_fallback_mode import ErrorFallbackMode
 from xplore_path.invocable import Invocable
 from xplore_path.invocables.count_invocable import CountInvocable
 from xplore_path.invocables.distinct_invocable import DistinctInvocable
@@ -35,12 +42,9 @@ from xplore_path.paths.mirror.mirror_path import MirrorPath
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 from xplore_path.paths.simple.simple_path import SimplePath
 from xplore_path.raise_parse_error_listener import RaiseParseErrorListener
-from xplore_path.sequence import Sequence, SingleWrapSequence, TransformSequence, FullSequence, FallbackMode, \
-    DiscardFallbackMode, ErrorFallbackMode, DefaultFallbackMode, EmptySequence, FilterSequence, \
-    SingleOrSequenceWrapSequence, DoNothingFallbackMode
 
 
-class PathResetMode(Enum):
+class CollectionResetMode(Enum):
     RESET_WITH_ROOT = 'RESET_WITH_ROOT'
     RESET_WITH_SELF = 'RESET_WITH_SELF'
     RESET_WITH_EMPTY = 'RESET_WITH_EMPTY'
@@ -56,7 +60,7 @@ class _EvaluatorVisitorContext:
             root: Path
     ):
         self._root = root
-        self._entities = SingleWrapSequence(root)
+        self._collection = SequenceCollection.from_unpacked([root])
         self._save_stack = []
         self._variables = {}
 
@@ -64,43 +68,45 @@ class _EvaluatorVisitorContext:
         if self._root.full_label() != [None]:
             raise ValueError('Root path in context not root path')
 
-    def reset_entities(self, new_entities: PathResetMode | Sequence):
-        if isinstance(new_entities, Sequence):
-            self._entities = new_entities
-        elif new_entities == PathResetMode.RESET_WITH_ROOT:
-            self._entities = SingleWrapSequence(self._root)
-        elif new_entities == PathResetMode.RESET_WITH_SELF:
-            self._entities = self._entities  # Normally it'd be a copy of the self.entities, but Sequences should be immutable
-        elif new_entities == PathResetMode.RESET_WITH_EMPTY:
-            self._entities = EmptySequence()
+    def reset_collection(self, collection: CollectionResetMode | Collection):
+        if isinstance(collection, Collection):
+            self._collection = collection
+        elif collection == CollectionResetMode.RESET_WITH_ROOT:
+            self._collection = SequenceCollection.from_unpacked([self._root])
+        elif collection == CollectionResetMode.RESET_WITH_SELF:
+            self._collection = self._collection  # Normally it'd be a copy of the self._collection, but Collection should be immutable
+        elif collection == CollectionResetMode.RESET_WITH_EMPTY:
+            self._collection = SequenceCollection.empty()
         else:
             raise ValueError('This should never happen')
 
-    def save(self, new_paths: PathResetMode | Sequence, new_root: RootResetMode | Any = RootResetMode.RESET_WITH_SELF):
-        self._save_stack.append((self._entities, self._root))
+    def save(self, new_collection: CollectionResetMode | Collection, new_root: RootResetMode | Any = RootResetMode.RESET_WITH_SELF):
+        self._save_stack.append((self._collection, self._root))
         if new_root != RootResetMode.RESET_WITH_SELF:
             self._root = new_root
-        self.reset_entities(new_paths)
+        self.reset_collection(new_collection)
 
     def restore(self) -> None:
-        self._entities, self._root = self._save_stack.pop()
-    
+        self._collection, self._root = self._save_stack.pop()
+
+    @property
     def root(self) -> Path:
         return self._root
 
-    def entities(self) -> Sequence:
-        return self._entities
+    @property
+    def collection(self) -> Collection:
+        return self._collection
     
-    def get_variable(self, name: str, default: Any) -> Any:
+    def get_variable(self, name: str, default: Collection) -> Collection:
         return self._variables.get(name, default)
     
-    def set_variable(self, name: str, value: Any) -> None:
+    def set_variable(self, name: str, value: Collection) -> None:
         self._variables[name] = value
 
     @staticmethod
     def prime(
             root_: Path | Any,
-            variables_: dict[str, Any]
+            variables_: dict[str, Collection]
     ):
         ret = _EvaluatorVisitorContext(root_)
         for k, v in variables_.items():
@@ -112,7 +118,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def __init__(
             self,
             root: Any,
-            variables: dict[str, Any]
+            variables: dict[str, Collection]
     ):
         self.context = _EvaluatorVisitorContext.prime(root, variables)
 
@@ -120,9 +126,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         return self.visit(ctx.expr())
 
     def visitExprPath(self, ctx: XplorePathGrammarParser.ExprPathContext):
-        entities = self.visit(ctx.path())
-        entities = self._apply_filter(entities, ctx.filter_())
-        return entities
+        collection = self.visit(ctx.path())
+        collection = self._apply_filter(collection, ctx.filter_())
+        return collection
 
     def visitExprPathInvoke(self, ctx: XplorePathGrammarParser.ExprPathInvokeContext):
         ret = self.visit(ctx.path())
@@ -142,7 +148,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             name = self._decode_str(ctx.varRef().StringLiteral().getText())
         else:
             raise ValueError('Unexpected')
-        return self.context.get_variable(name, EmptySequence())
+        return self.context.get_variable(name, SequenceCollection.empty())
 
     def visitExprVariable(self, ctx: XplorePathGrammarParser.ExprVariableContext):
         ret = self._get_var(ctx)
@@ -162,15 +168,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             fallback = DiscardFallbackMode()
         inner = self.visit(ctx.atomicOrEncapsulate())
         if ctx.MINUS():
-            if isinstance(inner, Sequence):
-                inner = TransformSequence(inner, lambda _, v: coerce_single_value(v, float), fallback)
-                inner = TransformSequence(inner, lambda _, v: -v, DoNothingFallbackMode())
-                return inner
-            else:
-                inner = SingleWrapSequence(inner)
-                inner = TransformSequence(inner, lambda _, v: coerce_single_value(v, float), fallback)
-                inner = TransformSequence(inner, lambda _, v: -v, DoNothingFallbackMode())
-                return inner.to_single_value_or_empty()
+            inner = inner.transform(lambda _, v: v.coerce(float), fallback)
+            inner = inner.transform(lambda _, v: Entity(-v.value), ErrorFallbackMode())
+            return inner
         elif ctx.PLUS():
             return inner  # Keep it as-is -- not required to do any manipulation here
         raise ValueError('Unexpected')
@@ -178,28 +178,17 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitExprAtomicOrEncapsulate(self, ctx: XplorePathGrammarParser.ExprAtomicOrEncapsulateContext):
         return self.visit(ctx.atomicOrEncapsulate())
 
-    def _invoke(self, invocable, arglist_ctx, result_filter_ctx):
+    def _invoke(self, collection, arglist_ctx, result_filter_ctx):
         # if ctx.coerceFallback():
         #     fallback = self.visit(ctx.coerceFallback())
         # else:
         #     fallback = DiscardFallbackMode()
         fallback = DiscardFallbackMode()
 
-        def op(_invocable, _args):
-            if isinstance(_invocable, Invocable):
-                try:
-                    return _invocable.invoke(_args)
-                except Exception:
-                    ...  # do nothing
-            return None
-
         args = [self.visit(n) for n in arglist_ctx.expr()]
-        if isinstance(invocable, Sequence):
-            ret = TransformSequence(invocable, lambda _, i: op(i, args), fallback)
-        else:
-            ret = SingleWrapSequence(invocable)
-            ret = TransformSequence(ret, lambda _, i: op(i, args), fallback)
-            ret = ret.to_single_value_or_empty()
+        ret = itertools.chain(*(e.invoke(args) for e in collection))  # explicitly flatten each invocation result
+        ret = itertools.chain(*(fallback.evaluate(r) for r in ret))  # apply fallback
+        ret = SequenceCollection.from_entities(ret)
         ret = self._apply_filter(ret, result_filter_ctx)
         return ret
 
@@ -264,101 +253,83 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             test_path.seal()
             return test_path
 
-        l = SingleOrSequenceWrapSequence(self.visit(ctx.expr(0)))
-        r = SingleOrSequenceWrapSequence(self.visit(ctx.expr(1)))
+        l = self.visit(ctx.expr(0))
+        r = self.visit(ctx.expr(1))
         root_path = SimplePath(None, None, None, None)
         root_path_next_child_idx = 0
         if ctx.joinOp().KW_INNER():
-            for l_item in l:
-                for r_item in r:
-                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_item, r_item)
-                    entities = SingleWrapSequence(test_path)
-                    self.context.save(entities)
+            for l_ in l.unpack:
+                for r_ in r.unpack:
+                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_, r_)
+                    collection = SequenceCollection.from_unpacked([test_path])
+                    self.context.save(collection)
                     try:
-                        entities = self._apply_filter(entities, ctx.joinCond().filter_())
+                        collection = self._apply_filter(collection, ctx.joinCond().filter_())
                     finally:
                         self.context.restore()
-                    if entities:
+                    if collection:
                         root_path.add_child(test_path)
                         root_path_next_child_idx += 1
         elif ctx.joinOp().KW_RIGHT():
-            for r_item in r:
+            for r_ in r.unpack:
                 joined = False
-                for l_item in l:
-                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_item, r_item)
-                    entities = SingleWrapSequence(test_path)
-                    self.context.save(entities)
+                for l_ in l.unpack:
+                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_, r_)
+                    collection = SequenceCollection.from_unpacked([test_path])
+                    self.context.save(collection)
                     try:
-                        entities = self._apply_filter(entities, ctx.joinCond().filter_())
+                        collection = self._apply_filter(collection, ctx.joinCond().filter_())
                     finally:
                         self.context.restore()
-                    if entities:
+                    if collection:
                         root_path.add_child(test_path)
                         root_path_next_child_idx += 1
                         joined = True
                 if not joined:
-                    r_path = _create_join_obj_right_only(root_path, root_path_next_child_idx, r_item)
+                    r_path = _create_join_obj_right_only(root_path, root_path_next_child_idx, r_)
                     root_path.add_child(r_path)
                     root_path_next_child_idx += 1
         else:  # if KW_LEFT not set explicitly, assume KW_LEFT
-            for l_item in l:
+            for l_ in l.unpack:
                 joined = False
-                for r_item in r:
-                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_item, r_item)
-                    entities = SingleWrapSequence(test_path)
-                    self.context.save(entities)
+                for r_ in r.unpack:
+                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_, r_)
+                    collection = SequenceCollection.from_unpacked([test_path])
+                    self.context.save(collection)
                     try:
-                        entities = self._apply_filter(entities, ctx.joinCond().filter_())
+                        collection = self._apply_filter(collection, ctx.joinCond().filter_())
                     finally:
                         self.context.restore()
-                    if entities:
+                    if collection:
                         root_path.add_child(test_path)
                         root_path_next_child_idx += 1
                         joined = True
                 if not joined:
-                    l_path = _create_join_obj_left_only(root_path, root_path_next_child_idx, l_item)
+                    l_path = _create_join_obj_left_only(root_path, root_path_next_child_idx, l_)
                     root_path.add_child(l_path)
                     root_path_next_child_idx += 1
         root_path.seal()
-        return FullSequence([root_path] + root_path.all_descendants())
+        return SequenceCollection.from_unpacked([root_path] + root_path.all_descendants())
 
     def visitExprSetIntersect(self, ctx: XplorePathGrammarParser.ExprSetIntersectContext):
-        l = self._coerce_for_set_operation(self.visit(ctx.expr(0)))
-        r = self._coerce_for_set_operation(self.visit(ctx.expr(1)))
+        l = self.visit(ctx.expr(0)).to_set()
+        r = self.visit(ctx.expr(1)).to_set()
         if ctx.KW_INTERSECT():
             result_keys = l.keys() & r.keys()
         elif ctx.KW_EXCEPT():
             result_keys = l.keys() - r.keys()
         else:
             raise ValueError('Unexpected')
-        return FullSequence(l[p] for p in result_keys)
+        return SequenceCollection.from_entities(l[p] for p in result_keys)
 
     def visitExprSetUnion(self, ctx: XplorePathGrammarParser.ExprSetUnionContext):
-        l = self._coerce_for_set_operation(self.visit(ctx.expr(0)))
-        r = self._coerce_for_set_operation(self.visit(ctx.expr(1)))
+        l = self.visit(ctx.expr(0)).to_set()
+        r = self.visit(ctx.expr(1)).to_set()
         result = l | r
-        return FullSequence(result.values())
-
-    def _coerce_for_set_operation(self, value: Any) -> dict[tuple[Literal['PATH', 'RAW'], Hashable], Any]:
-        if not isinstance(value, Sequence):
-            value = SingleWrapSequence(value)
-        ret = {}
-        for v in value:
-            if isinstance(v, Path):
-                k = 'PATH', tuple(v.full_label())
-            else:
-                k = 'RAW', v
-            try:
-                ret[k] = v
-            except TypeError:
-                ...  # type is unhashable? silently discard it and move on
-        return ret  # noqa
+        return SequenceCollection.from_entities(result.values())
 
     def visitExprBoolAggregate(self, ctx: XplorePathGrammarParser.ExprBoolAggregateContext):
-        if ctx.coerceFallback():
-            fallback = self.visit(ctx.coerceFallback())
-        else:
-            fallback = DefaultFallbackMode(False)
+        fallback_mode = self._to_fallback_mode(ctx, DefaultFallbackMode(Entity(False)))
         if ctx.KW_ANY():
             op = any
         elif ctx.KW_ALL():
@@ -366,418 +337,348 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         else:
             raise ValueError('Unexpected')
         r = self.visit(ctx.expr())
-        if isinstance(r, Sequence):
-            r = TransformSequence(r, lambda _, v: coerce_single_value(v, bool), fallback)
-            return op(r)
-        else:
-            r = SingleWrapSequence(r)
-            r = TransformSequence(r, lambda _, v: coerce_single_value(v, bool), fallback)
-            return op(r)
-
-    def _apply_binary_arithmetic_op(
-            self,
-            l: int | float | str | bool | list[Any],
-            r: int | float | str | bool | list[Any],
-            combine_op: Callable[[Any, Any], Any],
-            op: Callable[[Any, Any], Any],
-            expected_type: Type[bool | int | float | str],
-            fallback: FallbackMode
-    ):
-        if isinstance(l, Sequence) and isinstance(r, Sequence):
-            l = TransformSequence(l, lambda _, v: coerce_single_value(v, expected_type), fallback)
-            r = TransformSequence(r, lambda _, v: coerce_single_value(v, expected_type), fallback)
-            return FullSequence(op(l_, r_) for l_, r_ in combine_op(l, r))
-        elif isinstance(l, Sequence):
-            l = TransformSequence(l, lambda _, v: coerce_single_value(v, expected_type), fallback)
-            r = TransformSequence(SingleWrapSequence(r), lambda _, v: coerce_single_value(v, expected_type), fallback)
-            return FullSequence(op(l_, r_) for l_, r_ in combine_op(l, r))
-        elif isinstance(r, Sequence):
-            l = TransformSequence(SingleWrapSequence(l), lambda _, v: coerce_single_value(v, expected_type), fallback)
-            r = TransformSequence(r, lambda _, v: coerce_single_value(v, expected_type), fallback)
-            return FullSequence(op(l_, r_) for l_, r_ in combine_op(l, r))
-        else:
-            l = TransformSequence(SingleWrapSequence(l), lambda _, v: coerce_single_value(v, expected_type), fallback)
-            r = TransformSequence(SingleWrapSequence(r), lambda _, v: coerce_single_value(v, expected_type), fallback)
-            return FullSequence(op(l_, r_) for l_, r_ in combine_op(l, r)).to_single_value_or_empty()
+        r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
+        return op(r.unpack)
 
     def visitExprMultiplicative(self, ctx: XplorePathGrammarParser.ExprMultiplicativeContext):
-        if ctx.coerceFallback():
-            fallback = self.visit(ctx.coerceFallback())
-        else:
-            fallback = DiscardFallbackMode()
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
-        # default to zip if both are lists, otherwise use product as default - that's what xpath does
-        combine_op = zip if isinstance(l, Sequence) and isinstance(r, Sequence) else product
-        if ctx.mulOp().KW_ZIP():
-            combine_op = lambda a,b: zip(a, b)
-        elif ctx.mulOp().KW_PRODUCT():
-            combine_op = lambda a,b: product(a, b)
+        lhs = self.visit(ctx.expr(0))
+        rhs = self.visit(ctx.expr(1))
         if ctx.mulOp().STAR():
-            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l * _r, float, fallback)
+            op=lambda _l, _r: _l * _r
         elif ctx.mulOp().KW_DIV():
-            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l / _r, float, fallback)
+            op=lambda _l, _r: _l / _r
         elif ctx.mulOp().KW_IDIV():
-            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l // _r, float, fallback)
+            op=lambda _l, _r: _l // _r
         elif ctx.mulOp().KW_MOD():
-            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l % _r, float, fallback)
-        raise ValueError('Unexpected')
+            op=lambda _l, _r: _l % _r
+        else:
+            raise ValueError('Unexpected')
+        op_required_type = float
+        return combine_transform_aggregate(
+            lhs=lhs,
+            rhs=rhs,
+            combine_mode=self._to_arithmetic_combine_mode(lhs, rhs, ctx.mulOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DiscardFallbackMode()),
+            aggregate_mode=AggregateMode.NONE
+        )
 
     def visitExprAdditive(self, ctx: XplorePathGrammarParser.ExprAdditiveContext):
-        if ctx.coerceFallback():
-            fallback = self.visit(ctx.coerceFallback())
-        else:
-            fallback = DiscardFallbackMode()
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
-        # default to zip if both are lists, otherwise use product as default - that's what xpath does
-        combine_op = zip if isinstance(l, Sequence) and isinstance(r, Sequence) else product
-        if ctx.addOp().KW_ZIP():
-            combine_op = lambda a,b: zip(a, b)
-        elif ctx.addOp().KW_PRODUCT():
-            combine_op = lambda a,b: product(a, b)
+        lhs = self.visit(ctx.expr(0))
+        rhs = self.visit(ctx.expr(1))
         if ctx.addOp().PLUS():
-            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l + _r, float, fallback)
+            op=lambda _l, _r: _l + _r
+            op_required_type=float
         elif ctx.addOp().MINUS():
-            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l - _r, float, fallback)
+            op = lambda _l, _r: _l - _r
+            op_required_type = float
         elif ctx.addOp().PP():
-            return self._apply_binary_arithmetic_op(l, r, combine_op, lambda _l, _r: _l + _r, str, fallback)
-        raise ValueError('Unexpected')
+            op = lambda _l, _r: _l + _r
+            op_required_type = str
+        else:
+            raise ValueError('Unexpected')
+        return combine_transform_aggregate(
+            lhs=lhs,
+            rhs=rhs,
+            combine_mode=self._to_arithmetic_combine_mode(lhs, rhs, ctx.addOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DiscardFallbackMode()),
+            aggregate_mode=AggregateMode.NONE
+        )
+
+    def _to_arithmetic_combine_mode(self, lhs, rhs, ctx) -> CombineMode:
+        # default to zip if both are lists, otherwise use product as default - that's what xpath does
+        if isinstance(lhs, SequenceCollection) and isinstance(rhs, SequenceCollection):
+            ret = CombineMode.ZIP
+        else:
+            ret = CombineMode.PRODUCT
+        if ctx.KW_ZIP():
+            ret = CombineMode.ZIP
+        elif ctx.KW_PRODUCT():
+            ret = CombineMode.PRODUCT
+        return ret
 
     def visitExprExtractLabel(self, ctx: XplorePathGrammarParser.ExprExtractLabelContext):
-        l = self.visit(ctx.expr())
-        if isinstance(l, Sequence):
-            ret = FilterSequence(l, lambda _, v: isinstance(v, Path))
-            ret = TransformSequence(ret, lambda _, v: v.label(), DoNothingFallbackMode())
-            return ret
-        elif isinstance(l, Path):
-            return l.label()
-        return EmptySequence()
+        ret = self.visit(ctx.expr())
+        ret = ret.filter(lambda _, e: isinstance(e.value, Path))
+        ret = ret.transform(lambda _, e: Entity(e.value.label()), ErrorFallbackMode())
+        return ret
 
     def visitExprExtractPosition(self, ctx: XplorePathGrammarParser.ExprExtractPositionContext):
-        l = self.visit(ctx.expr())
-        if isinstance(l, Sequence):
-            ret = FilterSequence(l, lambda _, v: isinstance(v, Path))
-            ret = TransformSequence(ret, lambda _, v: v.position(), DoNothingFallbackMode())
-            return ret
-        elif isinstance(l, Path):
-            return l.position()
-        return EmptySequence()
-
-    def _apply_binary_boolean_op(
-            self,
-            l: int | float | str | bool | Sequence,
-            r: int | float | str | bool | Sequence,
-            combine_op: Callable[[Any, Any], Any],
-            test_op: Callable[[Any, Any], Any],
-            required_type: Type | None,
-            fallback: FallbackMode
-    ):
-        def _coerce_eval_insert(l_, r_):
-            # Paths to values
-            if isinstance(l_, Path):
-                l_ = l_.value()
-            if isinstance(r_, Path):
-                r_ = r_.value()
-            # Coerce to comparable types
-            if required_type is not None:
-                l_ = coerce_single_value(l_, required_type)  # noqa
-                r_ = coerce_single_value(r_, required_type)  # noqa
-            elif isinstance(l_, Matcher) or isinstance(r_, Matcher):
-                ...  # skip cohersion if either is a label matcher
-            else:
-                new_r_ = coerce_single_value(r_, type(l_))
-                if new_r_ is None:
-                    new_l_ = coerce_single_value(l_, type(r_))
-                    l_ = new_l_
-                else:
-                    r_ = new_r_
-            if l_ is None or r_ is None:
-                return None
-            return test_op(l_, r_)
-
-        if isinstance(l, Sequence) and isinstance(r, Sequence):  # list vs list - what happens depends on mode
-            ret = FullSequence(_coerce_eval_insert(l_, r_) for l_, r_ in combine_op(l, r))
-            ret = TransformSequence(ret, lambda _, v: v, fallback)
-            return ret
-        elif isinstance(l, Sequence): # for each comparison regardless of mode
-            ret = FullSequence(_coerce_eval_insert(l_, r) for l_ in l)
-            ret = TransformSequence(ret, lambda _, v: v, fallback)
-            return ret
-        elif isinstance(r, Sequence):  # for each comparison regardless of mode
-            ret = FullSequence(_coerce_eval_insert(l, r_) for r_ in r)
-            ret = TransformSequence(ret, lambda _, v: v, fallback)
-            return ret
-        else:  # single comparison regardless of mode
-            ret = SingleWrapSequence(_coerce_eval_insert(l, r))
-            ret = TransformSequence(ret, lambda _, v: v, fallback)
-            return ret.to_single_value_or_empty()
+        ret = self.visit(ctx.expr())
+        ret = ret.filter(lambda _, e: isinstance(e.value, Path))
+        ret = ret.transform(lambda _, e: Entity(e.value.position()), ErrorFallbackMode())
+        return ret
 
     def visitExprComparison(self, ctx: XplorePathGrammarParser.ExprComparisonContext):
-        if ctx.coerceFallback():
-            fallback = self.visit(ctx.coerceFallback())
-        else:
-            fallback = DefaultFallbackMode(False)
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
-
-        def eq_op(_l, _r):
+        def _eq_op(_l, _r):
+            if isinstance(_l, Matcher) and isinstance(_r, Matcher):
+                return False
+            if isinstance(_l, Invocable) and isinstance(_r, Invocable):
+                return False
             if isinstance(_l, Matcher):
                 return _l.match(_r)
             elif isinstance(_r, Matcher):
                 return _r.match(_l)
-            # WHAT IF THEY'RE BOTH LABEL MATCHERS? ALWAYS RETURN FALSE?
             return _l == _r
 
         if ctx.relOp().EQ():
-            op = eq_op
-            required_type = None
+            op = _eq_op
+            op_required_type = None
         elif ctx.relOp().NE():
-            op = lambda _l, _r: not eq_op(_l, _r)
-            required_type = None
+            op = lambda _l, _r: not _eq_op(_l, _r)
+            op_required_type = None
         elif ctx.relOp().LT():
             op = lambda _l, _r: _l < _r
-            required_type = float
+            op_required_type = float
         elif ctx.relOp().LE():
             op = lambda _l, _r: _l <= _r
-            required_type = float
+            op_required_type = float
         elif ctx.relOp().GT():
             op = lambda _l, _r: _l > _r
-            required_type = float
+            op_required_type = float
         elif ctx.relOp().GE():
             op = lambda _l, _r: _l >= _r
-            required_type = float
+            op_required_type = float
         elif ctx.relOp().LL():
             raise ValueError('Test if node A is before node B - unimplemented')
         elif ctx.relOp().GG():
             raise ValueError('Test if node A is after node B - unimplemented')
         else:
             raise ValueError('Unexpected')
-        combine_op = self._boolean_op_combiner(ctx.relOp())
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op, required_type, fallback)  # noqa
-        agg_op, ret = self._boolean_op_aggregator(ctx.relOp(), ret)
-        ret = agg_op(ret)
-        return ret
+        return combine_transform_aggregate(
+            lhs=self.visit(ctx.expr(0)),
+            rhs=self.visit(ctx.expr(1)),
+            combine_mode=self._to_boolean_combine_mode(ctx.relOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(Entity(False))),
+            aggregate_mode=self._to_aggregate_mode(ctx.relOp())
+        )
 
     def visitExprOr(self, ctx: XplorePathGrammarParser.ExprAndContext):
-        if ctx.coerceFallback():
-            coercer = self.visit(ctx.coerceFallback())
-        else:
-            coercer = DefaultFallbackMode(False)
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
-        op = lambda _l, _r: _l or _r
-        combine_op = self._boolean_op_combiner(ctx.orOp())
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op, bool, coercer)  # noqa
-        agg_op, ret = self._boolean_op_aggregator(ctx.orOp(), ret)
-        ret = agg_op(ret)
-        return ret
+        op = lambda lv, rv: lv or rv
+        op_required_type = bool
+        return combine_transform_aggregate(
+            lhs=self.visit(ctx.expr(0)),
+            rhs=self.visit(ctx.expr(1)),
+            combine_mode=self._to_boolean_combine_mode(ctx.orOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(Entity(False))),
+            aggregate_mode=self._to_aggregate_mode(ctx.orOp())
+        )
 
     def visitExprAnd(self, ctx: XplorePathGrammarParser.ExprAndContext):
-        if ctx.coerceFallback():
-            coercer = self.visit(ctx.coerceFallback())
-        else:
-            coercer = DefaultFallbackMode(False)
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
-        op = lambda _l, _r: _l and _r
-        combine_op = self._boolean_op_combiner(ctx.andOp())
-        ret = self._apply_binary_boolean_op(l, r, combine_op, op, bool, coercer)  # noqa
-        agg_op, ret = self._boolean_op_aggregator(ctx.andOp(), ret)
-        ret = agg_op(ret)
+        op = lambda lv, rv: lv and rv
+        op_required_type = bool
+        return combine_transform_aggregate(
+            lhs=self.visit(ctx.expr(0)),
+            rhs=self.visit(ctx.expr(1)),
+            combine_mode=self._to_boolean_combine_mode(ctx.andOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(Entity(False))),
+            aggregate_mode=self._to_aggregate_mode(ctx.andOp())
+        )
+
+    def _to_boolean_combine_mode(self, ctx) -> CombineMode:
+        ret = CombineMode.PRODUCT  # default is product, override if set - product is default in xpath
+        if ctx.KW_ZIP():
+            ret = CombineMode.ZIP
+        elif ctx.KW_PRODUCT():
+            ret = CombineMode.PRODUCT
         return ret
 
-    def _boolean_op_combiner(self, ctx):
-        combine_op = product  # default is product, override if set - product is default in xpath
-        if ctx.KW_ZIP():
-            combine_op = zip
-        elif ctx.KW_PRODUCT():
-            combine_op = product
-        return combine_op
-
-    def _boolean_op_aggregator(self, ctx, ret):
+    def _to_aggregate_mode(self, ctx) -> AggregateMode:
         if ctx.KW_ALL():
-            ret = SingleOrSequenceWrapSequence(ret)
-            agg_op = all
+            return AggregateMode.ALL
         elif ctx.KW_SEQUENCE():  # keep as-is
-            agg_op = lambda x: x
+            return AggregateMode.NONE
         else:  # if ctx.KW_ANY or no agg was explicitly specified (in which case it should default to ANY)
-            ret = SingleOrSequenceWrapSequence(ret)
-            agg_op = any
-        return agg_op, ret
+            return AggregateMode.ANY
+
+    def _to_fallback_mode(self, ctx, default: FallbackMode) -> FallbackMode:
+        if ctx.coerceFallback():
+            return self.visit(ctx.coerceFallback())
+        return default
     
     def visitExprWrapOrVar(self, ctx: XplorePathGrammarParser.ExprWrapOrVarContext):
         return self.visit(ctx.wrapOrVar())
 
     def visitExprWrap(self, ctx: XplorePathGrammarParser.ExprWrapContext):
-        entities = self.visit(ctx.wrap())
-        entities = self._apply_filter(entities, ctx.filter_())
-        return entities
+        collection = self.visit(ctx.wrap())
+        collection = self._apply_filter(collection, ctx.filter_())
+        return collection
 
     def visitExprWrapInvoke(self, ctx: XplorePathGrammarParser.ExprWrapInvokeContext):
-        entities = self.visit(ctx.wrap())
-        entities = self._apply_filter(entities, ctx.filter_(0))
-        entities = self._invoke(entities, ctx.argumentList(), ctx.filter_(1))
-        return entities
+        collection = self.visit(ctx.wrap())
+        collection = self._apply_filter(collection, ctx.filter_(0))
+        collection = self._invoke(collection, ctx.argumentList(), ctx.filter_(1))
+        return collection
 
     def visitExprWrapSingle(self, ctx: XplorePathGrammarParser.ExprWrapSingleContext):
         return self.visit(ctx.expr())
 
     def visitExprWrapSingleAsList(self, ctx: XplorePathGrammarParser.ExprWrapSingleAsListContext):
-        return SingleOrSequenceWrapSequence(self.visit(ctx.expr()))
+        return SequenceCollection.from_entities(self.visit(ctx.expr()))
 
     def visitExprWrapConcatenateList(self, ctx: XplorePathGrammarParser.ExprWrapConcatenateListContext):
-        entities = []
+        collection = []
         for e in ctx.expr():
-            entities.append(SingleOrSequenceWrapSequence(self.visit(e)))
-        return FullSequence(itertools.chain(*entities), order_paths=False, deduplicate_paths=False)  # concatenation never dedupes/orders paths
+            collection.append(self.visit(e))
+        return SequenceCollection.from_entities(itertools.chain(*collection), order_paths=False, deduplicate_paths=False)  # concatenation never dedupes/orders paths
 
     def visitExprEmptyList(self, ctx: XplorePathGrammarParser.ExprEmptyListContext):
-        return EmptySequence()
+        return SequenceCollection.empty()
 
     def visitPathAtRoot(self, ctx: XplorePathGrammarParser.PathAtRootContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_ROOT)
-            new_entities = self.context.entities()
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
-            return new_entities
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_ROOT)
+            collection = self.context.collection
+            collection = self._apply_filter(collection, ctx.filter_())
+            return collection
         finally:
             self.context.restore()
 
     def visitPathFromRoot(self, ctx: XplorePathGrammarParser.PathFromRootContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_ROOT)
-            new_entities = self.context.entities()
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.reset_entities(new_entities)  # will not include p, only descendants of p
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_ROOT)
+            collection = self.context.collection
+            collection = self._apply_filter(collection, ctx.filter_())
+            self.context.reset_collection(collection)  # will not include p, only descendants of p
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
 
     def visitPathFromRootAny(self, ctx: XplorePathGrammarParser.PathFromRootAnyContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_ROOT)
-            root = next(iter(self.context.entities()))
-            new_entities = FullSequence([root] + root.all_descendants())
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.reset_entities(new_entities)
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_ROOT)
+            root = next(iter(self.context.collection.unpack))
+            collection = SequenceCollection.from_unpacked([root] + root.all_descendants())
+            collection = self._apply_filter(collection, ctx.filter_())
+            self.context.reset_collection(collection)
             return self.visit(ctx.relPath())  # BUG: //* must return in document order, use position_in_parent of each path in the output to sort?
         finally:
             self.context.restore()
 
     def visitPathAtSelf(self, ctx: XplorePathGrammarParser.PathAtSelfContext):
-        return self.context.entities()
+        return self.context.collection
 
     def visitPathFromSelf(self, ctx: XplorePathGrammarParser.PathFromSelfContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = self.context.entities()
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.reset_entities(new_entities)
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            collection = self.context.collection
+            collection = self._apply_filter(collection, ctx.filter_())
+            self.context.reset_collection(collection)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
 
     def visitPathFromSelfAny(self, ctx: XplorePathGrammarParser.PathFromSelfAnyContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = FullSequence(
-                itertools.chain(*([p] + p.all_descendants() for p in self.context.entities()))
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            collection = SequenceCollection.from_unpacked(
+                itertools.chain(*([p] + p.all_descendants() for p in self.context.collection.unpack))
             )
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.reset_entities(new_entities)  # will not include p, only descendants of p
+            collection = self._apply_filter(collection, ctx.filter_())
+            self.context.reset_collection(collection)  # will not include p, only descendants of p
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
 
     def visitPathAtParent(self, ctx: XplorePathGrammarParser.PathAtParentContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = [e.parent() for e in self.context.entities()]
-            new_entities = [e for e in new_entities if e is not None]
-            new_entities = FullSequence(new_entities)
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
-            return new_entities
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            collection = [e.parent() for e in self.context.collection.unpack]
+            collection = [e for e in collection if e is not None]
+            collection = SequenceCollection.from_unpacked(collection)
+            collection = self._apply_filter(collection, ctx.filter_())
+            return collection
         finally:
             self.context.restore()
 
     def visitPathFromParent(self, ctx: XplorePathGrammarParser.PathFromParentContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = [e.parent() for e in self.context.entities()]
-            new_entities = [e for e in new_entities if e is not None]
-            new_entities = FullSequence(new_entities)
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.reset_entities(new_entities)
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            collection = [e.parent() for e in self.context.collection.unpack]
+            collection = [e for e in collection if e is not None]
+            collection = SequenceCollection.from_unpacked(collection)
+            collection = self._apply_filter(collection, ctx.filter_())
+            self.context.reset_collection(collection)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
 
     def visitPathFromParentAny(self, ctx: XplorePathGrammarParser.PathFromParentAnyContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = [e.parent() for e in self.context.entities()]
-            new_entities = [e for e in new_entities if e is not None]
-            new_entities = FullSequence(
-                itertools.chain(*(p.all_descendants() for p in new_entities))
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            collection = [e.parent() for e in self.context.collection.unpack]
+            collection = [e for e in collection if e is not None]
+            collection = SequenceCollection.from_unpacked(
+                itertools.chain(*(p.all_descendants() for p in collection))
             )
-            new_entities = self._apply_filter(new_entities, ctx.filter_())
-            self.context.reset_entities(new_entities)  # will not include p's parent, only descendants of p's parent
+            collection = self._apply_filter(collection, ctx.filter_())
+            self.context.reset_collection(collection)  # will not include p's parent, only descendants of p's parent
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
 
     def visitPathFromNested(self, ctx: XplorePathGrammarParser.PathFromNestedContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = self.visit(ctx.wrapOrVar())
-            new_entities = [e for e in new_entities if isinstance(e, Path)]
-            new_entities = FullSequence(new_entities)
-            self.context.reset_entities(new_entities)
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            collection = self.visit(ctx.wrapOrVar())
+            collection = [e for e in collection.unpack if isinstance(e, Path)]
+            collection = SequenceCollection.from_unpacked(collection)
+            self.context.reset_collection(collection)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
 
     def visitPathFromNestedAny(self, ctx: XplorePathGrammarParser.PathFromNestedAnyContext):
         try:
-            self.context.save(new_paths=PathResetMode.RESET_WITH_SELF)
-            new_entities = self.visit(ctx.wrapOrVar())
-            new_entities = [e for e in new_entities if isinstance(e, Path)]
-            new_entities = FullSequence(
-                itertools.chain(*([p] + p.all_descendants() for p in new_entities))
+            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            collection = self.visit(ctx.wrapOrVar())
+            collection = [e for e in collection.unpack if isinstance(e, Path)]
+            collection = SequenceCollection.from_unpacked(
+                itertools.chain(*([p] + p.all_descendants() for p in collection))
             )
-            self.context.reset_entities(new_entities)
+            self.context.reset_collection(collection)
             return self.visit(ctx.relPath())
         finally:
             self.context.restore()
 
-    def visitRelPathChain(self, ctx: XplorePathGrammarParser.RelPathChainContext):
+    def visitRelPathChainChild(self, ctx: XplorePathGrammarParser.RelPathChainChildContext):
         # TODO: Pushing / popping state not required?
         try:
-            self.context.save(PathResetMode.RESET_WITH_SELF)
+            self.context.save(CollectionResetMode.RESET_WITH_SELF)
             new_paths = []
-            if ctx.SLASH():
-                left_contexts = self.visit(ctx.relPath(0))
-                for left_path in left_contexts:
-                    self.context.save(SingleWrapSequence(left_path))
-                    right_contexts = self.visit(ctx.relPath(1))
-                    for right_path in right_contexts:
-                        new_paths.append(right_path)
-                    self.context.restore()
-            elif ctx.SS():
-                left_contexts = []
-                for e in self.visit(ctx.relPath(0)):
-                    left_contexts.append(e)
-                    left_contexts += e.all_descendants()
-                for left_path in left_contexts:
-                    self.context.save(SingleWrapSequence(left_path))
-                    right_contexts = self.visit(ctx.relPath(1))
-                    for right_path in right_contexts:
-                        new_paths.append(right_path)
-                    self.context.restore()
-            else:
-                raise ValueError('Unexpected')
-            return FullSequence(new_paths)
+            left_contexts = self.visit(ctx.relPath(0))
+            for left_path in left_contexts:
+                left_collection = SequenceCollection.from_entities([left_path])
+                self.context.save(left_collection)
+                right_contexts = self.visit(ctx.relPath(1))
+                for right_path in right_contexts:
+                    new_paths.append(right_path)
+                self.context.restore()
+            return SequenceCollection.from_entities(new_paths)
+        finally:
+            self.context.restore()
+
+    def visitRelPathChainDescendant(self, ctx: XplorePathGrammarParser.RelPathChainDescendantContext):
+        # TODO: Pushing / popping state not required?
+        try:
+            self.context.save(CollectionResetMode.RESET_WITH_SELF)
+            new_paths = []
+            left_contexts = []
+            for e in self.visit(ctx.relPath(0)):
+                left_contexts.append(e.value)
+                left_contexts += e.value.all_descendants()
+            for left_path in left_contexts:
+                left_collection = SequenceCollection.from_unpacked([left_path])
+                self.context.save(left_collection)
+                right_contexts = self.visit(ctx.relPath(1))
+                for right_path in right_contexts:
+                    new_paths.append(right_path)
+                self.context.restore()
+            return SequenceCollection.from_entities(new_paths)
         finally:
             self.context.restore()
 
@@ -793,72 +694,72 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitReverseStepParent(self, ctx: XplorePathGrammarParser.ReverseStepParentContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 parent_path = e.parent()
                 if parent_path is not None:
                     new_paths.append(parent_path)
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepAncestor(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths += e.all_ancestors()
         new_paths = new_paths[::-1]
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepPreceding(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths += e.preceding()
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepPrecedingSibling(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths += e.preceding_sibling()
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepAncestorOrSelf(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths.append(e)
                 new_paths += e.all_ancestors()
         new_paths = new_paths[::-1]
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepDirectParent(self, ctx: XplorePathGrammarParser.ReverseStepDirectParentContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 parent_path = e.parent()
                 if parent_path is not None:
                     new_paths.append(parent_path)
-        return FullSequence(new_paths)
+        return SequenceCollection.from_unpacked(new_paths)
 
     def visitForwardStepChild(self, ctx: XplorePathGrammarParser.ForwardStepChildContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths += e.all_children()
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepDescendant(self, ctx: XplorePathGrammarParser.ForwardStepDescendantContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths += e.all_descendants()
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepSelf(self, ctx: XplorePathGrammarParser.ForwardStepSelfContext):
@@ -866,121 +767,119 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitForwardStepDescendantOrSelf(self, ctx: XplorePathGrammarParser.ForwardStepDescendantOrSelfContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths.append(e)
                 new_paths += e.all_descendants()
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepFollowingSibling(self, ctx: XplorePathGrammarParser.ForwardStepFollowingSiblingContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths += e.following_sibling()
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepFollowing(self, ctx: XplorePathGrammarParser.ForwardStepFollowingContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths += e.following()
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepValue(self, ctx: XplorePathGrammarParser.ForwardStepValueContext):
         new_paths = []
-        for e in self.context.entities():
+        for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 new_paths += e.all_children()
-        self.context.reset_entities(FullSequence(new_paths))
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepDirectSelf(self, ctx: XplorePathGrammarParser.ForwardStepDirectSelfContext):
-        return self.context.entities()  # Return existing
+        return self.context.collection  # Return existing
 
-    def _walk_down(self, result: Any):
+    def _walk_down(self, collection: Collection):
         to_matcher = lambda v: v if isinstance(v, Matcher) else StrictMatcher(v)
         matchers = []
-        if isinstance(result, Sequence):
-            for v in result:
-                if isinstance(v, Path):
-                    v = v.value()
-                matchers.append(to_matcher(v))
-        else:
-            matchers.append(to_matcher(result))
+        for v in collection.unpack:
+            if isinstance(v, Path):
+                v = v.value()
+            matchers.append(to_matcher(v))
         # test
         combined_matcher = CombinedMatcher(matchers)
         ret = []
-        for e in self.context.entities():
-            if isinstance(e, Path):
-                label = e.label()
+        for v in self.context.collection.unpack:
+            if isinstance(v, Path):
+                label = v.label()
             else:
-                label = e
+                label = v
             if combined_matcher.match(label):
-                ret.append(e)
-        return FullSequence(ret)
+                ret.append(v)
+        return SequenceCollection.from_unpacked(ret)
 
-    def _apply_filter(self, entities: Sequence | Any, ctx: XplorePathGrammarParser.FilterContext | None):
+    def _apply_filter(self, collection: Collection, ctx: XplorePathGrammarParser.FilterContext | None):
         if ctx is None:
-            return entities
+            return collection
 
-        root = self.context.root()  # explicitly get root for use in transformer, in case it changes by the time lazy evaluation takes place (it does when this is called by join condition)
-                                    # -- simplest thing to do would be to not evaluate this lazily?
-        def transformer(idx, e):
-            self.context.save(
-                SingleWrapSequence(e),
-                root
-            )
+        root = self.context.root  # explicitly get root for use in transformer, in case it changes by the time lazy evaluation takes place (it does when this is called by join condition)
+                                  # -- simplest thing to do would be to not evaluate this lazily?
+        def transformer(idx: int, e: Entity) -> Entity | None:
+            self.context.save(SequenceCollection.from_entities([e]), root)
             try:
                 result = self.visit(ctx.expr())
-                if type(result) == bool and result == True:  # /a/b[bool] - return if true
+                if isinstance(result, SingleValueCollection) and type(result.single.value) == bool and result.single.value == True:  # /a/b[bool] - return if true
                     return e
-                elif type(result) in {float, int} and result == idx:  # /a/b[int] - return if index in the result set matches int
+                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {float, int} and result.single.value == idx:  # /a/b[int] - return if index in the result set matches int
                     return e
-                elif type(result) == NumericRangeMatcher and result.match(idx):  # /a/b[numericrangematcher] - return if index in the result set is in range
+                elif isinstance(result, SingleValueCollection) and type(result.single.value) == NumericRangeMatcher and result.single.value.match(idx):  # /a/b[numericrangematcher] - return if index in the result set is in range
                     return e
-                elif isinstance(result, Sequence) and result:  # /a/b[list] - return if non-empty (e.g. result was a list of paths looking for children, and some were found - e.g. /a/b[./c]
+                elif isinstance(result, SequenceCollection) and result:  # /a/b[list] - return if non-empty (e.g. result was a list of paths looking for children, and some were found - e.g. /a/b[./c]
                     return e
-                elif isinstance(result, Matcher) and not isinstance(e, Path) \
-                        and result.match(e):  # (a,b,c)[matcher] - if list of non paths, matcher should match against value directly
+                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) and not isinstance(e.value, Path) \
+                        and result.single.value.match(e.value):  # (a,b,c)[matcher] - if list of non paths, matcher should match against value directly
                     return e
-                elif isinstance(result, Matcher) and isinstance(e, Path) \
-                        and any(result.match(c.label()) for c in e.all_children()):  # /a/b[matcher] - ir a path,  return if has child with name matching label, if numericrangematcher above didn't match, it might match now
+                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) and isinstance(e.value, Path) \
+                        and any(result.single.value.match(c.label()) for c in e.value.all_children()):  # /a/b[matcher] - ir a path,  return if has child with name matching label, if numericrangematcher above didn't match, it might match now
                     return e
-                elif type(result) in {str, int} and isinstance(e, Path) and any(
-                        self._apply_binary_boolean_op(
-                            l=FullSequence(c.label() for c in e.all_children()),
-                            r=result,
-                            combine_op=lambda a, b: zip(a, b),
-                            test_op=lambda l, r: l == r,
-                            required_type=None,
-                            fallback=DiscardFallbackMode()
-                        )
-                ):  # /a/b[str_or_int]  - return if has child with label (coerced to match if possible)
-                    # you don't want to do /a/b[bool] because bool can get coerced to 0 - imagine /a/b[./c = some_val], if b is a list (labels with 0, 1, 2, 3, ...) and ./c = some_val evaluates to False, that False will coerce to int=0 for comparison and it'll always be True on first element?
+                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {str, int} and isinstance(e.value, Path) and \
+                        combine_transform_aggregate(
+                            lhs=SequenceCollection.from_unpacked(c.label() for c in e.value.all_children()),
+                            rhs=result,
+                            combine_mode=CombineMode.PRODUCT,
+                            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(
+                                l=l_,
+                                r=r_,
+                                test_op=lambda l__, r__: l__ == r__,
+                                required_type=None
+                            ),
+                            transform_fallback_mode=DiscardFallbackMode(),
+                            aggregate_mode=AggregateMode.ANY
+                        ).single.value:  # /a/b[str_or_int]  - return if has child with label (coerced to match if possible)
+                            # you don't want to do /a/b[bool] because bool can get coerced to 0 - imagine /a/b[./c = some_val], if b is a list (labels with 0, 1, 2, 3, ...) and ./c = some_val evaluates to False, that False will coerce to int=0 for comparison and it'll always be True on first element?
                     return e
-                elif not isinstance(e, Path) and \
-                        self._apply_binary_boolean_op(
-                            l=e,
-                            r=result,
-                            combine_op=lambda a, b: zip(a, b),
-                            test_op=lambda l, r: l == r,
-                            required_type=None,
-                            fallback=DiscardFallbackMode()
-                        ):  # if not a path - return if values match (coerced to match if possible)
+                elif isinstance(result, SingleValueCollection) and not isinstance(e.value, Path) and \
+                        combine_transform_aggregate(
+                            lhs=SingleValueCollection(e),
+                            rhs=result,
+                            combine_mode=CombineMode.PRODUCT,
+                            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(
+                                l=l_,
+                                r=r_,
+                                test_op=lambda l__, r__: l__ == r__,
+                                required_type=None
+                            ),
+                            transform_fallback_mode=DiscardFallbackMode(),
+                            aggregate_mode=AggregateMode.ANY
+                        ).single.value:  # if not a path - return if values match (coerced to match if possible)
                     return e
                 return None
             finally:
                 self.context.restore()
 
-        if isinstance(entities, Sequence):
-            return TransformSequence(sequence=entities, transformer=transformer, fallback_mode=DiscardFallbackMode())
-        else:
-            entities = SingleWrapSequence(entities)
-            entities = TransformSequence(sequence=entities, transformer=transformer, fallback_mode=DiscardFallbackMode())
-            return entities.to_single_value_or_empty()
+        return collection.transform(transformer, DiscardFallbackMode())
 
     def _decode_str(self, text: str) -> str:
         mode = text[0]
@@ -994,23 +893,23 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitLiteral(self, ctx: XplorePathGrammarParser.LiteralContext):
         if ctx.IntegerLiteral():
-            return int(ctx.getText())
+            return SingleValueCollection(int(ctx.getText()))
         elif ctx.DecimalLiteral():
-            return float(ctx.getText())
+            return SingleValueCollection(float(ctx.getText()))
         elif ctx.DoubleLiteral():
-            return float(ctx.getText())
+            return SingleValueCollection(float(ctx.getText()))
         elif ctx.StringLiteral():
-            return self._decode_str(ctx.getText())
+            return SingleValueCollection(self._decode_str(ctx.getText()))
         elif ctx.KW_TRUE():
-            return True
+            return SingleValueCollection(True)
         elif ctx.KW_FALSE():
-            return False
+            return SingleValueCollection(False)
         elif ctx.KW_NAN():
-            return math.nan
+            return SingleValueCollection(math.nan)
         elif ctx.KW_INF():
-            return math.inf
+            return SingleValueCollection(math.inf)
         elif ctx.Name():
-            return ctx.Name().getText()
+            return SingleValueCollection(ctx.Name().getText())
         raise ValueError('Unexpected')
 
     def visitExprMatcher(self, ctx: XplorePathGrammarParser.ExprMatcherContext):
@@ -1018,29 +917,29 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitMatcherStrict(self, ctx: XplorePathGrammarParser.MatcherStrictContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return StrictMatcher(pattern)
+        return SingleValueCollection(StrictMatcher(pattern))
 
     def visitMatcherRegex(self, ctx: XplorePathGrammarParser.MatcherRegexContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return RegexMatcher(pattern)
+        return SingleValueCollection(RegexMatcher(pattern))
 
     def visitMatcherGlob(self, ctx: XplorePathGrammarParser.MatcherGlobContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return GlobMatcher(pattern)
+        return SingleValueCollection(GlobMatcher(pattern))
 
     def visitMatcherFuzzy(self, ctx: XplorePathGrammarParser.MatcherGlobContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return FuzzyMatcher(pattern)
+        return SingleValueCollection(FuzzyMatcher(pattern))
 
     def visitMatcherCaseInsensitive(self, ctx: XplorePathGrammarParser.MatcherCaseInsensitiveContext):
         pattern = self._decode_str(ctx.getText()[1:])
-        return IgnoreCaseMatcher(pattern)
+        return SingleValueCollection(IgnoreCaseMatcher(pattern))
 
     def visitMatcherNumericRange(self, ctx: XplorePathGrammarParser.MatcherNumericRangeContext):
-        return self.visit(ctx.numericRangeMatcher())
+        return SingleValueCollection(self.visit(ctx.numericRangeMatcher()))
 
     def visitMatcherWildcard(self, ctx: XplorePathGrammarParser.MatcherWildcardContext):
-        return WildcardMatcher()
+        return SingleValueCollection(WildcardMatcher())
 
     def visitNumericRangeMatcherTolerance(self, ctx: XplorePathGrammarParser.NumericRangeMatcherToleranceContext):
         value = self.visit(ctx.numericRangeMatcherLiteral(0))
@@ -1086,21 +985,19 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             return ErrorFallbackMode()
         elif ctx.expr():
             res = self.visit(ctx.expr())
-            if isinstance(res, Sequence):
-                try:
-                    res = next(iter(res), None)
-                    return DefaultFallbackMode(res)
-                except StopIteration:
-                    return DiscardFallbackMode()
-            return DefaultFallbackMode(res)
+            try:
+                res = next(iter(res))
+                return DefaultFallbackMode(res)
+            except StopIteration:
+                return DiscardFallbackMode()
         raise ValueError('Unexpected')
 
 
 def evaluate(
         root: Any,
         expr: str,
-        variables: dict[str, Any] | None = None
-) -> Sequence | Any:
+        variables: dict[str, Collection] | None = None
+) -> Collection:
     if variables is None:
         variables = {}
     input_stream = InputStream(expr)
@@ -1118,18 +1015,18 @@ def evaluate(
 
 class Evaluator:
     _DEFAULT_VARIABLES = {
-        'distinct': DistinctInvocable(),
-        'count': CountInvocable(),
-        'frequency_count': FrequencyCountInvocable(),
-        'whitespace_collapse': WhitespaceCollapseInvocable(),
-        'whitespace_strip': WhitespaceStripInvocable(),
-        'whitespace_remove': WhitespaceRemoveInvocable(),
-        'regex_extract': RegexExtractInvocable()
+        'distinct': SingleValueCollection(DistinctInvocable()),
+        'count': SingleValueCollection(CountInvocable()),
+        'frequency_count': SingleValueCollection(FrequencyCountInvocable()),
+        'whitespace_collapse': SingleValueCollection(WhitespaceCollapseInvocable()),
+        'whitespace_strip': SingleValueCollection(WhitespaceStripInvocable()),
+        'whitespace_remove': SingleValueCollection(WhitespaceRemoveInvocable()),
+        'regex_extract': SingleValueCollection(RegexExtractInvocable())
     }
 
     def __init__(
             self,
-            variables: dict[str, Any] | None = None
+            variables: dict[str, Collection] | None = None
     ):
         if variables is None:
             variables = {}
@@ -1147,16 +1044,16 @@ def _test(root_obj, expr):
     return _test_with_path(PythonObjectPath.create_root_path(root_obj), expr)
 
 
-def _test_with_fs_path(dir, expr):
+def _test_with_fs_path(dir_, expr):
     print(f'---- res for {expr}')
     fs_path = FileSystemPath.create_root_path(
-        dir,
+        dir_,
         FileSystemContext(
             cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
         )
     )
     ret = Evaluator().evaluate(fs_path, expr)
-    if isinstance(ret, Sequence):
+    if isinstance(ret, SequenceCollection):
         for v in ret:
             print(f'  {v}')
         return ret
@@ -1166,7 +1063,7 @@ def _test_with_fs_path(dir, expr):
 def _test_with_path(p, expr):
     print(f'---- res for {expr}')
     ret = Evaluator().evaluate(p, expr)
-    if isinstance(ret, Sequence):
+    if isinstance(ret, SequenceCollection):
         for v in ret:
             print(f'  {v}')
         return ret

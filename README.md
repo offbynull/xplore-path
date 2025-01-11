@@ -48,6 +48,7 @@ Queries use a syntax inspired by XPath, where the start of the hierarchy is the 
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl` - List mouse gene ontology entries related to neuro, labels only.
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//(id, lbl)` - List mouse gene ontology entries related to neuro, ids and labels.
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//r'id|lbl'` - List mouse gene ontology entries related to neuro, ids and labels using regex.
+
 </details>
 
 <details><summary>Example queries with filtering</summary>
@@ -74,27 +75,35 @@ Queries use a syntax inspired by XPath, where the start of the hierarchy is the 
 The query above is made up of thw two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` amd `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists grabs the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
 
 :warning: **Xplore Path joins are currently slow.** At the moment, the joining logic hasn't been optimized. Expect joins to be incredibly slow: O(n^2).
+
 </details>
 
 
 If you've used XPath before, the queries above should feel familiar as Xplore Path's query language is heavily inspired by XPath. In addition to basic XPath syntax, Xplore Path provides several major updates:
 
 * Fuzzy matching is available in various forms.
+  * Prefix a string with `i` for case-insensitive matching (e.g. `i'HeLLo'`) 
   * Prefix a string with `g` for glob matching (e.g. `g'hello*'`).
   * Prefix a string with `r` for regex matching (e.g. `r'hello.*'`).
-  * Prefix a string with `f` for approximate string matching (e.g. `f'hello world'`).
-  * Prefix a string with `s` for strict matching, as in not fuzzy/approximate in any way (e.g. `s'hello world'`).
+  * Prefix a string with `f` for approximate string matching (e.g. `f'hello'`).
+  * Prefix a string with `s` for strict matching, as in not fuzzy/approximate in any way (e.g. `s'hello'`).
   * `~number:number` for number ranges, optionally using brackets to define open/closed-ness (e.g. `~[4:9)`)
   * `~number@tolerance` for number within some tolerance (e.g. `~3.14@0.0001`)
 * Variables are denoted by a `$` followed by a word (e.g. `$distinct`), and may be called / searched.
 * Queries are joinable using `inner join`, `left join`, and `right join`.
 
-The Xplore Path grammar is available at [XplorePathGrammar.g4](xplore_path/XplorePathGrammar.g4).
+The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/XplorePathGrammar.g4).
 
 # TODOs
 
-* TODO: Sequence should have a Single counterpart, instead of manipulating raw objects?
-* TODO: wrap non-Path types as Entity, which enforce certain checks / handle coercions?
+* TODO: update path constructor -- parent, position in parent, label in parent MUST BE SINGLE OBJECT, THAT CAN BE SET TO NONE
+* TODO: .value.value to .single.value or .unpacked_single
+* TODO: grammar rule PathAtSelf - filter not being applied? anywhere else?
+* TODO: test python_object_path
+* TODO: test mirror_path
+* TODO: test simple_path
+* TODO: test dummy_path
+* TODO: add a special "marker" value type that can represent null/undefined in javascript and other languages?
 * TODO: path should have metadata?
   * e.g. shell looks for a key that means that it hides the child in the output?
   * e.g. shell looks for a key that means it can preview children in the output? (e.g. if there is no value, show first 3 children inline where value should be? or display that it has children / is terminal?)

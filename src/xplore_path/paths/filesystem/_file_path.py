@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Hashable, Callable
 
 from xplore_path.path import Path
 from xplore_path.paths.filesystem.context import NoticeType, FileSystemContext
@@ -13,7 +12,7 @@ class FilePath(Path):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,
+            label: str | int | float | bool | None,  # None for root
             fs_path: pathlib.Path,
             ctx: FileSystemContext
     ):

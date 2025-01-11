@@ -8,16 +8,16 @@ class EvaluatorTest(unittest.TestCase):
     def test_must_treat_part_after_directive_as_expression_executed_within_context_of_each_path_returned(self):
         root = PythonObjectPath.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}})
         self.assertEqual(
-            [e.label() for e in evaluate(root, '/a/descendant-or-self::f')],
+            [e.label() for e in evaluate(root, '/a/descendant-or-self::f').unpack],
             ['f']
         )
         self.assertEqual(
-            sorted([e.full_label() for e in evaluate(root, '/a/descendant-or-self::(label .)')]),
-            sorted([e.full_label() for e in evaluate(root, '/a')] + [e.full_label() for e in evaluate(root, '/a//*')])
+            sorted([e.full_label() for e in evaluate(root, '/a/descendant-or-self::(label .)').unpack]),
+            sorted([e.full_label() for e in evaluate(root, '/a').unpack] + [e.full_label() for e in evaluate(root, '/a//*').unpack])
         )
         self.assertEqual(
-            sorted([e.full_label() for e in evaluate(root, '/descendant-or-self::*')]),
-            sorted([e.full_label() for e in evaluate(root, '.')] + [e.full_label() for e in evaluate(root, '//*')])
+            sorted([e.full_label() for e in evaluate(root, '/descendant-or-self::*').unpack]),
+            sorted([e.full_label() for e in evaluate(root, '.').unpack] + [e.full_label() for e in evaluate(root, '//*').unpack])
         )
 
 

@@ -254,13 +254,18 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#RelPathStep.
-    def visitRelPathStep(self, ctx:XplorePathGrammarParser.RelPathStepContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#RelPathChainChild.
+    def visitRelPathChainChild(self, ctx:XplorePathGrammarParser.RelPathChainChildContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#RelPathChain.
-    def visitRelPathChain(self, ctx:XplorePathGrammarParser.RelPathChainContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#RelPathChainDescendant.
+    def visitRelPathChainDescendant(self, ctx:XplorePathGrammarParser.RelPathChainDescendantContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#RelPathStep.
+    def visitRelPathStep(self, ctx:XplorePathGrammarParser.RelPathStepContext):
         return self.visitChildren(ctx)
 
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Hashable
+from typing import Any
 
 
 class Path(ABC):
@@ -9,13 +9,16 @@ class Path(ABC):
             self,
             parent: Path | None,
             position_in_parent: int | None,
-            label: Hashable | None,  # None for root - None is also a hashable type
+            label: str | int | float | bool | None,  # None for root
             value: Any
     ):
         self._parent = parent
         self._label = label
         self._value = value
         self._position_in_parent = position_in_parent
+        if (parent is None and position_in_parent is not None) or (parent is not None and position_in_parent is None):
+            raise ValueError('position_in_parent must be None if parent is None'
+                             ' / position_in_parent must be not None if parent not is None')
 
     @abstractmethod
     def all_children(self) -> list[Path]:
@@ -101,16 +104,22 @@ class Path(ABC):
     def value(self) -> Any:
         return self._value
 
-    def label(self) -> Hashable:
+    def label(self) -> str | int | float | bool | None:
         return self._label
 
-    def full_label(self) -> list[Any]:
+    def full_label(self) -> list[str | int | float | bool | None]:
         p_list = []
         p = self
         while p is not None:
             p_list.append(p)
             p = p.parent()
         return [p.label() for p in reversed(p_list)]
+
+    def to_dict(self) -> dict[str | int | float | bool | None, tuple[Any, dict]]:
+        ret = {}
+        for pe in self.all_children():
+            ret[pe.label()] = (pe.value(), pe.to_dict())
+        return ret
 
     def __str__(self):
         return f'{self.full_label()}: {self.value()}'
