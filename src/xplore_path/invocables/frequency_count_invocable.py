@@ -7,7 +7,7 @@ from xplore_path.null import Null
 from xplore_path.path import Path
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 from xplore_path.collection import Collection
-from xplore_path.collections.sequence_collection import SequenceCollection
+from xplore_path.collections_.sequence_collection import SequenceCollection
 
 
 class FrequencyCountInvocable(Invocable):

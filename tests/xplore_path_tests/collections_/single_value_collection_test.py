@@ -1,6 +1,6 @@
 import unittest
 
-from xplore_path.collections.single_value_collection import SingleValueCollection
+from xplore_path.collections_.single_value_collection import SingleValueCollection
 from xplore_path.entity import Entity
 from xplore_path.fallback_modes.discard_fallback_mode import DiscardFallbackMode
 

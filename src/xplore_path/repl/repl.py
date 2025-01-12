@@ -12,7 +12,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 
 import xplore_path.path
-from xplore_path.collections.sequence_collection import SequenceCollection
+from xplore_path.collections_.sequence_collection import SequenceCollection
 from xplore_path.evaluator import Evaluator
 from xplore_path.repl.query_completer import QueryCompleter
 from xplore_path.repl.utils import print_line, fix_label_for_expression
@@ -27,10 +27,13 @@ def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
         if not full_labels:
             ret += [('fg:ansiwhite bold', f'{v.label()}')]
         else:
-            for l in v.full_label():
-                l = fix_label_for_expression(l)
+            if v.full_label():
+                for l in v.full_label():
+                    l = fix_label_for_expression(l)
+                    ret.append(('fg:ansigray', '/'))
+                    ret.append(('fg:ansiwhite bold', f'{l}'))
+            else:
                 ret.append(('fg:ansigray', '/'))
-                ret.append(('fg:ansiwhite bold', f'{l}'))
         #
         # highlight = ''
         # cnt = len(v.all_children())

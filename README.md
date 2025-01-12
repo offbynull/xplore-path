@@ -8,14 +8,7 @@ Xplore Path is a tool for quick-and-dirty data exploration, built for messy, unt
  * **Unified environment**: Search through disparate files and formats within a single context.
  * **Extendable**: Add functions and formats to customize to your use case (e.g. 3D scene graphs, flow cytometry, ...).
 
-Xplore Path aims to be the first tool you reach for when inspecting / exploring new data "thrown over the fence" by a colleague or partner. It does not aim to be a database or a storage engine.
-
-<details>
-  <summary>:warning: Xplore Path is not a database :warning:</summary>
-
-  Xplore Path does not index data, optimize storage, or optimize queries as a traditional database does. Xplore Path works best when doing quick-and-dirty inspection / exploration on reasonable amounts of data.
-
-</details>
+Xplore Path aims to be the first tool you reach for when exploring new data "thrown over the fence" by a colleague or partner. It does not aim to be a database or a storage engine.
 
 ## Quick-Start Guide
 
@@ -96,7 +89,6 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/X
 
 # TODOs
 
-* TODO: update path constructor -- parent, position in parent, label in parent MUST BE SINGLE OBJECT, THAT CAN BE SET TO NONE
 * TODO: best effort output to CSV/JSON/YAML/XML/HTML?
 * TODO: test python_object_path
 * TODO: test mirror_path

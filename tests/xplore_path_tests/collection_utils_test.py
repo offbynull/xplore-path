@@ -2,8 +2,8 @@ import unittest
 
 from xplore_path.fallback_modes.error_fallback_mode import ErrorFallbackMode
 from xplore_path.collection_utils import combine_transform_aggregate, CombineMode, AggregateMode
-from xplore_path.collections.sequence_collection import SequenceCollection
-from xplore_path.collections.single_value_collection import SingleValueCollection
+from xplore_path.collections_.sequence_collection import SequenceCollection
+from xplore_path.collections_.single_value_collection import SingleValueCollection
 from xplore_path.entity import Entity
 
 

@@ -11,8 +11,8 @@ from xplore_path.XplorePathGrammarParser import XplorePathGrammarParser
 from xplore_path.XplorePathGrammarVisitor import XplorePathGrammarVisitor
 from xplore_path.collection import Collection
 from xplore_path.collection_utils import CombineMode, combine_transform_aggregate, AggregateMode
-from xplore_path.collections.sequence_collection import SequenceCollection
-from xplore_path.collections.single_value_collection import SingleValueCollection
+from xplore_path.collections_.sequence_collection import SequenceCollection
+from xplore_path.collections_.single_value_collection import SingleValueCollection
 from xplore_path.entity import Entity
 from xplore_path.fallback_mode import FallbackMode
 from xplore_path.fallback_modes.default_fallback_mode import DefaultFallbackMode
@@ -1205,27 +1205,11 @@ if __name__ == '__main__':
     # _test_with_fs_path('~/Downloads', "$regex_extract(/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*, '\\d{7}')")
     # _test_with_fs_path('~/Downloads', "$distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\\d{7}') = $regex_extract(//r//id, '\\d{7}')]")
     # _test_with_fs_path('~/Downloads', "//*")
-    _test_with_fs_path('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[./*=Well]")
-    _test_with_fs_path('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]")
+    # _test_with_fs_path('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[./*=Well]")
+    # _test_with_fs_path('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]")
     # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
     # _test_with_fs_path('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs_path('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs_path('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
 
     # _test(root, '$regex_extract((hello, yellow, mellow), "low?")')
-
-    # profiler = cProfile.Profile()
-    # profiler.enable()
-    # try:
-    #     fs_path = FileSystemPath.create_root_path(
-    #         '~/Downloads',
-    #         FileSystemPathContext(
-    #             cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
-    #         )
-    #     )
-    #     ret = Evaluator().evaluate(fs_path, "/uniprotkb_mouse_601_to_800_seqlen.json/results//*[. = g'EC*']")
-    #     print(f'{len(ret)=}')
-    # except KeyboardInterrupt:
-    #     ...
-    # profiler.disable()
-    # profiler.print_stats(sort='time')

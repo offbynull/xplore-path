@@ -2,7 +2,7 @@ import unittest
 from math import nan, inf
 
 from xplore_path.collection import Collection
-from xplore_path.collections.single_value_collection import SingleValueCollection
+from xplore_path.collections_.single_value_collection import SingleValueCollection
 from xplore_path.entity import Entity
 from xplore_path.invocable import Invocable
 from xplore_path.invocables.distinct_invocable import DistinctInvocable

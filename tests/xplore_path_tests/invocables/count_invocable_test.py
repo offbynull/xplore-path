@@ -1,6 +1,6 @@
 import unittest
 
-from xplore_path.collections.sequence_collection import SequenceCollection
+from xplore_path.collections_.sequence_collection import SequenceCollection
 from xplore_path.invocables.count_invocable import CountInvocable
 
 

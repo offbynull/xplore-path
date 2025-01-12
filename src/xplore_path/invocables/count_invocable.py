@@ -1,6 +1,6 @@
 from xplore_path.invocable import Invocable
 from xplore_path.collection import Collection
-from xplore_path.collections.single_value_collection import SingleValueCollection
+from xplore_path.collections_.single_value_collection import SingleValueCollection
 
 
 class CountInvocable(Invocable):

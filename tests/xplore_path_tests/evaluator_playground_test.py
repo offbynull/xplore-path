@@ -7,7 +7,7 @@ import unittest
 from xplore_path.evaluator import Evaluator
 from xplore_path.paths.filesystem.context import FileSystemContext
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
-from xplore_path.collections.sequence_collection import SequenceCollection
+from xplore_path.collections_.sequence_collection import SequenceCollection
 
 
 class EvaluatorTest(unittest.TestCase):

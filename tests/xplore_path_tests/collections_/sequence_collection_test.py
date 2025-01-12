@@ -2,7 +2,7 @@ import itertools
 import unittest
 from random import Random
 
-from xplore_path.collections.sequence_collection import SequenceCollection
+from xplore_path.collections_.sequence_collection import SequenceCollection
 from xplore_path.entity import Entity
 from xplore_path.fallback_modes.discard_fallback_mode import DiscardFallbackMode
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath

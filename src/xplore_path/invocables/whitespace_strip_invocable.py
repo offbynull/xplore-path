@@ -1,5 +1,5 @@
 from xplore_path.collection import Collection
-from xplore_path.collections.sequence_collection import SequenceCollection
+from xplore_path.collections_.sequence_collection import SequenceCollection
 from xplore_path.fallback_modes.discard_fallback_mode import DiscardFallbackMode
 from xplore_path.invocable import Invocable
 
