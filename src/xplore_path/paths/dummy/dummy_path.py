@@ -5,7 +5,7 @@ from xplore_path.path import Path
 
 class DummyPath(Path):
     def __init__(self):
-        super().__init__(None, None, None, None)
+        super().__init__(None, None)
 
     def all_children(self) -> list[Path]:
         return []

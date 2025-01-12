@@ -19,7 +19,7 @@ class EntityTestCase(unittest.TestCase):
         self.assertEqual(Entity(True), True)
 
     def test_must_pull_out_value_from_path(self):
-        self.assertEqual(Entity(PythonObjectPath(None, None, 'hello', 'world')).depath(), 'world')
+        self.assertEqual(Entity(PythonObjectPath(None, 'world')).depath(), 'world')
         self.assertEqual(Entity('world').depath(), 'world')
 
     def test_must_invoke(self):
@@ -49,10 +49,10 @@ class EntityTestCase(unittest.TestCase):
     def _coerce_both_test(self, v, t, expected):
         if expected is None:
             self.assertIsNone(Entity(v).coerce(t))
-            self.assertIsNone(Entity(SimplePath(None, None, 'fake', v)).coerce(t))
+            self.assertIsNone(Entity(SimplePath(None, v)).coerce(t))
         else:
             self.assertEqual(Entity(v).coerce(t).value, expected)
-            self.assertEqual(Entity(SimplePath(None, None, 'fake', v)).coerce(t).value, expected)
+            self.assertEqual(Entity(SimplePath(None, v)).coerce(t).value, expected)
 
     def test_must_coerce_to_bool(self):
         self._coerce_both_test(0, bool, False)

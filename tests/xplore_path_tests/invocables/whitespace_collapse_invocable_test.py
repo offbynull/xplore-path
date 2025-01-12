@@ -10,7 +10,7 @@ from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 
 class TestCase(unittest.TestCase):
     def test_must_invoke(self):
-        c = SequenceCollection.from_unpacked(['1 2 3','1   2    3','123'] + PythonObjectPath(None, None, 'x', {'a': 'a a a', 'b': 'b  b b'}).all_children())
+        c = SequenceCollection.from_unpacked(['1 2 3','1   2    3','123'] + PythonObjectPath(None, {'a': 'a a a', 'b': 'b  b b'}).all_children())
         c = WhitespaceCollapseInvocable().invoke([c])
         self.assertEqual(
             list(c.unpack),

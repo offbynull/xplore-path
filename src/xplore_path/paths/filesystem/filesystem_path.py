@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 from xplore_path.paths.filesystem._archive_path import ArchivePath
 from xplore_path.paths.filesystem._file_path import FilePath
 from xplore_path.paths.filesystem.context import FileSystemContext
@@ -11,13 +11,11 @@ from xplore_path.paths.filesystem.context import FileSystemContext
 class FileSystemPath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             fs_path: pathlib.Path,
             ctx: FileSystemContext
     ):
-        super().__init__(parent, position_in_parent, label, None)
+        super().__init__(parent, None)
         self._ctx = ctx
         self._fs_path = fs_path
 
@@ -30,11 +28,11 @@ class FileSystemPath(Path):
             c: pathlib.Path = c
             if c.is_file():
                 if c.suffix in {'.zip', '.tar'} or  c.suffixes[-2:] == ['.tar', '.gz']:
-                    ret.append(ArchivePath(self, c_idx, c.name, c, self._ctx, FileSystemPath))
+                    ret.append(ArchivePath(ParentBlock(self, c_idx, c.name), c, self._ctx, FileSystemPath))
                 else:
-                    ret.append(FilePath(self, c_idx, c.name, c, self._ctx))
+                    ret.append(FilePath(ParentBlock(self, c_idx, c.name), c, self._ctx))
             elif c.is_dir():
-                ret.append(FileSystemPath(self, c_idx, c.name, c, self._ctx))
+                ret.append(FileSystemPath(ParentBlock(self, c_idx, c.name), c, self._ctx))
         return ret
 
     @staticmethod
@@ -48,7 +46,7 @@ class FileSystemPath(Path):
             raise ValueError('Must be a directory')
         if ctx is None:
             ctx = FileSystemContext()
-        return FileSystemPath(None, None, None, dir, ctx)
+        return FileSystemPath(None, dir, ctx)
 
 
 if __name__ == '__main__':

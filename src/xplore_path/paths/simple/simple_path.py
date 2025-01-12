@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 from xplore_path.core_type_utils import CoreTypeAlias
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 
 
 class SimplePath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             value: CoreTypeAlias | None  # None means non-existent value, which is different from Null
     ):
-        super().__init__(parent, position_in_parent, label, value)
+        super().__init__(parent, value)
         self._children = []
         self._sealed = False
 

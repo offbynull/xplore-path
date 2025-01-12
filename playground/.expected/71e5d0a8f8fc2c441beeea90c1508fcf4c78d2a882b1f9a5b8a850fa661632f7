@@ -1,1 +1,1 @@
-["/goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl", "<entity>['goslim_mouse.json', 'graphs', 0, 'nodes', 42, 'lbl']: synapse", "<entity>['goslim_mouse.json', 'graphs', 0, 'nodes', 7, 'lbl']: signaling receptor binding"]
+["/goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl", "Entity(<class 'xplore_path.paths.mirror.mirror_path.MirrorPath'>Path(['goslim_mouse.json', 'graphs', 0, 'nodes', 42, 'lbl'], synapse))", "Entity(<class 'xplore_path.paths.mirror.mirror_path.MirrorPath'>Path(['goslim_mouse.json', 'graphs', 0, 'nodes', 7, 'lbl'], signaling receptor binding))"]

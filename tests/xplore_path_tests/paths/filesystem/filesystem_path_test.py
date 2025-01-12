@@ -20,8 +20,6 @@ class TestCase(unittest.TestCase):
             workspace_dir_path = pathlib.Path(workspace_dir)
             fsp = FileSystemPath(
                 None,
-                None,
-                None,
                 files_dir_path,
                 FileSystemContext(
                     workspace=workspace_dir_path

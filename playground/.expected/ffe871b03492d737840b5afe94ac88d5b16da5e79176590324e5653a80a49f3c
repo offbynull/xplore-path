@@ -1,1 +1,1 @@
-["<entity>Assay_Type", "<entity>Conditions", "<entity>Detection_Wavelength", "<entity>GO_Term", "<entity>Plate_Type", "<entity>Replicates", "<entity>Target_Gene_Protein", "label /mouse_assays.zip/Mouse_Assay_001.csv/0/*"]
+["Entity(<class 'str'>Assay_Type)", "Entity(<class 'str'>Conditions)", "Entity(<class 'str'>Detection_Wavelength)", "Entity(<class 'str'>GO_Term)", "Entity(<class 'str'>Plate_Type)", "Entity(<class 'str'>Replicates)", "Entity(<class 'str'>Target_Gene_Protein)", "label /mouse_assays.zip/Mouse_Assay_001.csv/0/*"]

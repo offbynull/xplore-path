@@ -36,7 +36,7 @@ from xplore_path.matchers.regex_matcher import RegexMatcher
 from xplore_path.matchers.strict_matcher import StrictMatcher
 from xplore_path.matchers.wildcard_matcher import WildcardMatcher
 from xplore_path.null import Null
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 from xplore_path.paths.filesystem.context import FileSystemContext
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
 from xplore_path.paths.mirror.mirror_path import MirrorPath
@@ -204,51 +204,51 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     #       sequence.
     def visitExprJoin(self, ctx: XplorePathGrammarParser.ExprJoinContext):
         def _create_join_obj(parent, parent_idx, l_item, r_item):
-            test_path = SimplePath(parent, parent_idx, 'joined', None)
+            test_path = SimplePath(ParentBlock(parent, parent_idx, 'joined'), None)
             if isinstance(l_item, Path):
-                l_path = SimplePath(test_path, 0, 'l', None)
+                l_path = SimplePath(ParentBlock(test_path, 0, 'l'), None)
                 l_path.add_child(
-                    MirrorPath(l_item, l_path, 0)
+                    MirrorPath(l_item, ParentBlock(l_path, 0, l_item.label()))
                 )
             else:
-                l_path = SimplePath(test_path, 0, 'l', l_item)
+                l_path = SimplePath(ParentBlock(test_path, 0, 'l'), l_item)
             l_path.seal()
             test_path.add_child(l_path)
             if isinstance(r_item, Path):
-                r_path = SimplePath(test_path, 1, 'r', None)
+                r_path = SimplePath(ParentBlock(test_path, 1, 'r'), None)
                 r_path.add_child(
-                    MirrorPath(r_item, r_path, 0)
+                    MirrorPath(r_item, ParentBlock(r_path, 0, r_item.label()))
                 )
             else:
-                r_path = SimplePath(test_path, 1, 'r', r_item)
+                r_path = SimplePath(ParentBlock(test_path, 1, 'r'), r_item)
             r_path.seal()
             test_path.add_child(r_path)
             test_path.seal()
             return test_path
 
         def _create_join_obj_left_only(parent, parent_idx, l_item):
-            test_path = SimplePath(parent, parent_idx, 'joined', None)
+            test_path = SimplePath(ParentBlock(parent, parent_idx, 'joined'), None)
             if isinstance(l_item, Path):
-                l_path = SimplePath(test_path, 0, 'l', None)
+                l_path = SimplePath(ParentBlock(test_path, 0, 'l'), None)
                 l_path.add_child(
-                    MirrorPath(l_item, l_path, 0)
+                    MirrorPath(l_item, ParentBlock(l_path, 0, l_item.label()))
                 )
             else:
-                l_path = SimplePath(test_path, 0, 'l', l_item)
+                l_path = SimplePath(ParentBlock(test_path, 0, 'l'), l_item)
             l_path.seal()
             test_path.add_child(l_path)
             test_path.seal()
             return test_path
 
         def _create_join_obj_right_only(parent, parent_idx, r_item):
-            test_path = SimplePath(parent, parent_idx, 'joined', None)
+            test_path = SimplePath(ParentBlock(parent, parent_idx, 'joined'), None)
             if isinstance(r_item, Path):
-                r_path = SimplePath(test_path, 0, 'r', None)
+                r_path = SimplePath(ParentBlock(test_path, 0, 'r'), None)
                 r_path.add_child(
-                    MirrorPath(r_item, r_path, 0)
+                    MirrorPath(r_item, ParentBlock(r_path, 0, r_item.label()))
                 )
             else:
-                r_path = SimplePath(test_path, 0, 'r', r_item)
+                r_path = SimplePath(ParentBlock(test_path, 0, 'r'), r_item)
             r_path.seal()
             test_path.add_child(r_path)
             test_path.seal()
@@ -256,7 +256,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
-        root_path = SimplePath(None, None, None, None)
+        root_path = SimplePath(None, None)
         root_path_next_child_idx = 0
         if ctx.joinOp().KW_INNER():
             for l_ in l.unpack:

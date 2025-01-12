@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from xplore_path.null import Null
@@ -8,21 +9,23 @@ if TYPE_CHECKING:
     from xplore_path.core_type_utils import CoreTypeAlias
 
 
+@dataclass
+class ParentBlock:
+    parent_path: Path
+    child_position: int
+    child_label: str | int | float | bool
+
+
 class Path(ABC):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             value: CoreTypeAlias | None  # None means non-existent value, which is different from Null
     ):
-        self._parent = parent
-        self._label = label
+        self._parent = None if parent is None else parent.parent_path
+        self._label = None if parent is None else parent.child_label
+        self._position = None if parent is None else parent.child_position
         self._value = value
-        self._position_in_parent = position_in_parent
-        if (parent is None and position_in_parent is not None) or (parent is not None and position_in_parent is None):
-            raise ValueError('position_in_parent must be None if parent is None'
-                             ' / position_in_parent must be not None if parent not is None')
 
     @abstractmethod
     def all_children(self) -> list[Path]:
@@ -65,9 +68,9 @@ class Path(ABC):
         return self._parent
 
     def position(self) -> int | Null:
-        if self._position_in_parent is None:
+        if self._position is None:
             return Null()
-        return self._position_in_parent
+        return self._position
 
     def full_position(self) -> list[int]:
         p_list = []
@@ -130,4 +133,4 @@ class Path(ABC):
         return ret
 
     def __str__(self):
-        return f'{self.full_label()}: {self.value()}'
+        return f'Path({self.full_label()}, {self.value()})'

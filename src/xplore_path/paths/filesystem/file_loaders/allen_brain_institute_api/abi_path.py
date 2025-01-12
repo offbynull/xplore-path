@@ -5,7 +5,7 @@ import urllib
 import urllib.parse
 import urllib.request
 
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 
 BASE_URL = 'http://api.brain-map.org/api/v2/data/query.json'
@@ -14,11 +14,9 @@ BASE_URL = 'http://api.brain-map.org/api/v2/data/query.json'
 class AbiAcronymPath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
     ):
-        super().__init__(parent, position_in_parent, label, None)
+        super().__init__(parent, None)
 
     def all_children(self) -> list[Path]:
         params = {
@@ -29,7 +27,7 @@ class AbiAcronymPath(Path):
             with urllib.request.urlopen(query_url) as response:
                 data = json.loads(response.read().decode())
                 if 'msg' in data:
-                    return [PythonObjectPath(self, 0, 'data', data['msg'])]
+                    return [PythonObjectPath(ParentBlock(self, 0, 'data'), data['msg'])]
                 return []
         except Exception as e:
             return []
@@ -40,18 +38,16 @@ class AbiAcronymPath(Path):
 class AbiRootPath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             codes: set[str]
     ):
-        super().__init__(parent, position_in_parent, label, None)
+        super().__init__(parent, None)
         self.codes = codes
 
     def all_children(self) -> list[Path]:
-        return [AbiAcronymPath(self, i, c) for i, c in enumerate(self.codes)]
+        return [AbiAcronymPath(ParentBlock(self, i, c)) for i, c in enumerate(self.codes)]
 
 
 if __name__ == '__main__':
-    x = AbiRootPath(None, None, None, {'NAT2'})
+    x = AbiRootPath(None, {'NAT2'})
     print(f'{x.all_descendants()}')

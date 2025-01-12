@@ -18,7 +18,7 @@ class FrequencyCountInvocable(Invocable):
         counter = Counter(v for v in result.unpack)
         output = {value: count for value, count in counter.most_common()}
         return SequenceCollection.from_unpacked(
-            [PythonObjectPath(None, None, None, output)],
+            [PythonObjectPath(None, output)],
             order_paths=False,
             deduplicate_paths=False
         )

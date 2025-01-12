@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 from xplore_path.paths.filesystem.context import NoticeType, FileSystemContext
 from xplore_path.paths.mirror.mirror_path import MirrorPath
 
@@ -10,13 +10,11 @@ from xplore_path.paths.mirror.mirror_path import MirrorPath
 class FilePath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             fs_path: pathlib.Path,
             ctx: FileSystemContext
     ):
-        super().__init__(parent, position_in_parent, label, None)
+        super().__init__(parent, None)
         self._children = None
         self._ctx = ctx
         self._fs_path = fs_path
@@ -60,6 +58,6 @@ class FilePath(Path):
             # done
             if loaded and data is not None:
                 path_creator = self._ctx.file_loader.path_creator(c)
-                path = path_creator(self, 0, c.name, data)
-                self._children = [MirrorPath(p, self, i) for i, p in enumerate(path.all_children())]
+                path = path_creator(ParentBlock(self, 0, c.name), data)
+                self._children = [MirrorPath(p, ParentBlock(self, i, p.label())) for i, p in enumerate(path.all_children())]
         return self._children

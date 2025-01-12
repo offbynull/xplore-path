@@ -1,1 +1,1 @@
-["$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\\d{7}')", "<entity>0005102", "<entity>0045202"]
+["$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\\d{7}')", "Entity(<class 'str'>0005102)", "Entity(<class 'str'>0045202)"]

@@ -4,7 +4,7 @@ import types
 from typing import Any
 
 from xplore_path.null import Null
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 
 
 def _valid_obj_attr(obj, k):
@@ -15,14 +15,12 @@ def _valid_obj_attr(obj, k):
 class PythonObjectPath(Path):
     def __init__(
             self,
-            parent: Path | None,  # None for root - None is also a hashable type
-            position_in_parent: int | None,  # None for root - None is also a hashable type
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             value: Any
     ):
         if value is None:
             value = Null()
-        super().__init__(parent, position_in_parent, label, value if type(value) in {bool, int, float, str, Null} else None)
+        super().__init__(parent, value if type(value) in {bool, int, float, str, Null} else None)
         self._data = value
 
     def all_children(self) -> list[Path]:
@@ -30,13 +28,13 @@ class PythonObjectPath(Path):
         ret = []
         if isinstance(this, dict):
             for i, k in enumerate(this.keys()):
-                ret += [PythonObjectPath(self, i, k, this[k])]
+                ret += [PythonObjectPath(ParentBlock(self, i, k), this[k])]
         elif isinstance(this, set):
             for i, v in enumerate(this):
-                return [PythonObjectPath(self, i, i, v)]
+                return [PythonObjectPath(ParentBlock(self, i, i), v)]
         elif isinstance(this, (list, tuple)):
             for i, v in enumerate(this):
-                ret += [PythonObjectPath(self, i, i, v)]
+                ret += [PythonObjectPath(ParentBlock(self, i, i), v)]
         # Don't allow it to dive into Python objects - very expensive and not useful for now
         # for i, k in enumerate(k_ for k_ in dir(this) if _valid_obj_attr(this, k_)):
         #     ret += [PythonObjectPath(self, i, k, getattr(this, k))]
@@ -44,7 +42,7 @@ class PythonObjectPath(Path):
 
     @staticmethod
     def create_root_path(obj: Any) -> PythonObjectPath:
-        return PythonObjectPath(None, None, None, obj)
+        return PythonObjectPath(None, obj)
 
 
 if __name__ == '__main__':

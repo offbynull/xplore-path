@@ -1,1 +1,1 @@
-["$count(/*)", "<entity>9"]
+["$count(/*)", "Entity(<class 'int'>9)"]

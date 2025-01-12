@@ -3,19 +3,17 @@ from __future__ import annotations
 import pathlib
 import sqlite3
 
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 
 
 class SqliteTablePath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             fs_path: pathlib.Path,
     ):
-        super().__init__(parent, position_in_parent, label, None)
+        super().__init__(parent, None)
         self.fs_path = fs_path
 
     def all_children(self) -> list[Path]:
@@ -27,19 +25,17 @@ class SqliteTablePath(Path):
             ret = []
             for i, row in enumerate(sorted(rows)):
                 row = {k: v for k, v in zip(names, row)}
-                ret.append(PythonObjectPath(self, i, i, row))
+                ret.append(PythonObjectPath(ParentBlock(self, i, i), row))
         return ret
 
 
 class SqliteObjectPath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             fs_path: pathlib.Path
     ):
-        super().__init__(parent, position_in_parent, label, None)
+        super().__init__(parent, None)
         self.fs_path = fs_path
 
     def all_children(self) -> list[Path]:
@@ -49,5 +45,5 @@ class SqliteObjectPath(Path):
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = cursor.fetchall()
             for i, (table, ) in enumerate(sorted(tables)):
-                ret.append(SqliteTablePath(self, i, table, self.fs_path))
+                ret.append(SqliteTablePath(ParentBlock(self, i, table), self.fs_path))
         return ret

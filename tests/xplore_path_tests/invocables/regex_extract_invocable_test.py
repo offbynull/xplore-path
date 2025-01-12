@@ -9,7 +9,7 @@ from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 
 class TestCase(unittest.TestCase):
     def test_must_invoke(self):
-        c = SequenceCollection.from_unpacked(['hello','yellow','miss','miss','brello'] + PythonObjectPath(None, None, 'x', {'a': 'miss', 'b': 'othello'}).all_children())
+        c = SequenceCollection.from_unpacked(['hello','yellow','miss','miss','brello'] + PythonObjectPath(None, {'a': 'miss', 'b': 'othello'}).all_children())
         c = RegexExtractInvocable().invoke([c, SingleValueCollection('.*el')])
         self.assertEqual(
             list(c.unpack),

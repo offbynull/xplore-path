@@ -17,7 +17,7 @@ class TestCase(unittest.TestCase):
         self.assertEqual(list(SequenceCollection.from_unpacked([5, 4, 3]).filter(lambda _, x: x.value >= 4).unpack), [5, 4])
 
     def test_must_order(self):
-        paths = PythonObjectPath(None, None, 'x', {'a': ['b', 'c'], 'd': 5, 'e': 3}).all_descendants()
+        paths = PythonObjectPath(None, {'a': ['b', 'c'], 'd': 5, 'e': 3}).all_descendants()
         randomized_paths = paths[:]
         Random(0).shuffle(randomized_paths)
         randomized_values = [5, 5, 4, 4, 3, 3, 2, 2, 1, 1]
@@ -34,7 +34,7 @@ class TestCase(unittest.TestCase):
         )
 
     def test_must_dedupe(self):
-        paths = PythonObjectPath(None, None, 'x', {'a': ['b', 'c'], 'd': 5, 'e': 3}).all_descendants()
+        paths = PythonObjectPath(None, {'a': ['b', 'c'], 'd': 5, 'e': 3}).all_descendants()
         randomized_paths = paths[:]
         Random(0).shuffle(randomized_paths)
         randomized_values = [5, 5, 4, 4, 3, 3, 2, 2, 1, 1]
@@ -51,7 +51,7 @@ class TestCase(unittest.TestCase):
         )
 
     def test_must_order_and_dedupe(self):
-        paths = PythonObjectPath(None, None, 'x', {'a': ['b', 'c'], 'd': 5, 'e': 3}).all_descendants()
+        paths = PythonObjectPath(None, {'a': ['b', 'c'], 'd': 5, 'e': 3}).all_descendants()
         randomized_paths = paths[:]
         Random(0).shuffle(randomized_paths)
         randomized_values = [5, 5, 4, 4, 3, 3, 2, 2, 1, 1]

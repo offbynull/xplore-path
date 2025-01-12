@@ -142,4 +142,4 @@ class Entity:
         return False
 
     def __str__(self):
-        return f'<entity>{self._value}'
+        return f'Entity({type(self._value)}{self._value})'

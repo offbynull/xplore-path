@@ -6,7 +6,7 @@ import zipfile
 from tempfile import TemporaryDirectory
 from typing import Any, Callable
 
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 from xplore_path.paths.filesystem._file_path import FilePath
 from xplore_path.paths.filesystem.context import NoticeType, FileSystemContext
 
@@ -18,14 +18,12 @@ def _temp_dir() -> pathlib.Path:
 class ArchivePath(Path):
     def __init__(
             self,
-            parent: Path | None,
-            position_in_parent: int | None,
-            label: str | int | float | bool | None,  # None for root
+            parent: ParentBlock | None,  # None for root
             fs_path: pathlib.Path,
             ctx: FileSystemContext,
             fspath_creator: Callable  # Required to avoid cyclical import
     ):
-        super().__init__(parent, position_in_parent, label, None)
+        super().__init__(parent, None)
         self._children = None
         self._ctx = ctx
         self._fspath_creator = fspath_creator
@@ -57,9 +55,9 @@ class ArchivePath(Path):
     def _create_children(self, cache_path):
         for c_idx, c in enumerate(sorted(cache_path.iterdir())):
             if c.is_dir():
-                self._children.append(self._fspath_creator(self, c_idx, c.name, c, self._ctx))
+                self._children.append(self._fspath_creator(ParentBlock(self, c_idx, c.name), c, self._ctx))
             else:
-                self._children.append(FilePath(self, c_idx, c.name, c, self._ctx))
+                self._children.append(FilePath(ParentBlock(self, c_idx, c.name), c, self._ctx))
 
     def all_children(self) -> list[Path]:
         if self._children is not None:

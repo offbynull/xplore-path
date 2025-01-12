@@ -2,21 +2,17 @@ from __future__ import annotations
 
 from typing import Any
 
-from xplore_path.path import Path
+from xplore_path.path import Path, ParentBlock
 
 
 class MirrorPath(Path):
     def __init__(
             self,
             backing_path: Path,
-            new_parent: Path | None = None,
-            new_position_in_parent: int | None = None,
-            new_label: Any | None = None
+            new_parent: ParentBlock | None,  # None for root
     ):
         super().__init__(
             new_parent,
-            new_position_in_parent,
-            new_label if new_label is not None else backing_path.label(),
             backing_path.value()
         )
         self.backing_path = backing_path
@@ -24,6 +20,6 @@ class MirrorPath(Path):
     def all_children(self) -> list[Path]:
         ret = []
         for child_p in self.backing_path.all_children():
-            child_p = MirrorPath(child_p, self, child_p.position())
+            child_p = MirrorPath(child_p, ParentBlock(self, child_p.position(), child_p.label()))
             ret.append(child_p)
         return ret
