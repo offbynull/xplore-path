@@ -6,13 +6,14 @@ from typing import Callable
 from xplore_path.collection import Collection
 from xplore_path.fallback_mode import FallbackMode
 from xplore_path.collections.sequence_collection import SequenceCollection
-from xplore_path.entity import Entity, BasicType
+from xplore_path.entity import Entity
+from xplore_path.core_type_utils import CoreTypeAlias
 
 
 class SingleValueCollection(Collection):
     def __init__(
             self,
-            value: Entity | BasicType
+            value: Entity | CoreTypeAlias
     ):
         if not isinstance(value, Entity):
             value = Entity(value)

@@ -27,7 +27,7 @@ def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
         if not full_labels:
             ret += [('fg:ansiwhite bold', f'{v.label()}')]
         else:
-            for l in v.full_label()[1:]:
+            for l in v.full_label():
                 l = fix_label_for_expression(l)
                 ret.append(('fg:ansigray', '/'))
                 ret.append(('fg:ansiwhite bold', f'{l}'))
@@ -45,11 +45,12 @@ def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
         ret += [('', '<NO_LABEL> ')]
         data = v
 
-    ret += [('', ' value=')]
-    if type(data) in {int, float, bool, str}:
-        ret += [('fg:ansiwhite bold', f'({type(data).__name__}) {data}')]
-    else:
-        ret += [('', f'({type(data).__name__}) {data}')]
+    if data is not None:
+        ret += [('', ' value=')]
+        if type(data) in {int, float, bool, str}:
+            ret += [('fg:ansiwhite bold', f'({type(data).__name__}) {data}')]
+        else:
+            ret += [('', f'({type(data).__name__}) {data}')]
 
     return ret
 
@@ -186,7 +187,7 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
             break
         try:
             query_res = evaluator.evaluate(p, expr)
-            for v in query_res:
+            for v in query_res.unpack:
                 print_line(session, _single_result_to_line(v, full_labels), truncate_long_lines)
         except ParseException as e:
             query_res = None

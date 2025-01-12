@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING
+
+from xplore_path.null import Null
+if TYPE_CHECKING:
+    from xplore_path.core_type_utils import CoreTypeAlias
 
 
 class Path(ABC):
@@ -10,7 +14,7 @@ class Path(ABC):
             parent: Path | None,
             position_in_parent: int | None,
             label: str | int | float | bool | None,  # None for root
-            value: Any
+            value: CoreTypeAlias | None  # None means non-existent value, which is different from Null
     ):
         self._parent = parent
         self._label = label
@@ -34,7 +38,7 @@ class Path(ABC):
 
     def following(self) -> list[Path]:
         parent_p = self.parent()
-        if parent_p is None:
+        if type(parent_p) == Null:
             return []
         siblings = parent_p.all_children()
         self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position() == self.position())
@@ -48,25 +52,27 @@ class Path(ABC):
 
     def following_sibling(self) -> list[Path]:
         parent_p = self.parent()
-        if parent_p is None:
+        if type(parent_p) == Null:
             return []
         siblings = parent_p.all_children()
         self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position() == self.position())
         siblings = siblings[self_idx_in_siblings+1:]
         return siblings
 
-    def parent(self) -> Path | None:
+    def parent(self) -> Path | Null:
+        if self._parent is None:
+            return Null()
         return self._parent
 
-    def position(self) -> int:
+    def position(self) -> int | Null:
         if self._position_in_parent is None:
-            raise ValueError('No parent')
+            return Null()
         return self._position_in_parent
 
     def full_position(self) -> list[int]:
         p_list = []
         p = self
-        while p is not None:
+        while type(p) != Null:
             p_list.append(p)
             p = p.parent()
         return [p.position() for p in reversed(p_list[:-1])]
@@ -74,14 +80,14 @@ class Path(ABC):
     def all_ancestors(self) -> list[Path]:
         ret = []
         parent_p = self.parent()
-        while parent_p is not None:
+        while type(parent_p) != Null:
             ret.append(parent_p)
             parent_p = parent_p.parent()
         return ret
 
     def preceding(self) -> list[Path]:
         parent_p = self.parent()
-        if parent_p is None:
+        if type(parent_p) == Null:
             return []
         siblings = parent_p.all_children()
         self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position() == self.position())
@@ -94,28 +100,30 @@ class Path(ABC):
 
     def preceding_sibling(self) -> list[Path]:
         parent_p = self.parent()
-        if parent_p is None:
+        if type(parent_p) == Null:
             return []
         siblings = parent_p.all_children()
         self_idx_in_siblings = next(i for i, p in enumerate(siblings) if p.position() == self.position())
         siblings = siblings[:self_idx_in_siblings]
         return siblings
 
-    def value(self) -> Any:
+    def value(self) -> CoreTypeAlias | None:  # why None? In some cases, it'll have children but no value (no value = None, which is different from Null)
         return self._value
 
-    def label(self) -> str | int | float | bool | None:
+    def label(self) -> str | int | float | bool | Null:
+        if self._label is None:
+            return Null()
         return self._label
 
-    def full_label(self) -> list[str | int | float | bool | None]:
+    def full_label(self) -> list[str | int | float | bool]:
         p_list = []
         p = self
-        while p is not None:
+        while type(p) != Null:
             p_list.append(p)
             p = p.parent()
-        return [p.label() for p in reversed(p_list)]
+        return [p.label() for p in reversed(p_list[:-1])]
 
-    def to_dict(self) -> dict[str | int | float | bool | None, tuple[Any, dict]]:
+    def to_dict(self) -> dict[str | int | float | bool | Null, tuple[CoreTypeAlias | None, dict]]:
         ret = {}
         for pe in self.all_children():
             ret[pe.label()] = (pe.value(), pe.to_dict())

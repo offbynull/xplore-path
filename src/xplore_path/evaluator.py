@@ -35,6 +35,7 @@ from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
 from xplore_path.matchers.regex_matcher import RegexMatcher
 from xplore_path.matchers.strict_matcher import StrictMatcher
 from xplore_path.matchers.wildcard_matcher import WildcardMatcher
+from xplore_path.null import Null
 from xplore_path.path import Path
 from xplore_path.paths.filesystem.context import FileSystemContext
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
@@ -65,7 +66,7 @@ class _EvaluatorVisitorContext:
         self._variables = {}
 
     def __post_init__(self):
-        if self._root.full_label() != [None]:
+        if self._root.full_label() != []:
             raise ValueError('Root path in context not root path')
 
     def reset_collection(self, collection: CollectionResetMode | Collection):
@@ -168,8 +169,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             fallback = DiscardFallbackMode()
         inner = self.visit(ctx.atomicOrEncapsulate())
         if ctx.MINUS():
-            inner = inner.transform(lambda _, v: v.coerce(float), fallback)
-            inner = inner.transform(lambda _, v: Entity(-v.value), ErrorFallbackMode())
+            inner = inner.transform(lambda _, e: e.coerce(float), fallback)
+            inner = inner.transform_unpacked(lambda _, v: -v, ErrorFallbackMode())
             return inner
         elif ctx.PLUS():
             return inner  # Keep it as-is -- not required to do any manipulation here
@@ -329,7 +330,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         return SequenceCollection.from_entities(result.values())
 
     def visitExprBoolAggregate(self, ctx: XplorePathGrammarParser.ExprBoolAggregateContext):
-        fallback_mode = self._to_fallback_mode(ctx, DefaultFallbackMode(Entity(False)))
+        fallback_mode = self._to_fallback_mode(ctx, DefaultFallbackMode(False))
         if ctx.KW_ANY():
             op = any
         elif ctx.KW_ALL():
@@ -400,14 +401,14 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitExprExtractLabel(self, ctx: XplorePathGrammarParser.ExprExtractLabelContext):
         ret = self.visit(ctx.expr())
-        ret = ret.filter(lambda _, e: isinstance(e.value, Path))
-        ret = ret.transform(lambda _, e: Entity(e.value.label()), ErrorFallbackMode())
+        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Path))
+        ret = ret.transform_unpacked(lambda _, v: v.label(), ErrorFallbackMode())
         return ret
 
     def visitExprExtractPosition(self, ctx: XplorePathGrammarParser.ExprExtractPositionContext):
         ret = self.visit(ctx.expr())
-        ret = ret.filter(lambda _, e: isinstance(e.value, Path))
-        ret = ret.transform(lambda _, e: Entity(e.value.position()), ErrorFallbackMode())
+        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Path))
+        ret = ret.transform_unpacked(lambda _, v: v.position(), ErrorFallbackMode())
         return ret
 
     def visitExprComparison(self, ctx: XplorePathGrammarParser.ExprComparisonContext):
@@ -451,7 +452,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             rhs=self.visit(ctx.expr(1)),
             combine_mode=self._to_boolean_combine_mode(ctx.relOp()),
             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
-            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(Entity(False))),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
             aggregate_mode=self._to_aggregate_mode(ctx.relOp())
         )
 
@@ -463,7 +464,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             rhs=self.visit(ctx.expr(1)),
             combine_mode=self._to_boolean_combine_mode(ctx.orOp()),
             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
-            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(Entity(False))),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
             aggregate_mode=self._to_aggregate_mode(ctx.orOp())
         )
 
@@ -475,7 +476,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             rhs=self.visit(ctx.expr(1)),
             combine_mode=self._to_boolean_combine_mode(ctx.andOp()),
             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
-            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(Entity(False))),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
             aggregate_mode=self._to_aggregate_mode(ctx.andOp())
         )
 
@@ -588,7 +589,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         try:
             self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
             collection = [e.parent() for e in self.context.collection.unpack]
-            collection = [e for e in collection if e is not None]
+            collection = [e for e in collection if type(e) != Null]
             collection = SequenceCollection.from_unpacked(collection)
             collection = self._apply_filter(collection, ctx.filter_())
             return collection
@@ -599,7 +600,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         try:
             self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
             collection = [e.parent() for e in self.context.collection.unpack]
-            collection = [e for e in collection if e is not None]
+            collection = [e for e in collection if type(e) != Null]
             collection = SequenceCollection.from_unpacked(collection)
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
@@ -611,7 +612,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         try:
             self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
             collection = [e.parent() for e in self.context.collection.unpack]
-            collection = [e for e in collection if e is not None]
+            collection = [e for e in collection if type(e) != Null]
             collection = SequenceCollection.from_unpacked(
                 itertools.chain(*(p.all_descendants() for p in collection))
             )
@@ -651,14 +652,14 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             self.context.save(CollectionResetMode.RESET_WITH_SELF)
             new_paths = []
             left_contexts = self.visit(ctx.relPath(0))
-            for left_path in left_contexts:
-                left_collection = SequenceCollection.from_entities([left_path])
+            for left_path in left_contexts.unpack:
+                left_collection = SequenceCollection.from_unpacked([left_path])
                 self.context.save(left_collection)
                 right_contexts = self.visit(ctx.relPath(1))
-                for right_path in right_contexts:
+                for right_path in right_contexts.unpack:
                     new_paths.append(right_path)
                 self.context.restore()
-            return SequenceCollection.from_entities(new_paths)
+            return SequenceCollection.from_unpacked(new_paths)
         finally:
             self.context.restore()
 
@@ -668,17 +669,17 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             self.context.save(CollectionResetMode.RESET_WITH_SELF)
             new_paths = []
             left_contexts = []
-            for e in self.visit(ctx.relPath(0)):
-                left_contexts.append(e.value)
-                left_contexts += e.value.all_descendants()
+            for p in self.visit(ctx.relPath(0)).unpack:
+                left_contexts.append(p)
+                left_contexts += p.all_descendants()
             for left_path in left_contexts:
                 left_collection = SequenceCollection.from_unpacked([left_path])
                 self.context.save(left_collection)
                 right_contexts = self.visit(ctx.relPath(1))
-                for right_path in right_contexts:
+                for right_path in right_contexts.unpack:
                     new_paths.append(right_path)
                 self.context.restore()
-            return SequenceCollection.from_entities(new_paths)
+            return SequenceCollection.from_unpacked(new_paths)
         finally:
             self.context.restore()
 
@@ -697,7 +698,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 parent_path = e.parent()
-                if parent_path is not None:
+                if type(parent_path) != Null:
                     new_paths.append(parent_path)
         self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
@@ -742,7 +743,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         for e in self.context.collection.unpack:
             if isinstance(e, Path):
                 parent_path = e.parent()
-                if parent_path is not None:
+                if type(parent_path) != Null:
                     new_paths.append(parent_path)
         return SequenceCollection.from_unpacked(new_paths)
 
@@ -807,6 +808,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         for v in collection.unpack:
             if isinstance(v, Path):
                 v = v.value()
+                if v is None:
+                    continue  # path has no value -- this is different from having a Null value
             matchers.append(to_matcher(v))
         # test
         combined_matcher = CombinedMatcher(matchers)
@@ -910,6 +913,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             return SingleValueCollection(math.inf)
         elif ctx.Name():
             return SingleValueCollection(ctx.Name().getText())
+        elif ctx.KW_NULL():
+            return SingleValueCollection(Null())
         raise ValueError('Unexpected')
 
     def visitExprMatcher(self, ctx: XplorePathGrammarParser.ExprMatcherContext):

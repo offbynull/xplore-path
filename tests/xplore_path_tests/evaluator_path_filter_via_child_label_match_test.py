@@ -10,13 +10,13 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/*[d]').unpack],
             [
-                [None, 'a', 'b']
+                ['a', 'b']
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/*[f]').unpack],
             [
-                [None, 'a', 'b']
+                ['a', 'b']
             ]
         )
         self.assertEqual(
@@ -26,25 +26,25 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/[a]').unpack],
             [
-                [None]
+                []
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/[y]').unpack],
             [
-                [None]
+                []
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/[z]').unpack],
             [
-                [None]
+                []
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/[ptrs]').unpack],
             [
-                [None]
+                []
             ]
         )
         self.assertEqual(
@@ -54,19 +54,19 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/[99]').unpack],  # first tries to grab value at index 99, if not exists it'll try to grab key 99 - the latter exists as a string
             [
-                [None]
+                []
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/["99"]').unpack],  # doesn't try to do index, goes to '99' directly
             [
-                [None]
+                []
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a[b]/b[c]/e').unpack],
             [
-                [None, 'a', 'b', 'e']
+                ['a', 'b', 'e']
             ]
         )
 
@@ -75,19 +75,19 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/*[s"d"]').unpack],
             [
-                [None, 'a', 'b']
+                ['a', 'b']
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/*[g"[fz]"]').unpack],
             [
-                [None, 'a', 'b']
+                ['a', 'b']
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/*[r"[fz]"]').unpack],
             [
-                [None, 'a', 'b']
+                ['a', 'b']
             ]
         )
         self.assertEqual(
@@ -97,20 +97,20 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/*[~1:2]').unpack],  # PULLS OUT INDEX 1:2
             [
-                [None, 'y'],
-                [None, 'z']
+                ['y'],
+                ['z']
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/[~98:100]').unpack],  # BECAUSE INDEX IS OUT OF RANGE, RETURNS IF CHILD WITH LABEL EXISTS
             [
-                [None]
+                []
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a[g"b"]/b[r"c"]/e').unpack],
             [
-                [None, 'a', 'b', 'e']
+                ['a', 'b', 'e']
             ]
         )
 

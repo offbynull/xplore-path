@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
-
+from xplore_path.core_type_utils import CoreTypeAlias
 from xplore_path.path import Path
 
 
@@ -11,7 +10,7 @@ class SimplePath(Path):
             parent: Path | None,
             position_in_parent: int | None,
             label: str | int | float | bool | None,  # None for root
-            value: Any
+            value: CoreTypeAlias | None  # None means non-existent value, which is different from Null
     ):
         super().__init__(parent, position_in_parent, label, value)
         self._children = []

@@ -1,1 +1,1 @@
-["/goslim_mouse.json//*[./meta//val = g'*neuro*']//id", "<entity>[None, 'goslim_mouse.json', 'graphs', 0, 'nodes', 42, 'id']: http://purl.obolibrary.org/obo/GO_0045202", "<entity>[None, 'goslim_mouse.json', 'graphs', 0, 'nodes', 7, 'id']: http://purl.obolibrary.org/obo/GO_0005102"]
+["/goslim_mouse.json//*[./meta//val = g'*neuro*']//id", "<entity>['goslim_mouse.json', 'graphs', 0, 'nodes', 42, 'id']: http://purl.obolibrary.org/obo/GO_0045202", "<entity>['goslim_mouse.json', 'graphs', 0, 'nodes', 7, 'id']: http://purl.obolibrary.org/obo/GO_0005102"]

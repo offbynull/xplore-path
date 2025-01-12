@@ -1,1 +1,1 @@
-["/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']", "<entity>[None, 'goslim_mouse.json', 'graphs', 0, 'nodes', 42]: None", "<entity>[None, 'goslim_mouse.json', 'graphs', 0, 'nodes', 7]: None"]
+["/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']", "<entity>['goslim_mouse.json', 'graphs', 0, 'nodes', 42]: None", "<entity>['goslim_mouse.json', 'graphs', 0, 'nodes', 7]: None"]

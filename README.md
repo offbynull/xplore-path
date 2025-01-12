@@ -53,7 +53,7 @@ Queries use a syntax inspired by XPath, where the start of the hierarchy is the 
 
 <details><summary>Example queries with filtering</summary>
 
-* `/mouse_assays.zip/*[.//Target_Gene_Protein = 'Mouse Cd40 (Immune Receptor)']` - List mouse assays targeting gene Cd40.
+* `/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']` - List mouse assays targeting gene Cd40.
 * `/mouse_assays.zip//*/GO_Term[. = g'GO:*']` - For each mouse assay, list the gene ontology terms used.
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//id` - List mouse gene ontology related to neuro, cleaned ids only.
 
@@ -97,13 +97,11 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/X
 # TODOs
 
 * TODO: update path constructor -- parent, position in parent, label in parent MUST BE SINGLE OBJECT, THAT CAN BE SET TO NONE
-* TODO: .value.value to .single.value or .unpacked_single
-* TODO: grammar rule PathAtSelf - filter not being applied? anywhere else?
+* TODO: best effort output to CSV/JSON/YAML/XML/HTML?
 * TODO: test python_object_path
 * TODO: test mirror_path
 * TODO: test simple_path
 * TODO: test dummy_path
-* TODO: add a special "marker" value type that can represent null/undefined in javascript and other languages?
 * TODO: path should have metadata?
   * e.g. shell looks for a key that means that it hides the child in the output?
   * e.g. shell looks for a key that means it can preview children in the output? (e.g. if there is no value, show first 3 children inline where value should be? or display that it has children / is terminal?)

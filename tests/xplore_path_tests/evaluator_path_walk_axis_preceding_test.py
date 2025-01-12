@@ -10,53 +10,53 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/ptrs/preceding::*').unpack],
             [
-                [None],
-                [None, 'a'],
-                [None, 'a', 'b'],
-                [None, 'a', 'b', 'c'],
-                [None, 'a', 'b', 'd'],
-                [None, 'a', 'b', 'e'],
-                [None, 'a', 'b', 'f'],
-                [None, 'y'],
-                [None, 'z'],
+                [],
+                ['a'],
+                ['a', 'b'],
+                ['a', 'b', 'c'],
+                ['a', 'b', 'd'],
+                ['a', 'b', 'e'],
+                ['a', 'b', 'f'],
+                ['y'],
+                ['z'],
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/ptrs/f_ptr/preceding::*').unpack],
             [
-                [None],
-                [None, 'a'],
-                [None, 'a', 'b'],
-                [None, 'a', 'b', 'c'],
-                [None, 'a', 'b', 'd'],
-                [None, 'a', 'b', 'e'],
-                [None, 'a', 'b', 'f'],
-                [None, 'y'],
-                [None, 'z'],
-                [None, 'ptrs'],
-                [None, 'ptrs', 'd_ptr'],
+                [],
+                ['a'],
+                ['a', 'b'],
+                ['a', 'b', 'c'],
+                ['a', 'b', 'd'],
+                ['a', 'b', 'e'],
+                ['a', 'b', 'f'],
+                ['y'],
+                ['z'],
+                ['ptrs'],
+                ['ptrs', 'd_ptr'],
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/ptrs/f_ptr/preceding::(label .)').unpack],
             [
-                [None],
-                [None, 'a'],
-                [None, 'a', 'b'],
-                [None, 'a', 'b', 'c'],
-                [None, 'a', 'b', 'd'],
-                [None, 'a', 'b', 'e'],
-                [None, 'a', 'b', 'f'],
-                [None, 'y'],
-                [None, 'z'],
-                [None, 'ptrs'],
-                [None, 'ptrs', 'd_ptr'],
+                [],
+                ['a'],
+                ['a', 'b'],
+                ['a', 'b', 'c'],
+                ['a', 'b', 'd'],
+                ['a', 'b', 'e'],
+                ['a', 'b', 'f'],
+                ['y'],
+                ['z'],
+                ['ptrs'],
+                ['ptrs', 'd_ptr'],
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/ptrs/f_ptr/preceding::e').unpack],
             [
-                [None, 'a', 'b', 'e']
+                ['a', 'b', 'e']
             ]
         )
         self.assertEqual(

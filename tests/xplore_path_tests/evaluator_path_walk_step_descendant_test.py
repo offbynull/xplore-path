@@ -7,15 +7,15 @@ from xplore_path.paths.python_object.python_object_path import PythonObjectPath
 class EvaluatorTest(unittest.TestCase):
     def test_must_walk_to_descendant_directly(self):
         root = PythonObjectPath.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}})
-        self.assertEqual([e.full_label() for e in evaluate(root, '//a').unpack], [[None, 'a']])
-        self.assertEqual([e.full_label() for e in evaluate(root, '//b').unpack], [[None, 'a', 'b']])
-        self.assertEqual([e.full_label() for e in evaluate(root, '//c').unpack], [[None, 'a', 'b', 'c']])
-        self.assertEqual([e.full_label() for e in evaluate(root, '//d').unpack], [[None, 'a', 'b', 'd']])
+        self.assertEqual([e.full_label() for e in evaluate(root, '//a').unpack], [['a']])
+        self.assertEqual([e.full_label() for e in evaluate(root, '//b').unpack], [['a', 'b']])
+        self.assertEqual([e.full_label() for e in evaluate(root, '//c').unpack], [['a', 'b', 'c']])
+        self.assertEqual([e.full_label() for e in evaluate(root, '//d').unpack], [['a', 'b', 'd']])
         self.assertEqual([e.full_label() for e in evaluate(root, '//xxx').unpack], [])
 
     def test_must_walk_to_descendant_from_sub_path(self):
         root = PythonObjectPath.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}})
-        self.assertEqual([e.full_label() for e in evaluate(root, '/a//d').unpack], [[None, 'a', 'b', 'd']])
+        self.assertEqual([e.full_label() for e in evaluate(root, '/a//d').unpack], [['a', 'b', 'd']])
         self.assertEqual([e.label() for e in evaluate(root, '/a//*').unpack], ['b', 'c', 'd', 'e', 'f'])
         self.assertEqual([e.label() for e in evaluate(root, '/a/b//*').unpack], ['c', 'd', 'e', 'f'])
         self.assertEqual([e.label() for e in evaluate(root, '/a//d').unpack], ['d'])

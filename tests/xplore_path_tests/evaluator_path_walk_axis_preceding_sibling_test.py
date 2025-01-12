@@ -10,23 +10,23 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/ptrs/preceding-sibling::*').unpack],
             [
-                [None, 'a'],
-                [None, 'y'],
-                [None, 'z']
+                ['a'],
+                ['y'],
+                ['z']
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/e/preceding-sibling::*').unpack],
             [
-                [None, 'a','b','c'],
-                [None, 'a','b','d']
+                ['a','b','c'],
+                ['a','b','d']
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/e/preceding-sibling::(label .)').unpack],
             [
-                [None, 'a','b','c'],
-                [None, 'a','b','d']
+                ['a','b','c'],
+                ['a','b','d']
             ]
         )
         self.assertEqual(

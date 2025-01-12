@@ -68,7 +68,7 @@ class QueryCompleter(Completer):
             res = self.evaluator.evaluate(self.p, partial_query)
             yield Completion('/*', start_position=inject_offset)
             yield Completion('//*', start_position=inject_offset)
-            for p in res:
+            for p in res.unpack:
                 for child_p in p.all_children():
                     if isinstance(child_p, xplore_path.path.Path) and str(child_p.label()).startswith(unfinished_token):
                         # add style to debug: style='bg:ansiyellow fg:ansiblack'
@@ -76,7 +76,7 @@ class QueryCompleter(Completer):
                         yield Completion(f'/{label}/*', start_position=inject_offset)
                         yield Completion(f'/{label}/', start_position=inject_offset)
                         yield Completion(f'/{label}', start_position=inject_offset)
-            for p in res:
+            for p in res.unpack:
                 for child_p in p.all_children():
                     if isinstance(child_p, xplore_path.path.Path):
                         label = fix_label_for_expression(child_p.label())

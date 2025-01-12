@@ -74,7 +74,8 @@ KW_INNER                  : 'inner';
 KW_JOIN                   : 'join';
 KW_CONCATENATE            : 'concat';
 KW_TRUE                   : 'true';
-KW_FALSE                   : 'false';
+KW_FALSE                  : 'false';
+KW_NULL                   : 'null';
 
 RegexMatcher      : 'r' FragStringLiteral;
 GlobMatcher       : 'g' FragStringLiteral;
@@ -262,6 +263,7 @@ literal
     | KW_NAN
     | KW_INF
     | Name
+    | KW_NULL
     ;
 
 matcher

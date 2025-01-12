@@ -3,6 +3,7 @@ from __future__ import annotations
 import types
 from typing import Any
 
+from xplore_path.null import Null
 from xplore_path.path import Path
 
 
@@ -19,7 +20,9 @@ class PythonObjectPath(Path):
             label: str | int | float | bool | None,  # None for root
             value: Any
     ):
-        super().__init__(parent, position_in_parent, label, value if type(value) in {bool, int, float, str} else None)
+        if value is None:
+            value = Null()
+        super().__init__(parent, position_in_parent, label, value if type(value) in {bool, int, float, str, Null} else None)
         self._data = value
 
     def all_children(self) -> list[Path]:

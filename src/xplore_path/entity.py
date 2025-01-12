@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from math import isnan
-from typing import Type, TypeAlias, Callable, TYPE_CHECKING
+from typing import Type, Callable, TYPE_CHECKING
 
+from xplore_path.core_type_utils import CoreTypeAlias
 from xplore_path.invocable import Invocable
 from xplore_path.matcher import Matcher
 from xplore_path.path import Path
@@ -10,10 +11,7 @@ if TYPE_CHECKING:
     from xplore_path.collection import Collection
 
 
-BasicType: TypeAlias = str | int | float | bool | Matcher | Invocable | Path
-
-
-def _coerce_value(v: BasicType, new_t: Type[BasicType]) -> BasicType | None:
+def _coerce_value(v: CoreTypeAlias, new_t: Type[CoreTypeAlias]) -> CoreTypeAlias | None:
     if type(v) == new_t:
         return v
     elif new_t == bool:
@@ -69,16 +67,19 @@ def _coerce_value(v: BasicType, new_t: Type[BasicType]) -> BasicType | None:
 
 
 class Entity:
-    def __init__(self, value: BasicType):
+    def __init__(self, value: CoreTypeAlias):
         self._value = value
 
     @property
-    def value(self) -> BasicType:
+    def value(self) -> CoreTypeAlias:
         return self._value
 
-    def depath(self) -> Entity:
+    def depath(self) -> Entity | None:
         if isinstance(self._value, Path):
-            return Entity(self._value.value())
+            v = self._value.value()
+            if v is None:
+                return None
+            return Entity(v)
         return self
 
     def invoke(self, args: list[Collection]) -> Collection | None:
@@ -89,7 +90,7 @@ class Entity:
                 ...  # do nothing
         return None
 
-    def coerce(self, new_t: Type[BasicType]) -> Entity | None:
+    def coerce(self, new_t: Type[CoreTypeAlias]) -> Entity | None:
         new_value = _coerce_value(self._value, new_t)
         if new_value is None:
             return None
@@ -109,12 +110,14 @@ class Entity:
     def apply_binary_boolean_op(
         l: Entity,
         r: Entity,
-        test_op: Callable[[BasicType, BasicType], bool],
+        test_op: Callable[[CoreTypeAlias, CoreTypeAlias], bool],
         required_type: Type | None
     ) -> Entity | None:
         # Paths to values (if they are paths)
         l = l.depath()
         r = r.depath()
+        if l is None or r is None:  # It was a path, but path had no value assigned to it
+            return None
         # Coerce to comparable types
         if required_type is not None:
             l = l.coerce(required_type)  # noqa

@@ -1,6 +1,7 @@
 import hashlib
 import json
 import pathlib
+import tempfile
 import unittest
 
 from xplore_path.evaluator import Evaluator
@@ -11,21 +12,22 @@ from xplore_path.collections.sequence_collection import SequenceCollection
 
 class EvaluatorTest(unittest.TestCase):
     def _eval(self, expr):
-        dir = pathlib.Path(__file__).parent.parent.parent / 'playground'
-        fs_path = FileSystemPath.create_root_path(dir, FileSystemContext())
-        outputs = Evaluator().evaluate(fs_path, expr)
-        actual = [expr]
-        if isinstance(outputs, SequenceCollection):
-            for v in outputs:
-                actual.append(f'{v}')
-        else:
-            actual.append(f'{outputs}')
-        actual = sorted(actual)
-        expected_path = dir / '.expected' / hashlib.sha256(expr.encode()).hexdigest()
-        expected_path.parent.mkdir(parents=True, exist_ok=True)
-        expected_path.write_text(json.dumps(actual))
-        # expected = json.loads(expected_path.read_text())
-        # self.assertEqual(expected, actual)
+        dir_ = pathlib.Path(__file__).parent.parent.parent / 'playground'
+        with tempfile.TemporaryDirectory() as workspace:
+            fs_path = FileSystemPath.create_root_path(dir_, FileSystemContext(workspace=pathlib.Path(workspace)))
+            outputs = Evaluator().evaluate(fs_path, expr)
+            actual = [expr]
+            if isinstance(outputs, SequenceCollection):
+                for v in outputs:
+                    actual.append(f'{v}')
+            else:
+                actual.append(f'{outputs}')
+            actual = sorted(actual)
+            expected_path = dir_ / '.expected' / hashlib.sha256(expr.encode()).hexdigest()
+            expected_path.parent.mkdir(parents=True, exist_ok=True)
+            # expected_path.write_text(json.dumps(actual))
+            expected = json.loads(expected_path.read_text())
+            self.assertEqual(expected, actual)
         
     def test_must_match_known_results(self):
         # Inspect root

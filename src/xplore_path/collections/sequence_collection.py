@@ -5,7 +5,8 @@ from typing import Iterable, Callable, Iterator
 
 from xplore_path.collection import Collection
 from xplore_path.fallback_mode import FallbackMode
-from xplore_path.entity import Entity, BasicType
+from xplore_path.entity import Entity
+from xplore_path.core_type_utils import CoreTypeAlias
 from xplore_path.path import Path
 
 
@@ -83,7 +84,7 @@ class SequenceCollection(Collection):
 
     @staticmethod
     def from_unpacked(
-            values: Iterator[BasicType] | Iterable[BasicType],
+            values: Iterator[CoreTypeAlias] | Iterable[CoreTypeAlias],
             order_paths: bool = True,
             deduplicate_paths: bool = True
     ) -> SequenceCollection:
