@@ -1,6 +1,11 @@
 import argparse
+import os
+import pathlib
+import platform
 import shutil
+import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 from tempfile import gettempdir
 from typing import Any
@@ -12,8 +17,11 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 
 import xplore_path.path
+from xplore_path.collection import Collection
 from xplore_path.collections_.sequence_collection import SequenceCollection
 from xplore_path.evaluator import Evaluator
+from xplore_path.repl.outputter import Outputter
+from xplore_path.repl.outputters.csv_outputter import CsvOutputter
 from xplore_path.repl.query_completer import QueryCompleter
 from xplore_path.repl.utils import print_line, fix_label_for_expression
 from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
@@ -56,6 +64,34 @@ def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
             ret += [('', f'({type(data).__name__}) {data}')]
 
     return ret
+
+
+def _launch_file(file_path: pathlib.Path):
+    system = platform.system()
+    if system == 'Windows':
+        os.startfile(file_path)
+    elif system == 'Darwin':
+        subprocess.run(['open', file_path], check=True)
+    else:  # Linux/Unix
+        subprocess.run(['xdg-open', file_path], check=True)
+
+
+def _output(app, outputter: Outputter, collection: Collection, write_dir_path: pathlib.Path):
+    current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    output_fs_path = pathlib.Path(write_dir_path) / f'{current_datetime}.{outputter.extension()}'
+    if collection is not None:
+        app.print_text([('', 'Writing '), ('fg:ansiwhite', f'{output_fs_path}'), ('', '...\n')])
+        try:
+            outputter.output(collection, output_fs_path)
+        except Exception as e:
+            app.print_text('fg:ansired', f'Failed to write: {e}\n')
+            return
+        try:
+            app.print_text([('', 'Opening '), ('fg:ansiwhite', f'{output_fs_path}'), ('', '...\n')])
+            _launch_file(output_fs_path)
+        except Exception as e:
+            app.print_text('fg:ansired', f'Failed to open: {e}\n')
+            return
 
 
 _STYLES = Style.from_dict({
@@ -105,6 +141,14 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
         buffer = event.app.current_buffer
         buffer.text = ''
         event.app.invalidate()
+
+    @bindings.add('c-o')
+    def _(event):
+        try:
+            event.app.print_text([('', '\n')])
+            _output(event.app, CsvOutputter(), query_res, query_path)
+        finally:
+            event.app.invalidate()
 
     query_res = None
     def get_toolbar_text():
@@ -166,6 +210,7 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
         ('fg:ansiblue ', '  Esc'), ('', ' to clear input\n'),
         ('fg:ansiblue ', '  Tab'), ('', ' for autocomplete suggestions\n'),
         ('fg:ansiblue ', '  ↑↓'), ('', ' to navigate history\n'),
+        ('fg:ansiblue ', '  Ctrl-O'), ('', ' to write last output as CSV\n'),
         ('fg:ansiblue ', '  Ctrl-L'), ('', ' to turn on/off full labels in outputs\n'),
         ('fg:ansiblue ', '  Ctrl-T'), ('', ' to turn on/off truncating outputs\n'),
         ('fg:ansiblue ', '  Ctrl-C'), ('', ' to exit\n'),
