@@ -16,7 +16,10 @@ class RaiseParseErrorListener(ErrorListener):
         raise ParseException(f'Syntax Error: {line}:{column} {msg}', line, column)
 
     # def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs):
-    #     raise ParseException('Ambiguity Error')
+    #     text_segment = recognizer.getInputStream().getText(startIndex, stopIndex)
+    #     raise ParseException(f'Ambiguity Error\n\n'
+    #                          f'Ambiguity from {startIndex} to {stopIndex}: "{text_segment}"\n'
+    #                          f'{ambigAlts=}, {configs=}, {dfa=}')
     #
     # def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
     #     raise ParseException('Attempting Full Context Error')

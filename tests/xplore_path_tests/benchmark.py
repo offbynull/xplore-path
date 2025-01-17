@@ -18,7 +18,7 @@ try:
             cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
         )
     )
-    ret = Evaluator().evaluate(fs_path, "/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']")
+    ret = Evaluator().evaluate(fs_path, "/mouse_assays.zip/Mouse_Assay_001.csv/0/Target_Gene_Protein[. = .]")
     #print(f'{len(ret)=}')
 except KeyboardInterrupt:
     ...

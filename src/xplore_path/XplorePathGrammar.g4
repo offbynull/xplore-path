@@ -149,8 +149,8 @@ expr
 atomicOrEncapsulate
     : (MINUS | PLUS) atomicOrEncapsulate coerceFallback?  # ExprUnary
     | wrapOrVar                                           # ExprWrapOrVar
-    | path filter?                                        # ExprPath
-    | path filter? argumentList filter?                   # ExprPathInvoke
+    | path                                                # ExprPath        // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
+    | path argumentList filter?                           # ExprPathInvoke  // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
     | matcher                                             # ExprMatcher
     | literal                                             # ExprLiteral
     ;
@@ -195,7 +195,6 @@ joinCond
 
 relOp
     : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? (EQ | NE | LT | LE | GT | GE | LL | GG)
-    | (KW_SEQUENCE | KW_ANY | KW_ALL)? (KW_ZIP | KW_PRODUCT)? (EQ | NE | LT | LE | GT | GE | LL | GG)
     ;
 
 mulOp

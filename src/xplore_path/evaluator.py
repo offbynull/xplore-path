@@ -128,13 +128,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitExprPath(self, ctx: XplorePathGrammarParser.ExprPathContext):
         collection = self.visit(ctx.path())
-        collection = self._apply_filter(collection, ctx.filter_())
         return collection
 
     def visitExprPathInvoke(self, ctx: XplorePathGrammarParser.ExprPathInvokeContext):
         ret = self.visit(ctx.path())
-        ret = self._apply_filter(ret, ctx.filter_(0))
-        ret = self._invoke(ret, ctx.argumentList(), ctx.filter_(1))
+        ret = self._invoke(ret, ctx.argumentList(), ctx.filter_())
         return ret
 
     def visitExprLiteral(self, ctx: XplorePathGrammarParser.ExprLiteralContext):
