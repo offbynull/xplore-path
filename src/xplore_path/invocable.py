@@ -1,3 +1,5 @@
+"""Invocable scalar type."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -8,6 +10,15 @@ if TYPE_CHECKING:
 
 
 class Invocable(ABC):
+    """
+    An invocable performs some computation when invoked, as if invoking a function.
+    """
     @abstractmethod
     def invoke(self, args: list[Collection]) -> Collection:
+        """
+        Invoke.
+
+        :param args: Invocation arguments.
+        :return: Invocation result.
+        """
         pass

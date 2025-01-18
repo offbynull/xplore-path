@@ -16,7 +16,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 
-import xplore_path.path
+import xplore_path.node
 from xplore_path.collection import Collection
 from xplore_path.collections_.sequence_collection import SequenceCollection
 from xplore_path.evaluator import Evaluator
@@ -24,14 +24,14 @@ from xplore_path.repl.outputter import Outputter
 from xplore_path.repl.outputters.csv_outputter import CsvOutputter
 from xplore_path.repl.query_completer import QueryCompleter
 from xplore_path.repl.utils import print_line, fix_label_for_expression
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
-from xplore_path.paths.filesystem.context import NoticeType, FileSystemContext
+from xplore_path.nodes.filesystem.filesystem_node import FileSystemNode
+from xplore_path.nodes.filesystem.context import NoticeType, FileSystemContext
 from xplore_path.raise_parse_error_listener import ParseException
 
 
 def _single_result_to_line(v: Any, full_labels: bool) -> list[tuple[str, str]]:
     ret = []
-    if isinstance(v, xplore_path.path.Path):
+    if isinstance(v, xplore_path.node.Node):
         if not full_labels:
             ret += [('fg:ansiwhite bold', f'{v.label()}')]
         else:
@@ -167,14 +167,14 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
         return toolbar_text
 
 
-    p = FileSystemPath.create_root_path(
+    p = FileSystemNode.create_root_path(
         query_path,
         FileSystemContext(
             workspace=cache_path,
             cache_notifier=_cache_notifier
         )
     )
-    p_cached_only = FileSystemPath.create_root_path(
+    p_cached_only = FileSystemNode.create_root_path(
         query_path,
         FileSystemContext(
             workspace=cache_path,
@@ -243,7 +243,7 @@ def prompt(evaluator: Evaluator, query_path: Path, cache_path: Path):
 
 
 def precache(evaluator: Evaluator, query_path: Path, cache_path: Path) -> None:
-    p = FileSystemPath.create_root_path(
+    p = FileSystemNode.create_root_path(
         query_path,
         FileSystemContext(
             workspace=cache_path,

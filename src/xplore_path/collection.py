@@ -7,7 +7,7 @@ from typing import Callable, Literal, Iterator
 from xplore_path.entity import Entity
 from xplore_path.core_type_utils import CoreTypeAlias
 from xplore_path.fallback_mode import FallbackMode
-from xplore_path.path import Path
+from xplore_path.node import Node
 
 
 class Collection(ABC):
@@ -49,7 +49,7 @@ class Collection(ABC):
     def to_set(self) -> dict[tuple[Literal['PATH', 'RAW'], tuple[str | int | float | bool | None, ...]], Entity]:
         ret = {}
         for v in self.unpack:
-            if isinstance(v, Path):
+            if isinstance(v, Node):
                 k = 'PATH', tuple(v.full_label())
             else:
                 if not isinstance(v, (str, int, float, bool, None)):  # discard matchers, invocables, etc..

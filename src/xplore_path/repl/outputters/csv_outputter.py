@@ -2,8 +2,8 @@ import pathlib
 from collections import defaultdict
 
 from xplore_path.collection import Collection
-from xplore_path.path import Path
-from xplore_path.evaluator import _test_with_fs_path
+from xplore_path.node import Node
+from xplore_path.evaluator import _test_with_fs
 
 import pandas as pd
 
@@ -15,8 +15,8 @@ class CsvOutputter(Outputter):
         return 'csv'
 
     def output(self, collection: Collection, write_path: pathlib.Path):
-        paths = list(collection.filter_unpacked(lambda _, v: isinstance(v, Path)).unpack)
-        non_paths = list(collection.filter_unpacked(lambda _, v: not isinstance(v, Path)).unpack)
+        paths = list(collection.filter_unpacked(lambda _, v: isinstance(v, Node)).unpack)
+        non_paths = list(collection.filter_unpacked(lambda _, v: not isinstance(v, Node)).unpack)
 
         path_labels_elem_cnt = max(len(p.full_label()) for p in paths)
         cut_idx = 0
@@ -52,7 +52,7 @@ class CsvOutputter(Outputter):
 
 
 if __name__ == '__main__':
-    collection = _test_with_fs_path('~/Downloads', "/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']//*")
+    collection = _test_with_fs('~/Downloads', "/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']//*")
     file_path = pathlib.Path('~/output_test.csv').expanduser()
     CsvOutputter().output(collection, file_path)
 

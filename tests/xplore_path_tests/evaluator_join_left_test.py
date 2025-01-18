@@ -1,8 +1,9 @@
 import itertools
 import unittest
 
-from xplore_path.evaluator import evaluate
-from xplore_path.paths.python_object.python_object_path import PythonObjectPath
+from xplore_path.evaluator import Evaluator
+from xplore_path.nodes.python_object.python_object_node import PythonObjectNode
+
 
 _TEST_OBJ = {
     'Colors': {"Apple": "Red", "Cherry": "Red", "Blueberry": "Blue", "Grape": "Purple", "Orange": "Orange",
@@ -22,6 +23,11 @@ _TEST_OBJ = {
                  "Iran": "Tehran", "Afghanistan": "Kabul", }
 }
 
+
+def evaluate(root, expr, variables = None):
+    return Evaluator(variables).evaluate(root, expr)
+
+
 class EvaluatorTest(unittest.TestCase):
     def _pop_first_and_assert_path(self, p_list, p_expected_label, p_expected_value):
         p = p_list.pop(0)
@@ -29,9 +35,9 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(p_expected_value, p.value())
 
     def test_must_left_join_path_vs_path(self):
-        root = PythonObjectPath.create_root_path(_TEST_OBJ)
+        root = PythonObjectNode.create_root_path(_TEST_OBJ)
         r = evaluate(root, '/Colors/* left join /Regions/* on [label ./l/*[0] = label ./r/*[0]]').unpack
-        r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
+        r_actual = list(itertools.chain(*([r_] + r_.descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [], None)
         self._pop_first_and_assert_path(r_actual, ['joined'], None)
         self._pop_first_and_assert_path(r_actual, ['joined', 'l'], None)
@@ -145,9 +151,9 @@ class EvaluatorTest(unittest.TestCase):
         self._pop_first_and_assert_path(r_actual, ['joined', 'r', 'Blackberry', 1], 'Europe')
 
     def test_must_left_join_single_vs_path(self):
-        root = PythonObjectPath.create_root_path(_TEST_OBJ)
+        root = PythonObjectNode.create_root_path(_TEST_OBJ)
         r = evaluate(root, '(Cherry, Watermelon, Blueberry) left join /Regions/* on [./l = label ./r/*[0]]').unpack
-        r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
+        r_actual = list(itertools.chain(*([r_] + r_.descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [], None)
         self._pop_first_and_assert_path(r_actual, ['joined'], None)
         self._pop_first_and_assert_path(r_actual, ['joined', 'l'], 'Cherry')
@@ -165,9 +171,9 @@ class EvaluatorTest(unittest.TestCase):
         self._pop_first_and_assert_path(r_actual, ['joined', 'l'], 'Blueberry')
 
     def test_must_left_join_path_vs_single(self):
-        root = PythonObjectPath.create_root_path(_TEST_OBJ)
+        root = PythonObjectNode.create_root_path(_TEST_OBJ)
         r = evaluate(root, '/Colors/* left join (Cherry, Grape, Orange, Watermelon, Strawberry, Lemon, Kiwi, Mango, Pineapple, Raspberry, Coconut, Pomegranate, Fig, Papaya, Blackberry) on [label ./l/*[0] = ./r]').unpack
-        r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
+        r_actual = list(itertools.chain(*([r_] + r_.descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [], None)
         self._pop_first_and_assert_path(r_actual, ['joined'], None)
         self._pop_first_and_assert_path(r_actual, ['joined', 'l'], None)
@@ -237,9 +243,9 @@ class EvaluatorTest(unittest.TestCase):
         self._pop_first_and_assert_path(r_actual, ['joined', 'r'], 'Blackberry')
 
     def test_must_left_join_single_vs_single(self):
-        root = PythonObjectPath.create_root_path(_TEST_OBJ)
+        root = PythonObjectNode.create_root_path(_TEST_OBJ)
         r = evaluate(root, '(Cherry, Watermelon, Blueberry) left join (Cherry, Grape, Orange, Watermelon, Strawberry, Lemon, Kiwi, Mango, Pineapple, Raspberry, Coconut, Pomegranate, Fig, Papaya, Blackberry) on [./l = ./r]').unpack
-        r_actual = list(itertools.chain(*([r_] + r_.all_descendants() for r_ in r)))
+        r_actual = list(itertools.chain(*([r_] + r_.descendants() for r_ in r)))
         self._pop_first_and_assert_path(r_actual, [], None)
         self._pop_first_and_assert_path(r_actual, ['joined'], None)
         self._pop_first_and_assert_path(r_actual, ['joined', 'l'], 'Cherry')

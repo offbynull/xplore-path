@@ -6,7 +6,7 @@ from typing import Type, Callable, TYPE_CHECKING
 from xplore_path.core_type_utils import CoreTypeAlias
 from xplore_path.invocable import Invocable
 from xplore_path.matcher import Matcher
-from xplore_path.path import Path
+from xplore_path.node import Node
 if TYPE_CHECKING:
     from xplore_path.collection import Collection
 
@@ -15,7 +15,7 @@ def _coerce_value(v: CoreTypeAlias, new_t: Type[CoreTypeAlias]) -> CoreTypeAlias
     if type(v) == new_t:
         return v
     elif new_t == bool:
-        if isinstance(v, Path):
+        if isinstance(v, Node):
             return _coerce_value(v.value(), new_t)
         elif type(v) == bool:
             return v
@@ -26,7 +26,7 @@ def _coerce_value(v: CoreTypeAlias, new_t: Type[CoreTypeAlias]) -> CoreTypeAlias
         elif type(v) == int:
             return v != 0
     elif new_t == int:
-        if isinstance(v, Path):
+        if isinstance(v, Node):
             return _coerce_value(v.value(), new_t)
         elif type(v) == bool:
             return int(v)
@@ -40,7 +40,7 @@ def _coerce_value(v: CoreTypeAlias, new_t: Type[CoreTypeAlias]) -> CoreTypeAlias
         elif type(v) == int:
             return v
     elif new_t == float:
-        if isinstance(v, Path):
+        if isinstance(v, Node):
             return _coerce_value(v.value(), new_t)
         elif type(v) == bool:
             return float(v)
@@ -54,7 +54,7 @@ def _coerce_value(v: CoreTypeAlias, new_t: Type[CoreTypeAlias]) -> CoreTypeAlias
         elif type(v) == int:
             return float(v)
     elif new_t == str:
-        if isinstance(v, Path):
+        if isinstance(v, Node):
             return _coerce_value(v.value(), new_t)
         elif type(v) == float and v.is_integer():
             return str(int(v))
@@ -75,7 +75,7 @@ class Entity:
         return self._value
 
     def depath(self) -> Entity | None:
-        if isinstance(self._value, Path):
+        if isinstance(self._value, Node):
             v = self._value.value()
             if v is None:
                 return None
@@ -124,7 +124,7 @@ class Entity:
             r = r.coerce(required_type)  # noqa
         elif isinstance(l.value, Invocable) or isinstance(r.value, Invocable):
             l, r = None, None  # blank out if either is invocable
-        elif isinstance(l.value, Path) or isinstance(r.value, Path):
+        elif isinstance(l.value, Node) or isinstance(r.value, Node):
             raise ValueError('This should never happen')  # depath'd above
         elif isinstance(l.value, Matcher) or isinstance(r.value, Matcher):
             ...  # skip coercion if either is a label matcher

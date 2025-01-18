@@ -1,14 +1,14 @@
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 
-import xplore_path.path
+import xplore_path.node
 from xplore_path.evaluator import Evaluator
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
+from xplore_path.nodes.filesystem.filesystem_node import FileSystemNode
 from xplore_path.repl.utils import TOKENS, fix_label_for_expression
 
 
 class QueryCompleter(Completer):
-    def __init__(self, evaluator: Evaluator, p: FileSystemPath):
+    def __init__(self, evaluator: Evaluator, p: FileSystemNode):
         self.evaluator = evaluator
         self.p = p
 
@@ -69,16 +69,16 @@ class QueryCompleter(Completer):
             yield Completion('/*', start_position=inject_offset)
             yield Completion('//*', start_position=inject_offset)
             for p in res.unpack:
-                for child_p in p.all_children():
-                    if isinstance(child_p, xplore_path.path.Path) and str(child_p.label()).startswith(unfinished_token):
+                for child_p in p.children():
+                    if isinstance(child_p, xplore_path.node.Node) and str(child_p.label()).startswith(unfinished_token):
                         # add style to debug: style='bg:ansiyellow fg:ansiblack'
                         label = fix_label_for_expression(child_p.label())
                         yield Completion(f'/{label}/*', start_position=inject_offset)
                         yield Completion(f'/{label}/', start_position=inject_offset)
                         yield Completion(f'/{label}', start_position=inject_offset)
             for p in res.unpack:
-                for child_p in p.all_children():
-                    if isinstance(child_p, xplore_path.path.Path):
+                for child_p in p.children():
+                    if isinstance(child_p, xplore_path.node.Node):
                         label = fix_label_for_expression(child_p.label())
                         yield Completion(f'/{label}/*', start_position=inject_offset)
                         yield Completion(f'/{label}/', start_position=inject_offset)

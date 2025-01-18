@@ -36,29 +36,29 @@ from xplore_path.matchers.regex_matcher import RegexMatcher
 from xplore_path.matchers.strict_matcher import StrictMatcher
 from xplore_path.matchers.wildcard_matcher import WildcardMatcher
 from xplore_path.null import Null
-from xplore_path.path import Path, ParentBlock
-from xplore_path.paths.filesystem.context import FileSystemContext
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
-from xplore_path.paths.mirror.mirror_path import MirrorPath
-from xplore_path.paths.python_object.python_object_path import PythonObjectPath
-from xplore_path.paths.simple.simple_path import SimplePath
+from xplore_path.node import Node, ParentBlock
+from xplore_path.nodes.filesystem.context import FileSystemContext
+from xplore_path.nodes.filesystem.filesystem_node import FileSystemNode
+from xplore_path.nodes.mirror.mirror_node import MirrorNode
+from xplore_path.nodes.python_object.python_object_node import PythonObjectNode
+from xplore_path.nodes.simple.simple_node import SimpleNode
 from xplore_path.raise_parse_error_listener import RaiseParseErrorListener
 
 
-class CollectionResetMode(Enum):
+class _CollectionResetMode(Enum):
     RESET_WITH_ROOT = 'RESET_WITH_ROOT'
     RESET_WITH_SELF = 'RESET_WITH_SELF'
     RESET_WITH_EMPTY = 'RESET_WITH_EMPTY'
 
 
-class RootResetMode(Enum):
+class _RootResetMode(Enum):
     RESET_WITH_SELF = 'RESET_WITH_SELF'
 
 
 class _EvaluatorVisitorContext:
     def __init__(
             self,
-            root: Path
+            root: Node
     ):
         self._root = root
         self._collection = SequenceCollection.from_unpacked([root])
@@ -67,23 +67,23 @@ class _EvaluatorVisitorContext:
 
     def __post_init__(self):
         if self._root.full_label() != []:
-            raise ValueError('Root path in context not root path')
+            raise ValueError('Root node is not root')
 
-    def reset_collection(self, collection: CollectionResetMode | Collection):
+    def reset_collection(self, collection: _CollectionResetMode | Collection):
         if isinstance(collection, Collection):
             self._collection = collection
-        elif collection == CollectionResetMode.RESET_WITH_ROOT:
+        elif collection == _CollectionResetMode.RESET_WITH_ROOT:
             self._collection = SequenceCollection.from_unpacked([self._root])
-        elif collection == CollectionResetMode.RESET_WITH_SELF:
+        elif collection == _CollectionResetMode.RESET_WITH_SELF:
             self._collection = self._collection  # Normally it'd be a copy of the self._collection, but Collection should be immutable
-        elif collection == CollectionResetMode.RESET_WITH_EMPTY:
+        elif collection == _CollectionResetMode.RESET_WITH_EMPTY:
             self._collection = SequenceCollection.empty()
         else:
             raise ValueError('This should never happen')
 
-    def save(self, new_collection: CollectionResetMode | Collection, new_root: RootResetMode | Any = RootResetMode.RESET_WITH_SELF):
+    def save(self, new_collection: _CollectionResetMode | Collection, new_root: _RootResetMode | Any = _RootResetMode.RESET_WITH_SELF):
         self._save_stack.append((self._collection, self._root))
-        if new_root != RootResetMode.RESET_WITH_SELF:
+        if new_root != _RootResetMode.RESET_WITH_SELF:
             self._root = new_root
         self.reset_collection(new_collection)
 
@@ -91,7 +91,7 @@ class _EvaluatorVisitorContext:
         self._collection, self._root = self._save_stack.pop()
 
     @property
-    def root(self) -> Path:
+    def root(self) -> Node:
         return self._root
 
     @property
@@ -106,7 +106,7 @@ class _EvaluatorVisitorContext:
 
     @staticmethod
     def prime(
-            root_: Path | Any,
+            root_: Node | Any,
             variables_: dict[str, Collection]
     ):
         ret = _EvaluatorVisitorContext(root_)
@@ -196,119 +196,118 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     #       lookup. Likewise, if relational operator (e.g. > or <=) and operands support sorting, sort and lookup using
     #       binary search.
     #
-    #       Maybe, instead of passing around lists of Paths (and singular values), create a Sequence class that holds
-    #       Maybe, instead of passing around lists of Paths (and singular values), create a Sequence class that holds
+    #       Maybe, instead of passing around lists of Nodes (and singular values), create a Sequence class that holds
     #       these values. The Sequence class can generate an index (e.g. hash or sorted) based on the values within the
     #       sequence.
     def visitExprJoin(self, ctx: XplorePathGrammarParser.ExprJoinContext):
         def _create_join_obj(parent, parent_idx, l_item, r_item):
-            test_path = SimplePath(ParentBlock(parent, parent_idx, 'joined'), None)
-            if isinstance(l_item, Path):
-                l_path = SimplePath(ParentBlock(test_path, 0, 'l'), None)
-                l_path.add_child(
-                    MirrorPath(l_item, ParentBlock(l_path, 0, l_item.label()))
+            test_node = SimpleNode(ParentBlock(parent, parent_idx, 'joined'), None)
+            if isinstance(l_item, Node):
+                l_node = SimpleNode(ParentBlock(test_node, 0, 'l'), None)
+                l_node.add_child(
+                    MirrorNode(l_item, ParentBlock(l_node, 0, l_item.label()))
                 )
             else:
-                l_path = SimplePath(ParentBlock(test_path, 0, 'l'), l_item)
-            l_path.seal()
-            test_path.add_child(l_path)
-            if isinstance(r_item, Path):
-                r_path = SimplePath(ParentBlock(test_path, 1, 'r'), None)
-                r_path.add_child(
-                    MirrorPath(r_item, ParentBlock(r_path, 0, r_item.label()))
+                l_node = SimpleNode(ParentBlock(test_node, 0, 'l'), l_item)
+            l_node.seal()
+            test_node.add_child(l_node)
+            if isinstance(r_item, Node):
+                r_node = SimpleNode(ParentBlock(test_node, 1, 'r'), None)
+                r_node.add_child(
+                    MirrorNode(r_item, ParentBlock(r_node, 0, r_item.label()))
                 )
             else:
-                r_path = SimplePath(ParentBlock(test_path, 1, 'r'), r_item)
-            r_path.seal()
-            test_path.add_child(r_path)
-            test_path.seal()
-            return test_path
+                r_node = SimpleNode(ParentBlock(test_node, 1, 'r'), r_item)
+            r_node.seal()
+            test_node.add_child(r_node)
+            test_node.seal()
+            return test_node
 
         def _create_join_obj_left_only(parent, parent_idx, l_item):
-            test_path = SimplePath(ParentBlock(parent, parent_idx, 'joined'), None)
-            if isinstance(l_item, Path):
-                l_path = SimplePath(ParentBlock(test_path, 0, 'l'), None)
-                l_path.add_child(
-                    MirrorPath(l_item, ParentBlock(l_path, 0, l_item.label()))
+            test_node = SimpleNode(ParentBlock(parent, parent_idx, 'joined'), None)
+            if isinstance(l_item, Node):
+                l_node = SimpleNode(ParentBlock(test_node, 0, 'l'), None)
+                l_node.add_child(
+                    MirrorNode(l_item, ParentBlock(l_node, 0, l_item.label()))
                 )
             else:
-                l_path = SimplePath(ParentBlock(test_path, 0, 'l'), l_item)
-            l_path.seal()
-            test_path.add_child(l_path)
-            test_path.seal()
-            return test_path
+                l_node = SimpleNode(ParentBlock(test_node, 0, 'l'), l_item)
+            l_node.seal()
+            test_node.add_child(l_node)
+            test_node.seal()
+            return test_node
 
         def _create_join_obj_right_only(parent, parent_idx, r_item):
-            test_path = SimplePath(ParentBlock(parent, parent_idx, 'joined'), None)
-            if isinstance(r_item, Path):
-                r_path = SimplePath(ParentBlock(test_path, 0, 'r'), None)
-                r_path.add_child(
-                    MirrorPath(r_item, ParentBlock(r_path, 0, r_item.label()))
+            test_node = SimpleNode(ParentBlock(parent, parent_idx, 'joined'), None)
+            if isinstance(r_item, Node):
+                r_node = SimpleNode(ParentBlock(test_node, 0, 'r'), None)
+                r_node.add_child(
+                    MirrorNode(r_item, ParentBlock(r_node, 0, r_item.label()))
                 )
             else:
-                r_path = SimplePath(ParentBlock(test_path, 0, 'r'), r_item)
-            r_path.seal()
-            test_path.add_child(r_path)
-            test_path.seal()
-            return test_path
+                r_node = SimpleNode(ParentBlock(test_node, 0, 'r'), r_item)
+            r_node.seal()
+            test_node.add_child(r_node)
+            test_node.seal()
+            return test_node
 
         l = self.visit(ctx.expr(0))
         r = self.visit(ctx.expr(1))
-        root_path = SimplePath(None, None)
-        root_path_next_child_idx = 0
+        root_node = SimpleNode(None, None)
+        root_node_next_child_idx = 0
         if ctx.joinOp().KW_INNER():
             for l_ in l.unpack:
                 for r_ in r.unpack:
-                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_, r_)
-                    collection = SequenceCollection.from_unpacked([test_path])
+                    test_node = _create_join_obj(root_node, root_node_next_child_idx, l_, r_)
+                    collection = SequenceCollection.from_unpacked([test_node])
                     self.context.save(collection)
                     try:
                         collection = self._apply_filter(collection, ctx.joinCond().filter_())
                     finally:
                         self.context.restore()
                     if collection:
-                        root_path.add_child(test_path)
-                        root_path_next_child_idx += 1
+                        root_node.add_child(test_node)
+                        root_node_next_child_idx += 1
         elif ctx.joinOp().KW_RIGHT():
             for r_ in r.unpack:
                 joined = False
                 for l_ in l.unpack:
-                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_, r_)
-                    collection = SequenceCollection.from_unpacked([test_path])
+                    test_node = _create_join_obj(root_node, root_node_next_child_idx, l_, r_)
+                    collection = SequenceCollection.from_unpacked([test_node])
                     self.context.save(collection)
                     try:
                         collection = self._apply_filter(collection, ctx.joinCond().filter_())
                     finally:
                         self.context.restore()
                     if collection:
-                        root_path.add_child(test_path)
-                        root_path_next_child_idx += 1
+                        root_node.add_child(test_node)
+                        root_node_next_child_idx += 1
                         joined = True
                 if not joined:
-                    r_path = _create_join_obj_right_only(root_path, root_path_next_child_idx, r_)
-                    root_path.add_child(r_path)
-                    root_path_next_child_idx += 1
+                    r_node = _create_join_obj_right_only(root_node, root_node_next_child_idx, r_)
+                    root_node.add_child(r_node)
+                    root_node_next_child_idx += 1
         else:  # if KW_LEFT not set explicitly, assume KW_LEFT
             for l_ in l.unpack:
                 joined = False
                 for r_ in r.unpack:
-                    test_path = _create_join_obj(root_path, root_path_next_child_idx, l_, r_)
-                    collection = SequenceCollection.from_unpacked([test_path])
+                    test_node = _create_join_obj(root_node, root_node_next_child_idx, l_, r_)
+                    collection = SequenceCollection.from_unpacked([test_node])
                     self.context.save(collection)
                     try:
                         collection = self._apply_filter(collection, ctx.joinCond().filter_())
                     finally:
                         self.context.restore()
                     if collection:
-                        root_path.add_child(test_path)
-                        root_path_next_child_idx += 1
+                        root_node.add_child(test_node)
+                        root_node_next_child_idx += 1
                         joined = True
                 if not joined:
-                    l_path = _create_join_obj_left_only(root_path, root_path_next_child_idx, l_)
-                    root_path.add_child(l_path)
-                    root_path_next_child_idx += 1
-        root_path.seal()
-        return SequenceCollection.from_unpacked([root_path] + root_path.all_descendants())
+                    l_node = _create_join_obj_left_only(root_node, root_node_next_child_idx, l_)
+                    root_node.add_child(l_node)
+                    root_node_next_child_idx += 1
+        root_node.seal()
+        return SequenceCollection.from_unpacked([root_node] + root_node.descendants())
 
     def visitExprSetIntersect(self, ctx: XplorePathGrammarParser.ExprSetIntersectContext):
         l = self.visit(ctx.expr(0)).to_set()
@@ -399,13 +398,13 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitExprExtractLabel(self, ctx: XplorePathGrammarParser.ExprExtractLabelContext):
         ret = self.visit(ctx.expr())
-        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Path))
+        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Node))
         ret = ret.transform_unpacked(lambda _, v: v.label(), ErrorFallbackMode())
         return ret
 
     def visitExprExtractPosition(self, ctx: XplorePathGrammarParser.ExprExtractPositionContext):
         ret = self.visit(ctx.expr())
-        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Path))
+        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Node))
         ret = ret.transform_unpacked(lambda _, v: v.position(), ErrorFallbackMode())
         return ret
 
@@ -530,7 +529,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathAtRoot(self, ctx: XplorePathGrammarParser.PathAtRootContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_ROOT)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_ROOT)
             collection = self.context.collection
             collection = self._apply_filter(collection, ctx.filter_())
             return collection
@@ -539,7 +538,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathFromRoot(self, ctx: XplorePathGrammarParser.PathFromRootContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_ROOT)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_ROOT)
             collection = self.context.collection
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p, only descendants of p
@@ -549,9 +548,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathFromRootAny(self, ctx: XplorePathGrammarParser.PathFromRootAnyContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_ROOT)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_ROOT)
             root = next(iter(self.context.collection.unpack))
-            collection = SequenceCollection.from_unpacked([root] + root.all_descendants())
+            collection = SequenceCollection.from_unpacked([root] + root.descendants())
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
             return self.visit(ctx.relPath())  # BUG: //* must return in document order, use position_in_parent of each path in the output to sort?
@@ -563,7 +562,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathFromSelf(self, ctx: XplorePathGrammarParser.PathFromSelfContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
             collection = self.context.collection
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
@@ -573,9 +572,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathFromSelfAny(self, ctx: XplorePathGrammarParser.PathFromSelfAnyContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
             collection = SequenceCollection.from_unpacked(
-                itertools.chain(*([p] + p.all_descendants() for p in self.context.collection.unpack))
+                itertools.chain(*([p] + p.descendants() for p in self.context.collection.unpack))
             )
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p, only descendants of p
@@ -585,7 +584,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathAtParent(self, ctx: XplorePathGrammarParser.PathAtParentContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
             collection = [e.parent() for e in self.context.collection.unpack]
             collection = [e for e in collection if type(e) != Null]
             collection = SequenceCollection.from_unpacked(collection)
@@ -596,7 +595,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathFromParent(self, ctx: XplorePathGrammarParser.PathFromParentContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
             collection = [e.parent() for e in self.context.collection.unpack]
             collection = [e for e in collection if type(e) != Null]
             collection = SequenceCollection.from_unpacked(collection)
@@ -608,11 +607,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathFromParentAny(self, ctx: XplorePathGrammarParser.PathFromParentAnyContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
             collection = [e.parent() for e in self.context.collection.unpack]
             collection = [e for e in collection if type(e) != Null]
             collection = SequenceCollection.from_unpacked(
-                itertools.chain(*(p.all_descendants() for p in collection))
+                itertools.chain(*(p.descendants() for p in collection))
             )
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p's parent, only descendants of p's parent
@@ -622,9 +621,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathFromNested(self, ctx: XplorePathGrammarParser.PathFromNestedContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
             collection = self.visit(ctx.wrapOrVar())
-            collection = [e for e in collection.unpack if isinstance(e, Path)]
+            collection = [e for e in collection.unpack if isinstance(e, Node)]
             collection = SequenceCollection.from_unpacked(collection)
             self.context.reset_collection(collection)
             return self.visit(ctx.relPath())
@@ -633,11 +632,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
     def visitPathFromNestedAny(self, ctx: XplorePathGrammarParser.PathFromNestedAnyContext):
         try:
-            self.context.save(new_collection=CollectionResetMode.RESET_WITH_SELF)
+            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
             collection = self.visit(ctx.wrapOrVar())
-            collection = [e for e in collection.unpack if isinstance(e, Path)]
+            collection = [e for e in collection.unpack if isinstance(e, Node)]
             collection = SequenceCollection.from_unpacked(
-                itertools.chain(*([p] + p.all_descendants() for p in collection))
+                itertools.chain(*([p] + p.descendants() for p in collection))
             )
             self.context.reset_collection(collection)
             return self.visit(ctx.relPath())
@@ -647,37 +646,37 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitRelPathChainChild(self, ctx: XplorePathGrammarParser.RelPathChainChildContext):
         # TODO: Pushing / popping state not required?
         try:
-            self.context.save(CollectionResetMode.RESET_WITH_SELF)
-            new_paths = []
+            self.context.save(_CollectionResetMode.RESET_WITH_SELF)
+            new_nodes = []
             left_contexts = self.visit(ctx.relPath(0))
-            for left_path in left_contexts.unpack:
-                left_collection = SequenceCollection.from_unpacked([left_path])
+            for left_node in left_contexts.unpack:
+                left_collection = SequenceCollection.from_unpacked([left_node])
                 self.context.save(left_collection)
                 right_contexts = self.visit(ctx.relPath(1))
-                for right_path in right_contexts.unpack:
-                    new_paths.append(right_path)
+                for right_node in right_contexts.unpack:
+                    new_nodes.append(right_node)
                 self.context.restore()
-            return SequenceCollection.from_unpacked(new_paths)
+            return SequenceCollection.from_unpacked(new_nodes)
         finally:
             self.context.restore()
 
     def visitRelPathChainDescendant(self, ctx: XplorePathGrammarParser.RelPathChainDescendantContext):
         # TODO: Pushing / popping state not required?
         try:
-            self.context.save(CollectionResetMode.RESET_WITH_SELF)
-            new_paths = []
+            self.context.save(_CollectionResetMode.RESET_WITH_SELF)
+            new_nodes = []
             left_contexts = []
             for p in self.visit(ctx.relPath(0)).unpack:
                 left_contexts.append(p)
-                left_contexts += p.all_descendants()
-            for left_path in left_contexts:
-                left_collection = SequenceCollection.from_unpacked([left_path])
+                left_contexts += p.descendants()
+            for left_node in left_contexts:
+                left_collection = SequenceCollection.from_unpacked([left_node])
                 self.context.save(left_collection)
                 right_contexts = self.visit(ctx.relPath(1))
-                for right_path in right_contexts.unpack:
-                    new_paths.append(right_path)
+                for right_node in right_contexts.unpack:
+                    new_nodes.append(right_node)
                 self.context.restore()
-            return SequenceCollection.from_unpacked(new_paths)
+            return SequenceCollection.from_unpacked(new_nodes)
         finally:
             self.context.restore()
 
@@ -692,109 +691,109 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         return ret
 
     def visitReverseStepParent(self, ctx: XplorePathGrammarParser.ReverseStepParentContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                parent_path = e.parent()
-                if type(parent_path) != Null:
-                    new_paths.append(parent_path)
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                parent_node = e.parent()
+                if type(parent_node) != Null:
+                    new_nodes.append(parent_node)
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepAncestor(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths += e.all_ancestors()
-        new_paths = new_paths[::-1]
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes += e.ancestors()
+        new_nodes = new_nodes[::-1]
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepPreceding(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths += e.preceding()
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes += e.preceding()
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepPrecedingSibling(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths += e.preceding_sibling()
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes += e.preceding_sibling()
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepAncestorOrSelf(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths.append(e)
-                new_paths += e.all_ancestors()
-        new_paths = new_paths[::-1]
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes.append(e)
+                new_nodes += e.ancestors()
+        new_nodes = new_nodes[::-1]
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitReverseStepDirectParent(self, ctx: XplorePathGrammarParser.ReverseStepDirectParentContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                parent_path = e.parent()
-                if type(parent_path) != Null:
-                    new_paths.append(parent_path)
-        return SequenceCollection.from_unpacked(new_paths)
+            if isinstance(e, Node):
+                parent_node = e.parent()
+                if type(parent_node) != Null:
+                    new_nodes.append(parent_node)
+        return SequenceCollection.from_unpacked(new_nodes)
 
     def visitForwardStepChild(self, ctx: XplorePathGrammarParser.ForwardStepChildContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths += e.all_children()
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes += e.children()
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepDescendant(self, ctx: XplorePathGrammarParser.ForwardStepDescendantContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths += e.all_descendants()
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes += e.descendants()
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepSelf(self, ctx: XplorePathGrammarParser.ForwardStepSelfContext):
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepDescendantOrSelf(self, ctx: XplorePathGrammarParser.ForwardStepDescendantOrSelfContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths.append(e)
-                new_paths += e.all_descendants()
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes.append(e)
+                new_nodes += e.descendants()
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepFollowingSibling(self, ctx: XplorePathGrammarParser.ForwardStepFollowingSiblingContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths += e.following_sibling()
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes += e.following_sibling()
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepFollowing(self, ctx: XplorePathGrammarParser.ForwardStepFollowingContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths += e.following()
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes += e.following()
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepValue(self, ctx: XplorePathGrammarParser.ForwardStepValueContext):
-        new_paths = []
+        new_nodes = []
         for e in self.context.collection.unpack:
-            if isinstance(e, Path):
-                new_paths += e.all_children()
-        self.context.reset_collection(SequenceCollection.from_unpacked(new_paths))
+            if isinstance(e, Node):
+                new_nodes += e.children()
+        self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
         return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
 
     def visitForwardStepDirectSelf(self, ctx: XplorePathGrammarParser.ForwardStepDirectSelfContext):
@@ -804,16 +803,16 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         to_matcher = lambda v: v if isinstance(v, Matcher) else StrictMatcher(v)
         matchers = []
         for v in collection.unpack:
-            if isinstance(v, Path):
+            if isinstance(v, Node):
                 v = v.value()
                 if v is None:
-                    continue  # path has no value -- this is different from having a Null value
+                    continue  # node has no value -- this is different from having a Null value
             matchers.append(to_matcher(v))
         # test
         combined_matcher = CombinedMatcher(matchers)
         ret = []
         for v in self.context.collection.unpack:
-            if isinstance(v, Path):
+            if isinstance(v, Node):
                 label = v.label()
             else:
                 label = v
@@ -837,17 +836,17 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                     return e
                 elif isinstance(result, SingleValueCollection) and type(result.single.value) == NumericRangeMatcher and result.single.value.match(idx):  # /a/b[numericrangematcher] - return if index in the result set is in range
                     return e
-                elif isinstance(result, SequenceCollection) and result:  # /a/b[list] - return if non-empty (e.g. result was a list of paths looking for children, and some were found - e.g. /a/b[./c]
+                elif isinstance(result, SequenceCollection) and result:  # /a/b[list] - return if non-empty (e.g. result was a list of nodes looking for children, and some were found - e.g. /a/b[./c])
                     return e
-                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) and not isinstance(e.value, Path) \
-                        and result.single.value.match(e.value):  # (a,b,c)[matcher] - if list of non paths, matcher should match against value directly
+                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) and not isinstance(e.value, Node) \
+                        and result.single.value.match(e.value):  # (a,b,c)[matcher] - if list of non nodes, matcher should match against value directly
                     return e
-                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) and isinstance(e.value, Path) \
-                        and any(result.single.value.match(c.label()) for c in e.value.all_children()):  # /a/b[matcher] - ir a path,  return if has child with name matching label, if numericrangematcher above didn't match, it might match now
+                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) and isinstance(e.value, Node) \
+                        and any(result.single.value.match(c.label()) for c in e.value.children()):  # /a/b[matcher] - if a node, return if has child with name matching label, if numericrangematcher above didn't match, it might match now
                     return e
-                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {str, int} and isinstance(e.value, Path) and \
+                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {str, int} and isinstance(e.value, Node) and \
                         combine_transform_aggregate(
-                            lhs=SequenceCollection.from_unpacked(c.label() for c in e.value.all_children()),
+                            lhs=SequenceCollection.from_unpacked(c.label() for c in e.value.children()),
                             rhs=result,
                             combine_mode=CombineMode.PRODUCT,
                             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(
@@ -861,7 +860,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                         ).single.value:  # /a/b[str_or_int]  - return if has child with label (coerced to match if possible)
                             # you don't want to do /a/b[bool] because bool can get coerced to 0 - imagine /a/b[./c = some_val], if b is a list (labels with 0, 1, 2, 3, ...) and ./c = some_val evaluates to False, that False will coerce to int=0 for comparison and it'll always be True on first element?
                     return e
-                elif isinstance(result, SingleValueCollection) and not isinstance(e.value, Path) and \
+                elif isinstance(result, SingleValueCollection) and not isinstance(e.value, Node) and \
                         combine_transform_aggregate(
                             lhs=SingleValueCollection(e),
                             rhs=result,
@@ -874,7 +873,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                             ),
                             transform_fallback_mode=DiscardFallbackMode(),
                             aggregate_mode=AggregateMode.ANY
-                        ).single.value:  # if not a path - return if values match (coerced to match if possible)
+                        ).single.value:  # if not a node - return if values match (coerced to match if possible)
                     return e
                 return None
             finally:
@@ -996,26 +995,6 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         raise ValueError('Unexpected')
 
 
-def evaluate(
-        root: Any,
-        expr: str,
-        variables: dict[str, Collection] | None = None
-) -> Collection:
-    if variables is None:
-        variables = {}
-    input_stream = InputStream(expr)
-    lexer = XplorePathGrammarLexer(input_stream)
-    lexer.removeErrorListeners()
-    lexer.addErrorListener(RaiseParseErrorListener())
-    token_stream = CommonTokenStream(lexer)
-    parser = XplorePathGrammarParser(token_stream)
-    parser.removeErrorListeners()
-    parser.addErrorListener(RaiseParseErrorListener())
-    tree = parser.xplorePath()
-    visitor = _EvaluatorVisitor(root, variables)
-    return tree.accept(visitor)
-
-
 class Evaluator:
     _DEFAULT_VARIABLES = {
         'distinct': SingleValueCollection(DistinctInvocable()),
@@ -1040,22 +1019,23 @@ class Evaluator:
             root: Any,
             expr: str
     ):
-        return evaluate(root, expr, self.variables)
+        input_stream = InputStream(expr)
+        lexer = XplorePathGrammarLexer(input_stream)
+        lexer.removeErrorListeners()
+        lexer.addErrorListener(RaiseParseErrorListener())
+        token_stream = CommonTokenStream(lexer)
+        parser = XplorePathGrammarParser(token_stream)
+        parser.removeErrorListeners()
+        parser.addErrorListener(RaiseParseErrorListener())
+        tree = parser.xplorePath()
+        visitor = _EvaluatorVisitor(root, self.variables)
+        return tree.accept(visitor)
 
 
-def _test(root_obj, expr):
-    return _test_with_path(PythonObjectPath.create_root_path(root_obj), expr)
-
-
-def _test_with_fs_path(dir_, expr):
+def _test_with_obj(root_obj, expr):
     print(f'---- res for {expr}')
-    fs_path = FileSystemPath.create_root_path(
-        dir_,
-        FileSystemContext(
-            cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
-        )
-    )
-    ret = Evaluator().evaluate(fs_path, expr)
+    node = PythonObjectNode.create_root_path(root_obj)
+    ret = Evaluator().evaluate(node, expr)
     if isinstance(ret, SequenceCollection):
         for v in ret:
             print(f'  {v}')
@@ -1063,9 +1043,16 @@ def _test_with_fs_path(dir_, expr):
     else:
         print(f'  {ret}')
 
-def _test_with_path(p, expr):
+
+def _test_with_fs(dir_, expr):
     print(f'---- res for {expr}')
-    ret = Evaluator().evaluate(p, expr)
+    fs_node = FileSystemNode.create_root_path(
+        dir_,
+        FileSystemContext(
+            cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
+        )
+    )
+    ret = Evaluator().evaluate(fs_node, expr)
     if isinstance(ret, SequenceCollection):
         for v in ret:
             print(f'  {v}')
@@ -1075,139 +1062,54 @@ def _test_with_path(p, expr):
 
 
 if __name__ == '__main__':
-    root = {'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': -2}}, 'y': 3, 'z': 4, 'ptrs': {'d_ptr': 'd', 'f_ptr': 'f'}}
-    # evaluate(root, '/')
-    # evaluate(root, '/*')
-    # test(root, '/a')
-    # test(root, '/a/b')
-    # test(root, '/a/*')
-    # test(root, '/a/b/c')
-    # test(root, '/a/b/d')
-    # evaluate(root, '/a/b/*')
-    # test(root, '/a/b/following::*')
-    # test(root, '/a/b/following::z')
-    # test(root, '/a/b/d/following-sibling::*')
-    # test(root, '/a/b/d/following-sibling::f')
-    # test(root, '/a/descendant-or-self::*')
-    # test(root, '/a/descendant-or-self::d')
-    # test(root, '/a/descendant::*')
-    # test(root, '/a/descendant::d')
-    # test(root, '/a/b/self::*')
-    # test(root, '/a/b/self::d')
-    # test(root, '/a/b/self::b')
-    # test(root, '/a/b/child::*')
-    # test(root, '/a/b/child::d')
-    #
-    # test(root, '/a/b/..')
-    # test(root, '/a/b/e/ancestor-or-self::*')
-    # test(root, '/a/b/e/ancestor-or-self::a')
-    # test(root, '/y/preceding::*')
-    # test(root, '/y/preceding::b')
-    # test(root, '/y/preceding-sibling::*')
-    # test(root, '/y/preceding-sibling::b')
-    # test(root, '/a/b/e/parent::*')
-    # test(root, '/a/b/e/parent::d')
-    # test(root, '/a/b/e/parent::b')
-    #
-    # test(root, '/a/"b"')  # Test literal in path
-    # test(root, '/a/"b"/./d')   # Test dot in path
-    # test(root, '/a/b/*')  # Test looking up another path to walk forward
-    # test(root, '/a/b/*[. = /ptrs/*]')  # Test looking up another path to walk forward
+    ...
+    # _test_with_fs('~', '/*')
+    # _test_with_fs('~', '/test.json//*')
+    # _test_with_fs('~', '/test.json/address/city')
+    # _test_with_fs('~', '/test.xml//*')
+    # _test_with_fs('~', '/test.html//*')
+    # _test_with_fs('~/Downloads', '/pycharm-community-2024.3.1.tar.gz/*')
+    # _test_with_fs('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'")
+    # _test_with_fs('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'//*")
+    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies//*")
+    # _test_with_fs('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
+    # _test_with_fs('~', '/test.yaml//*')
+    # _test_with_fs('~', '/test.csv/*/Name')
+    # _test_with_fs('~', '/test.csv/*/Name[. = "John Doe"]')
+    # _test_with_fs('~', '/test.csv/*')
+    # _test_with_fs('~', '/test.csv/*[./Name = f"John Do"]')
+    # _test_with_fs('~', '/test.csv/*[f"John Do" = ./Name]')
+    # _test_with_fs('~', '/test.csv/*[r"J.*" = ./Name]')
+    # _test_with_fs('~', '(/test.csv/*)[./Name/r"J.*"]')
 
-    # test(root, '-/a/b/*')
-    # test(root, '-/*')
+    # _test_with_fs('~', '/Downloads/*')
+    # _test_with_fs('~', '/Downloads/"parabilis.zip"/*')
+    # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/*')
+    # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/*')
+    # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/modules.xml//*')
 
-    # test(root, '/a/b/* , /a/b/*')
-    # test(root, '/a/b/* , /y')
+    # _test_with_fs('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
+    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
+    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
+    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* inner join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
+    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* left join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
+    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* right join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
+    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'")
+    # _test_with_fs('~/Downloads', "$count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+    # _test_with_fs('~/Downloads', "$distinct(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+    # _test_with_fs('~/Downloads', "$frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+    # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))/*")
+    # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))//*")
+    # _test_with_fs('~/Downloads', "$distinct($regex_extract(/mouse_assays.zip/*/0/GO_Term, '\d{7}'))")
+    # _test_with_fs('~/Downloads', "/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*")
+    # _test_with_fs('~/Downloads', "$regex_extract(/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*, '\\d{7}')")
+    # _test_with_fs('~/Downloads', "$distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\\d{7}') = $regex_extract(//r//id, '\\d{7}')]")
+    # _test_with_fs('~/Downloads', "//*")
+    # _test_with_fs('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[./*=Well]")
+    # _test_with_fs('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]")
+    # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
+    # _test_with_fs('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
+    # _test_with_fs('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
+    # _test_with_fs('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
 
-    # test(root, '/a/b/* intersect /a/b/*')
-    # test(root, '/a/b/* intersect (/a/b/c, /a/b/e)')
-    # test(root, '/a/b/* intersect /y')
-
-    # test(root, '/a/b/* union /a/b/*')
-    # test(root, '/a/b/* union (/a/b/c, /a/b/e)')
-    # test(root, '/a/b/* union /y')
-
-    # test(root, '/a/b/* + /a/b/*')
-    # test(root, '/a/b/* + 1')
-    # test(root, '/a/b/* + [1]')  # right is now a sequence - meaning only first elem is added
-    # test(root, '/a/b/* + [1,2]')  # right is now a sequence - meaning only first elem is added
-    # test(root, '5+4')
-
-    # test(root, '5 to 7')
-    # test(root, '5.0 to 7')
-    # test(root, '5 to 7.0')
-    # test(root, '5.0 to 7.0')
-    # test(root, '5 to 5')
-    # test(root, '5 to 4')
-
-    # test(root, '/a/b[./d]')  # Get all children, so long as one of the children is d
-    # test(root, '/a/b[./z]')  # Get all children, so long as one of the children is z
-    # test(root, '/a/b/*[./self::d]')  # Get child with path label d
-    # test(root, '/a/b/*[2]')  # Get child in 2nd position
-    # test(root, '/a/b/*[. = 2]')  # Get child with value of 2
-    # test(root, '[1,2,3] zip = [1,"2","bad"]')
-    # test(root, '[1,2,3] zip any = [1,"2","bad"]')
-    # test(root, '[1,2,3] zip all = [1,"2","bad"]')
-    # test(root, '[1,2,3] product = [1,"2","bad"]')
-    # test(root, '[1,2,3] = [1,"2","bad"]')
-
-    # _test({}, '[] product all > 5')
-    # _test({}, '5 product all > []')
-    # _test({}, '-1 and true')
-    # _test({}, '-1 and false')
-    # _test(root, '[5,7,9][1]')
-    # _test(root, '[5,7,9][. = 7]')
-    # _test(root, '.')
-    # _test(root, '/a')
-
-    # _test_with_fs_path('~', '/*')
-    # _test_with_fs_path('~', '/test.json//*')
-    # _test_with_fs_path('~', '/test.json/address/city')
-    # _test_with_fs_path('~', '/test.xml//*')
-    # _test_with_fs_path('~', '/test.html//*')
-    # _test_with_fs_path('~/Downloads', '/pycharm-community-2024.3.1.tar.gz/*')
-    # _test_with_fs_path('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'")
-    # _test_with_fs_path('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'//*")
-    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies//*")
-    # _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
-    # _test_with_fs_path('~', '/test.yaml//*')
-    # _test_with_fs_path('~', '/test.csv/*/Name')
-    # _test_with_fs_path('~', '/test.csv/*/Name[. = "John Doe"]')
-    # # _test_with_fs_path('~', '/test.csv/*')
-    # _test_with_fs_path('~', '/test.csv/*[./Name = f"John Do"]')
-    # _test_with_fs_path('~', '/test.csv/*[f"John Do" = ./Name]')
-    # _test_with_fs_path('~', '/test.csv/*[r"J.*" = ./Name]')
-    # _test_with_fs_path('~', '(/test.csv/*)[./Name/r"J.*"]')
-
-    # _test_with_fs_path('~', '/Downloads/*')
-    # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/*')
-    # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/parabilis/*')
-    # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/*')
-    # _test_with_fs_path('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/modules.xml//*')
-
-    # _test_with_fs_path('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
-    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
-    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
-    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* inner join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
-    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* left join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
-    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* right join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
-    # _test_with_fs_path('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'")
-    # _test_with_fs_path('~/Downloads', "$count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
-    # _test_with_fs_path('~/Downloads', "$distinct(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
-    # _test_with_fs_path('~/Downloads', "$frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
-    # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))/*")
-    # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))//*")
-    # _test_with_fs_path('~/Downloads', "$distinct($regex_extract(/mouse_assays.zip/*/0/GO_Term, '\d{7}'))")
-    # _test_with_fs_path('~/Downloads', "/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*")
-    # _test_with_fs_path('~/Downloads', "$regex_extract(/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*, '\\d{7}')")
-    # _test_with_fs_path('~/Downloads', "$distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\\d{7}') = $regex_extract(//r//id, '\\d{7}')]")
-    # _test_with_fs_path('~/Downloads', "//*")
-    # _test_with_fs_path('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[./*=Well]")
-    # _test_with_fs_path('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]")
-    # _test_with_fs_path('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
-    # _test_with_fs_path('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
-    # _test_with_fs_path('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
-    # _test_with_fs_path('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
-
-    # _test(root, '$regex_extract((hello, yellow, mellow), "low?")')
+    # _test_with_obj({}}, '$regex_extract((hello, yellow, mellow), "low?")')

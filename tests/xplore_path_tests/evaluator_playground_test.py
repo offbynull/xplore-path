@@ -5,8 +5,8 @@ import tempfile
 import unittest
 
 from xplore_path.evaluator import Evaluator
-from xplore_path.paths.filesystem.context import FileSystemContext
-from xplore_path.paths.filesystem.filesystem_path import FileSystemPath
+from xplore_path.nodes.filesystem.context import FileSystemContext
+from xplore_path.nodes.filesystem.filesystem_node import FileSystemNode
 from xplore_path.collections_.sequence_collection import SequenceCollection
 
 
@@ -14,7 +14,7 @@ class EvaluatorTest(unittest.TestCase):
     def _eval(self, expr):
         dir_ = pathlib.Path(__file__).parent.parent.parent / 'playground'
         with tempfile.TemporaryDirectory() as workspace:
-            fs_path = FileSystemPath.create_root_path(dir_, FileSystemContext(workspace=pathlib.Path(workspace)))
+            fs_path = FileSystemNode.create_root_path(dir_, FileSystemContext(workspace=pathlib.Path(workspace)))
             outputs = Evaluator().evaluate(fs_path, expr)
             actual = [expr]
             if isinstance(outputs, SequenceCollection):

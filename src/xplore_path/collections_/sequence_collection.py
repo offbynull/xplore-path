@@ -7,7 +7,7 @@ from xplore_path.collection import Collection
 from xplore_path.fallback_mode import FallbackMode
 from xplore_path.entity import Entity
 from xplore_path.core_type_utils import CoreTypeAlias
-from xplore_path.path import Path
+from xplore_path.node import Node
 
 
 class SequenceCollection(Collection):
@@ -22,7 +22,7 @@ class SequenceCollection(Collection):
             paths = []
             non_paths = []
             for e in entities:
-                if isinstance(e.value, Path):
+                if isinstance(e.value, Node):
                     paths.append(e.value)
                 else:
                     non_paths.append(e.value)
@@ -41,12 +41,12 @@ class SequenceCollection(Collection):
             paths = []
             non_paths = []
             for e in entities:
-                if isinstance(e.value, Path):
+                if isinstance(e.value, Node):
                     paths.append(e.value)
                 else:
                     non_paths.append(e.value)
             # NOTE: entities is no longer usable at this point
-            paths = list({tuple(v.full_position()): v for v in paths if isinstance(v, Path)}.values())
+            paths = list({tuple(v.full_position()): v for v in paths if isinstance(v, Node)}.values())
             new_values = paths + non_paths
         else:
             new_values = [e.value for e in entities]
