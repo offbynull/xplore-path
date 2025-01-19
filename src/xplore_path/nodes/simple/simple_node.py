@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from xplore_path.core_type_utils import CoreTypeAlias
+from xplore_path.core_types import CoreTypeAlias
 from xplore_path.node import Node, ParentBlock
 
 

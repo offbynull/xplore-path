@@ -19,8 +19,8 @@ class EntityTestCase(unittest.TestCase):
         self.assertEqual(Entity(True), True)
 
     def test_must_pull_out_value_from_path(self):
-        self.assertEqual(Entity(PythonObjectNode(None, 'world')).depath(), 'world')
-        self.assertEqual(Entity('world').depath(), 'world')
+        self.assertEqual(Entity(PythonObjectNode(None, 'world')).denode(), 'world')
+        self.assertEqual(Entity('world').denode(), 'world')
 
     def test_must_invoke(self):
         invoke_args = []

@@ -1,4 +1,4 @@
-"""Data hierarchy."""
+"""Node hierarchy."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from xplore_path.null import Null
 if TYPE_CHECKING:
-    from xplore_path.core_type_utils import CoreTypeAlias
+    from xplore_path.core_types import CoreTypeAlias
 
 
 @dataclass

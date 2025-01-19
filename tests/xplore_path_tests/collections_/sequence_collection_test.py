@@ -26,8 +26,8 @@ class TestCase(unittest.TestCase):
             list(
                 SequenceCollection.from_unpacked(
                     randomized_paths + randomized_values + randomized_paths,
-                    order_paths=True,
-                    deduplicate_paths=False
+                    order_nodes=True,
+                    deduplicate_nodes=False
                 ).unpack
             ),
             list(itertools.chain(*([p, p] for p in paths))) + randomized_values
@@ -43,8 +43,8 @@ class TestCase(unittest.TestCase):
             list(
                 SequenceCollection.from_unpacked(
                     randomized_paths + randomized_values + randomized_paths,
-                    order_paths=False,
-                    deduplicate_paths=True
+                    order_nodes=False,
+                    deduplicate_nodes=True
                 ).unpack
             ),
             randomized_paths + randomized_values
@@ -60,8 +60,8 @@ class TestCase(unittest.TestCase):
             list(
                 SequenceCollection.from_unpacked(
                     randomized_paths + randomized_values + randomized_paths,
-                    order_paths=True,
-                    deduplicate_paths=True
+                    order_nodes=True,
+                    deduplicate_nodes=True
                 ).unpack
             ),
             paths + randomized_values

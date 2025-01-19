@@ -1,4 +1,4 @@
-"""``Entity`` error evaluator."""
+"""``Entity`` error fallback mode."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -8,7 +8,7 @@ from xplore_path.entity import Entity
 
 class FallbackMode(ABC):
     """
-    ``Entity`` error evaluator.
+    ``Entity`` error fallback mode.
     """
     @abstractmethod
     def evaluate(self, x: Entity | None) -> tuple[Entity] | ():

@@ -1,3 +1,6 @@
+"""
+Entity collection, backed by a single ``Entity``.
+"""
 from __future__ import annotations
 
 import itertools
@@ -7,14 +10,23 @@ from xplore_path.collection import Collection
 from xplore_path.fallback_mode import FallbackMode
 from xplore_path.collections_.sequence_collection import SequenceCollection
 from xplore_path.entity import Entity
-from xplore_path.core_type_utils import CoreTypeAlias
+from xplore_path.core_types import CoreTypeAlias
 
 
 class SingleValueCollection(Collection):
+    """
+    ``Collection`` backed by a single ``Entity``.
+    """
     def __init__(
             self,
             value: Entity | CoreTypeAlias
     ):
+        """
+        Construct a ``SingleValueCollection`` object.
+
+        :param value: Single ``Entity`` to back this ``Collection``. If ``value``'s type isn't ``Entity``, it's
+            internally wrapped as an ``Entity``.
+        """
         if not isinstance(value, Entity):
             value = Entity(value)
         self._value = value
@@ -40,6 +52,11 @@ class SingleValueCollection(Collection):
 
     @property
     def single(self):
+        """
+        Get single ``Entity`` backing this ``Collection``.
+
+        :return: ``Entity`` backing this ``Collection``.
+        """
         return self._value
 
     def __iter__(self):

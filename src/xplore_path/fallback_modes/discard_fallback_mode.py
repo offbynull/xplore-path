@@ -1,3 +1,6 @@
+"""
+``FallbackMode`` that returns a default value on error.
+"""
 from __future__ import annotations
 
 from typing import Any
@@ -7,6 +10,9 @@ from xplore_path.fallback_mode import FallbackMode
 
 
 class DiscardFallbackMode(FallbackMode):
+    """
+    ``FallbackMode`` that silently discards error.
+    """
     def evaluate(self, x: Entity | None) -> tuple[Entity] | ():
         if x is None:
             return tuple()

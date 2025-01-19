@@ -127,6 +127,24 @@ xplorePath
     : expr EOF
     ;
 
+// TODO: Having "coerceFallback?" at the end of expr's recursive alternatives introduces an ambigutaty. For example,
+//       "(KW_ANY | KW_ALL) expr coerceFallback?" - imagine the expression "any any True on error discard". The
+//       coerceFallback rule could be either part of the inner expr or the outer expr because both are at the end and
+//       both are optional.
+//
+//       Think of "any any True on error discard" once expr is flattened:
+//       "(KW_ANY | KW_ALL) ((KW_ANY | KW_ALL) expr coerceFallback?) coerceFallback?". There are two optional
+//       "coerceFallback"s at the end but the expression only tries to insert one - which of the two "coerceFallback"
+//       does it get it assigned to?
+//
+//                   INTERPRETATION 1                                                   INTERPRETATION 2
+//
+//            any any True on error discard                                         any any True on error discard
+//               '-------------------------' inner expr                 inner expr     '--------'
+//           '-----------------------------' outer expr                 outer expr '-----------------------------'
+//
+//       In INTERPRETATION 1, "coerceFallbck" is consumed by the inner expr. In INTERPRETATION 2, it's the other way
+//       around.
 expr
     : (KW_ANY | KW_ALL) expr coerceFallback?            # ExprBoolAggregate
     | expr joinOp expr joinCond                         # ExprJoin

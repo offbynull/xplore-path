@@ -1,3 +1,7 @@
+"""
+Expression evaluator.
+"""
+
 import itertools
 import math
 from enum import Enum
@@ -75,13 +79,17 @@ class _EvaluatorVisitorContext:
         elif collection == _CollectionResetMode.RESET_WITH_ROOT:
             self._collection = SequenceCollection.from_unpacked([self._root])
         elif collection == _CollectionResetMode.RESET_WITH_SELF:
-            self._collection = self._collection  # Normally it'd be a copy of the self._collection, but Collection should be immutable
+            ... # It's asking to be reset to a "copy" what it already is, but Collection is immutable so this is a no-op
         elif collection == _CollectionResetMode.RESET_WITH_EMPTY:
             self._collection = SequenceCollection.empty()
         else:
             raise ValueError('This should never happen')
 
-    def save(self, new_collection: _CollectionResetMode | Collection, new_root: _RootResetMode | Any = _RootResetMode.RESET_WITH_SELF):
+    def save(
+            self,
+            new_collection: _CollectionResetMode | Collection,
+            new_root: _RootResetMode | Any = _RootResetMode.RESET_WITH_SELF
+    ):
         self._save_stack.append((self._collection, self._root))
         if new_root != _RootResetMode.RESET_WITH_SELF:
             self._root = new_root
@@ -106,7 +114,7 @@ class _EvaluatorVisitorContext:
 
     @staticmethod
     def prime(
-            root_: Node | Any,
+            root_: Node,
             variables_: dict[str, Collection]
     ):
         ret = _EvaluatorVisitorContext(root_)
@@ -118,7 +126,7 @@ class _EvaluatorVisitorContext:
 class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def __init__(
             self,
-            root: Any,
+            root: Node,
             variables: dict[str, Collection]
     ):
         self.context = _EvaluatorVisitorContext.prime(root, variables)
@@ -522,7 +530,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         collection = []
         for e in ctx.expr():
             collection.append(self.visit(e))
-        return SequenceCollection.from_entities(itertools.chain(*collection), order_paths=False, deduplicate_paths=False)  # concatenation never dedupes/orders paths
+        return SequenceCollection.from_entities(
+            itertools.chain(*collection),
+            order_nodes=False,
+            deduplicate_nodes=False
+        )  # concatenation never dedupes/orders paths
 
     def visitExprEmptyList(self, ctx: XplorePathGrammarParser.ExprEmptyListContext):
         return SequenceCollection.empty()
@@ -824,28 +836,63 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         if ctx is None:
             return collection
 
-        root = self.context.root  # explicitly get root for use in transformer, in case it changes by the time lazy evaluation takes place (it does when this is called by join condition)
-                                  # -- simplest thing to do would be to not evaluate this lazily?
+        # Explicitly get root for use in transformer(). This is done in case root changes by the time lazy evaluation
+        # takes place (e.g. this used to happen when _apply_filter() was invoked by the joining logic, and may
+        # potentially happen again). But, doing this adds confusion / complexity. The simplest thing to do would be to
+        # avoid lazy evaluation entirely? Ultimately, the results get sorted before they're returned such that they're
+        # in document-order and duplicates are removed (see SequenceCollection class), so lazy evaluation has no real
+        # benefit? Unless that sorting/deduplication requirement is removed?
+        root = self.context.root
+
         def transformer(idx: int, e: Entity) -> Entity | None:
             self.context.save(SequenceCollection.from_entities([e]), root)
             try:
                 result = self.visit(ctx.expr())
-                if isinstance(result, SingleValueCollection) and type(result.single.value) == bool and result.single.value == True:  # /a/b[bool] - return if true
+                # /a/b[bool] - Return if true.
+                if isinstance(result, SingleValueCollection) and type(result.single.value) == bool \
+                        and result.single.value == True:
                     return e
-                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {float, int} and result.single.value == idx:  # /a/b[int] - return if index in the result set matches int
+                # /a/b[int] - Return if index in the result set matches int.
+                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {float, int} \
+                        and result.single.value == idx:
                     return e
-                elif isinstance(result, SingleValueCollection) and type(result.single.value) == NumericRangeMatcher and result.single.value.match(idx):  # /a/b[numericrangematcher] - return if index in the result set is in range
+                # /a/b[numericrangematcher] - Return if index in the result set is in range
+                elif isinstance(result, SingleValueCollection) and type(result.single.value) == NumericRangeMatcher \
+                        and result.single.value.match(idx):
                     return e
-                elif isinstance(result, SequenceCollection) and result:  # /a/b[list] - return if non-empty (e.g. result was a list of nodes looking for children, and some were found - e.g. /a/b[./c])
+                # /a/b[list] - Return if non-empty (e.g. result was a list of nodes looking for children, and some were
+                #              found: /a/b[./c]).
+                elif isinstance(result, SequenceCollection) and result:
                     return e
-                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) and not isinstance(e.value, Node) \
-                        and result.single.value.match(e.value):  # (a,b,c)[matcher] - if list of non nodes, matcher should match against value directly
+                # (a,b,c)[matcher] - If list of non-nodes, matcher should match against value directly
+                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) \
+                        and not isinstance(e.value, Node) and result.single.value.match(e.value):
                     return e
-                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) and isinstance(e.value, Node) \
-                        and any(result.single.value.match(c.label()) for c in e.value.children()):  # /a/b[matcher] - if a node, return if has child with name matching label, if numericrangematcher above didn't match, it might match now
+                # /a/b[matcher] - If a node, return if has child with name matching label. Assuming that the
+                #                 numericrangematcher test above didn't match, it might match now.
+                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) \
+                        and isinstance(e.value, Node) \
+                        and any(result.single.value.match(c.label()) for c in e.value.children()):
                     return e
-                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {str, int} and isinstance(e.value, Node) and \
-                        combine_transform_aggregate(
+                # /a/b[str_or_int] - Return if child exists matching str_or_int (coerced to match if possible).
+                #
+                #                    NOTE: You don't want to include bool in this test (e.g. /a/b[bool_str_or_int])
+                #                          because it'll break people's assumptions/expectations of how things should
+                #                          be interpreted. For example, imagine the expression /a/b[./c=some_val],
+                #                          where...
+                #
+                #                           * b has children with labels integer labels (0, 1, 2, 3, etc...).
+                #                           * ./c=some_val always evaluates to a False.
+                #
+                #                          Because ./c=some_val evaluates to False, that False will go on to be tested
+                #                          against the labels of b's children. Whenever a child label is an int, that
+                #                          False will get coerced to 0, meaning that child will get returned. The
+                #                          problem is that this isn't what most users expect when they see ./c=some_val.
+                #                          That is, what the test done further above for /a/b[bool] that simply returns
+                #                          b when the bool is True.
+                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {str, int} \
+                        and isinstance(e.value, Node) \
+                        and combine_transform_aggregate(
                             lhs=SequenceCollection.from_unpacked(c.label() for c in e.value.children()),
                             rhs=result,
                             combine_mode=CombineMode.PRODUCT,
@@ -857,11 +904,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                             ),
                             transform_fallback_mode=DiscardFallbackMode(),
                             aggregate_mode=AggregateMode.ANY
-                        ).single.value:  # /a/b[str_or_int]  - return if has child with label (coerced to match if possible)
-                            # you don't want to do /a/b[bool] because bool can get coerced to 0 - imagine /a/b[./c = some_val], if b is a list (labels with 0, 1, 2, 3, ...) and ./c = some_val evaluates to False, that False will coerce to int=0 for comparison and it'll always be True on first element?
+                        ).single.value:
                     return e
-                elif isinstance(result, SingleValueCollection) and not isinstance(e.value, Node) and \
-                        combine_transform_aggregate(
+                # (a,b,c)[any] - Return any values match (coerced to match if possible)
+                elif isinstance(result, SingleValueCollection) and not isinstance(e.value, Node) \
+                        and combine_transform_aggregate(
                             lhs=SingleValueCollection(e),
                             rhs=result,
                             combine_mode=CombineMode.PRODUCT,
@@ -873,7 +920,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                             ),
                             transform_fallback_mode=DiscardFallbackMode(),
                             aggregate_mode=AggregateMode.ANY
-                        ).single.value:  # if not a node - return if values match (coerced to match if possible)
+                        ).single.value:
                     return e
                 return None
             finally:
@@ -996,6 +1043,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
 
 class Evaluator:
+    """
+    Expression evaluator.
+    """
     _DEFAULT_VARIABLES = {
         'distinct': SingleValueCollection(DistinctInvocable()),
         'count': SingleValueCollection(CountInvocable()),
@@ -1010,15 +1060,56 @@ class Evaluator:
             self,
             variables: dict[str, Collection] | None = None
     ):
+        """
+        Construct an ``Evaluator`` instance.
+
+        :param variables: Variables available to expressions being evaluated, or ``None`` if there are no variables
+            (equivalent to passing in an empty dictionary). For example, when this evaluator encounters an expression
+            with the variable ``$aaa``, it'll map that variable to key ``aaa`` within this dictionary.
+
+            Note that the evaluator injects a default set of variables as a baseline (see ``_DEFAULT_VARIABLES``), with
+            the variables in this dictionary being added on top of (or replacing) those variables.
+        """
         if variables is None:
             variables = {}
-        self.variables = Evaluator._DEFAULT_VARIABLES | variables  # same key? _DEFAULT_VARIABLES loses
+        self.variables = Evaluator._DEFAULT_VARIABLES | variables  # Same key? _DEFAULT_VARIABLES loses
 
     def evaluate(
             self,
-            root: Any,
+            root: Node,
             expr: str
-    ):
+    ) -> Collection:
+        """
+        Evaluate expression. The expression (``expr``) is evaluated relative to the root node of a hierarchy (``root``),
+        where the evaluation typically traverses/searches that hierarchy in some way.
+
+        Example::
+
+            # Convert nested Python collections into a hierarchy of nodes
+            root = PythonObjectPath.create_root_path(
+                {
+                    'a': {
+                        b': {
+                            'c': 1,
+                            'e': -1,
+                        }
+                    },
+                    'y': [3, 'hi', 5.0],
+                    'z': {
+                        'd_ptr': 'd',
+                        'f_ptr': 'f'
+                    }
+                }
+            )
+            # Search through nodes for any labelled b that also has a child labelled c
+            ret = Evaluator().evaluate(root, '//b[./c]')
+
+        :param root: Root node of hierarchy.
+        :param expr: Expression to evaluate.
+        :return: Result of evaluated expression.
+        :raises ParseException: If ``expr`` has invalid syntax.
+        :raises Exception: If ``expr`` causes evaluation to enter into an unexpected state (rare, but may happen).
+        """
         input_stream = InputStream(expr)
         lexer = XplorePathGrammarLexer(input_stream)
         lexer.removeErrorListeners()

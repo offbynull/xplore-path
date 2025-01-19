@@ -10,6 +10,6 @@ from xplore_path.null import Null
 class DistinctInvocable(Invocable):
     def invoke(self, args: list[Collection]) -> Collection:
         result, = args
-        result = result.transform(lambda _, e: e.depath(), DiscardFallbackMode())
+        result = result.transform(lambda _, e: e.denode(), DiscardFallbackMode())
         result = result.filter_unpacked(lambda _, v: isinstance(v, Hashable))
         return SequenceCollection.from_unpacked(set(result.unpack))  # noqa
