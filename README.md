@@ -89,6 +89,13 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/X
 
 # TODOs
 
+* TODO: extend the language to somehow handle cycles
+  * examples of cycles:
+    * python objects/collections may have cycles  
+    * goslim_mouse.json is actually a graph - it has nodes and edges - possibly withcycles?
+  * mark edges leading to cycle as a "weak" link that's traversed only once?
+    * // operator will stop when it's seen a node more than once?
+    * // operator takes an optional parameter for how many times to step over the same weak edge before stopping? 
 * TODO: best effort output to CSV/JSON/YAML/XML/HTML?
 * TODO: test python_object_path
 * TODO: test mirror_path
@@ -103,10 +110,6 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/X
 * TODO: add callback that notifies of what's happening when evaluation is running
 * TODO: update syntax so variable calls can go into path expression without wrapping e.g. $var(a,b,c)/d/e instead of ($var(a,b,c))/d/e 
 * TODO: test complex math (order of operations)
-* TODO: evalutor context - hide direct access to context varaibles
-* TODO: evaluator: entities -> sequence
-* TODO: test function invocations syntax
-* TODO: test code in the invocables package
 * TODO: cache all_children() in PythonObjectPath + stream all_children() in other paths + take in max argument to cap number of children
 * TODO: make use of variables in REPL - store results in var names and use those var names in queries
 * TODO: Cache results for each call to expr(), reset it every time xplore() called

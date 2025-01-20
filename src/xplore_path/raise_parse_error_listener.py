@@ -1,11 +1,10 @@
-"""Custom ANTLR error / warning handlers."""
-
 from antlr4.error.ErrorListener import ErrorListener
 
 
 class ParseException(Exception):
-    """Exception indicating an ANTLR parse error."""
-
+    """
+    Exception indicating an ANTLR parse error.
+    """
     def __init__(self, message, line=None, column=None):
         """
         Construct a ``ParseException`` object.

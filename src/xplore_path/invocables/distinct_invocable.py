@@ -8,6 +8,10 @@ from xplore_path.null import Null
 
 
 class DistinctInvocable(Invocable):
+    """
+    ```Invocable`` that returns the distinct ``Entity`` values in a ``Collection`` (``Node``\s unpacked to their
+    values). Unhashable values are silently discarded.
+    """
     def invoke(self, args: list[Collection]) -> Collection:
         result, = args
         result = result.transform(lambda _, e: e.denode(), DiscardFallbackMode())

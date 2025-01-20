@@ -143,8 +143,8 @@ xplorePath
 //               '-------------------------' inner expr                 inner expr     '--------'
 //           '-----------------------------' outer expr                 outer expr '-----------------------------'
 //
-//       In INTERPRETATION 1, "coerceFallbck" is consumed by the inner expr. In INTERPRETATION 2, it's the other way
-//       around.
+//       In INTERPRETATION 1, "coerceFallbck" is consumed by the inner expr. In INTERPRETATION 2, it's consumed by the
+//       outer expr.
 expr
     : (KW_ANY | KW_ALL) expr coerceFallback?            # ExprBoolAggregate
     | expr joinOp expr joinCond                         # ExprJoin

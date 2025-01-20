@@ -1,7 +1,3 @@
-"""
-Entity collection utilities.
-"""
-
 import itertools
 from enum import Enum
 from itertools import product

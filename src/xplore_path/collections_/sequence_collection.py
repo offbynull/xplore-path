@@ -1,6 +1,3 @@
-"""
-Entity collection, backed by a listed.
-"""
 from __future__ import annotations
 
 import itertools

@@ -1,7 +1,3 @@
-"""
-Expression evaluator.
-"""
-
 import itertools
 import math
 from enum import Enum

@@ -2,12 +2,18 @@ from xplore_path.matcher import Matcher
 
 
 class StrictMatcher(Matcher):
+    """
+    ``Matcher`` that matches strictly, meaning without coercion (types must match).
+    """
     def __init__(self, pattern: str | int | float | bool):
-        self.pattern = pattern
+        """
+        Construct a ``StrictMatcher`` object.
+        :param pattern: Value to test for.
+        """
+        self._pattern = pattern
 
-    # MATCHES STRICTLY, WITHOUT COERCION
     def match(self, value: str | int | float | bool) -> bool:
-        if type(self.pattern) in {int, float} and type(value) in {int, float}:
-            return self.pattern == value  # special case - treat numbers as equal
-        return type(value) == type(self.pattern) and self.pattern == value  # otherwise ensure types match
-        # why is type test required? e.g. bool inherits from int
+        if type(self._pattern) in {int, float} and type(value) in {int, float}:
+            return self._pattern == value  # Special case - treat numbers as equal
+        return type(value) == type(self._pattern) and self._pattern == value  # Otherwise ensure types match
+        # Why is type test required? e.g. bool inherits from int

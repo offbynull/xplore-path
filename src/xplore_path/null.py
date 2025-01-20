@@ -1,6 +1,3 @@
-"""Null scalar type."""
-
-
 class Null:
     """
     Representation of an absent value, often represented as ``None``, ``null``, or ``nil`` in other languages / formats

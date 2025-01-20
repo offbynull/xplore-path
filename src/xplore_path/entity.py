@@ -1,7 +1,3 @@
-"""
-Entity wrapper / utilities.
-"""
-
 from __future__ import annotations
 
 from math import isnan

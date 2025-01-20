@@ -1,4 +1,3 @@
-"""``Entity`` error fallback mode."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
