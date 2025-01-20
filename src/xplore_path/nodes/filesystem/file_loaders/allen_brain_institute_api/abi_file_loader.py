@@ -7,15 +7,19 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
-from xplore_path.nodes.filesystem.file_loaders.allen_brain_institute_api.abi_node import AbiRootNode, BASE_URL
-from xplore_path.nodes.filesystem.file_loader import FileLoader, PATH_LOADER
+from xplore_path.nodes.filesystem.file_loaders.allen_brain_institute_api._abi_node import AbiRootNode, BASE_URL
+from xplore_path.nodes.filesystem.file_loader import FileLoader, NODE_CREATOR
 
 
 class AbiFileLoader(FileLoader):
+    """
+    ``FileLoader`` that targets the Allen Brain Institute's API. This is a proof-of-concept, not intended for
+    production use.
+    """
     def is_loadable(self, p: pathlib.Path) -> bool:
         return p.suffix == '.abi'
 
-    def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
+    def node_creator(self, p: pathlib.Path) -> NODE_CREATOR:
         return AbiRootNode
 
     def load(self, p: pathlib.Path) -> Any:

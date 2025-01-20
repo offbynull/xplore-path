@@ -9,6 +9,9 @@ from xplore_path.nodes.filesystem.file_loader import FileLoader
 
 
 class TsvFileLoader(FileLoader):
+    """
+    ``FileLoader`` for TSV files.
+    """
     def is_loadable(self, p: pathlib.Path) -> bool:
         return p.suffix == '.tsv'
 

@@ -8,7 +8,7 @@ class TestCase(unittest.TestCase):
     def test_must_load_example_sanity_test(self):
         fs_path = Path(__file__).parent / 'test.sqlite'
         raw_data = SqliteFileLoader().load(fs_path)
-        path_creator = SqliteFileLoader().path_creator(fs_path)
+        path_creator = SqliteFileLoader().node_creator(fs_path)
         path = path_creator(None, raw_data)
         # for inner_path in path.all_descendants(max_level=6):
         #     print(f'{inner_path}')

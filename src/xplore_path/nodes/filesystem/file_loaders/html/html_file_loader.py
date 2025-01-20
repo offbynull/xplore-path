@@ -6,15 +6,18 @@ from typing import Any
 import bs4
 from bs4 import BeautifulSoup
 
-from xplore_path.nodes.filesystem.file_loader import FileLoader, PATH_LOADER
-from xplore_path.nodes.filesystem.file_loaders.xml.xml_object_node import XmlObjectNode, XmlTag
+from xplore_path.nodes.filesystem.file_loader import FileLoader, NODE_CREATOR
+from xplore_path.nodes.filesystem.file_loaders.xml._xml_object_node import XmlObjectNode, XmlTag
 
 
 class HtmlFileLoader(FileLoader):
+    """
+    ``FileLoader`` for HTML files.
+    """
     def is_loadable(self, p: pathlib.Path) -> bool:
         return p.suffix == '.html'
 
-    def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
+    def node_creator(self, p: pathlib.Path) -> NODE_CREATOR:
         return XmlObjectNode
 
     def load(self, p: pathlib.Path) -> Any:

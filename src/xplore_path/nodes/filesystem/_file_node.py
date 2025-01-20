@@ -57,7 +57,7 @@ class FileNode(Node):
                     self._notify(NoticeType.DATA_CACHE_COMPLETE, c)
             # done
             if loaded and data is not None:
-                path_creator = self._ctx.file_loader.path_creator(c)
+                path_creator = self._ctx.file_loader.node_creator(c)
                 path = path_creator(ParentBlock(self, 0, c.name), data)
                 self._children = [MirrorNode(p, ParentBlock(self, i, p.label())) for i, p in enumerate(path.children())]
         return self._children

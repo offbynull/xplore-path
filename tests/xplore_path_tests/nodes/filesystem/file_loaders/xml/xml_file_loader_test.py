@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 from xplore_path.nodes.filesystem.file_loaders.xml.xml_file_loader import XmlFileLoader
-from xplore_path.nodes.filesystem.file_loaders.xml.xml_object_node import XmlTag
+from xplore_path.nodes.filesystem.file_loaders.xml._xml_object_node import XmlTag
 
 
 class TestCase(unittest.TestCase):

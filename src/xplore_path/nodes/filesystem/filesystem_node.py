@@ -9,15 +9,32 @@ from xplore_path.nodes.filesystem.context import FileSystemContext
 
 
 class FileSystemNode(Node):
+    """
+    ``Node`` backed by a directory. Children are child paths (directories and files) within backing the directory.
+    If a supported file's type is recognized, that file is parsed and its data / structure is represented as the
+    ``Node`` for that file.
+    """
     def __init__(
             self,
             parent: ParentBlock | None,  # None for root
             fs_path: pathlib.Path,
             ctx: FileSystemContext
     ):
+        """
+        Construct a ``FileSystemNode`` object.
+
+        :param parent: Attributes defining this node in relation to its parent, or ``None`` if this node has no parent
+            (it represents root).
+        :param fs_path: Directory.
+        :param ctx: Context.
+        :raises ValueError: If ``fs_path`` is not a directory. The directory should be accessible throughout the entire
+            lifetime of this object, otherwise the behavior of this object is undefined.
+        """
         super().__init__(parent, None)
         self._ctx = ctx
         self._fs_path = fs_path
+        if not self._fs_path.is_dir():
+           raise ValueError('Directory expected')
 
     def children(self) -> list[Node]:
         if not self._fs_path.is_dir():

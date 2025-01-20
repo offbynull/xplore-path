@@ -7,6 +7,9 @@ from xplore_path.nodes.filesystem.file_loader import FileLoader
 
 
 class DefaultFileLoader(FileLoader):
+    """
+    ``FileLoader`` that loads up any file as ASCII text.
+    """
     def is_loadable(self, p: pathlib.Path) -> bool:
         return True
 

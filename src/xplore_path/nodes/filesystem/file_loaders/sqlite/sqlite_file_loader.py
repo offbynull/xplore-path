@@ -3,11 +3,14 @@ from __future__ import annotations
 import pathlib
 from typing import Any
 
-from xplore_path.nodes.filesystem.file_loader import FileLoader, PATH_LOADER
-from xplore_path.nodes.filesystem.file_loaders.sqlite.sqlite_object_path import SqliteObjectNode
+from xplore_path.nodes.filesystem.file_loader import FileLoader, NODE_CREATOR
+from xplore_path.nodes.filesystem.file_loaders.sqlite._sqlite_object_path import SqliteObjectNode
 
 
 class SqliteFileLoader(FileLoader):
+    """
+    ``FileLoader`` for SQLite database files.
+    """
     def is_loadable(self, p: pathlib.Path) -> bool:
         try:
             with p.open('rb') as file:
@@ -18,7 +21,7 @@ class SqliteFileLoader(FileLoader):
     def is_cachable(self, p: pathlib.Path) -> bool:
         return False
 
-    def path_creator(self, p: pathlib.Path) -> PATH_LOADER:
+    def node_creator(self, p: pathlib.Path) -> NODE_CREATOR:
         return SqliteObjectNode
 
     def load(self, p: pathlib.Path) -> Any:

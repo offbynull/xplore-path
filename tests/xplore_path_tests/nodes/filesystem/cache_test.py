@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from xplore_path.nodes.filesystem.cache import Cache
+from xplore_path.nodes.filesystem._cache import Cache
 
 
 class TestCacheCase(unittest.TestCase):

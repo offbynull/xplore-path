@@ -13,11 +13,22 @@ def _valid_obj_attr(obj, k):
 
 
 class PythonObjectNode(Node):
+    """
+    ``Node`` backed by a complex object. Best effort is made to represent the object graph as children, interpreting
+    common collections (e.g. dict, list, tuple, etc...) and common built-in values.
+    """
     def __init__(
             self,
             parent: ParentBlock | None,  # None for root
-            value: Any
+            value: dict | set | list | tuple
     ):
+        """
+        Construct a ``PythonObjectNode`` object.
+
+        :param parent: Attributes defining this node in relation to its parent, or ``None`` if this node has no parent
+            (it represents root).
+        :param value: Backing Python object.
+        """
         if value is None:
             value = Null()
         super().__init__(parent, value if type(value) in {bool, int, float, str, Null} else None)
@@ -42,6 +53,12 @@ class PythonObjectNode(Node):
 
     @staticmethod
     def create_root_path(obj: Any) -> PythonObjectNode:
+        """
+        Equivalent to ``PythonObjectNode(None, obj)``.
+
+        :param obj: Python object to represent as a ``Node``.
+        :return: New ``PythonObjectNode``.
+        """
         return PythonObjectNode(None, obj)
 
 
