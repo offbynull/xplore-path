@@ -17,7 +17,7 @@ The easiest way to get familiar with Xplore Path is to jump right in:
 1. `python --version && pip install poetry` - Ensure Python and Poetry are installed.
 2. `git clone https://github.com/offbynull/xplore-path.git` - Clone the repository.
 3. `cd xplore-path` - Enter the cloned repository.
-4. `poetry install` - Install the package.
+4. `poetry install -E data` - Install the package.
 5. `poetry shell` - Activate the package's environment. 
 6. `xplore-path --path ./playground` - Launch the Xplore Path REPL.
 

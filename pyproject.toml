@@ -11,18 +11,21 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.12"
 antlr4-python3-runtime = "^4.13.2"
-pandas = "^2.2.3"
-openpyxl = "^3.1.5"
-pypdf2 = "^3.0.1"
-pyyaml = "^6.0.2"
-python-docx = "^1.1.2"
-prompt-toolkit = "^3.0.48"
-bs4 = "^0.0.2"
+pandas = { version = "^2.2.3", optional = true }
+openpyxl = { version = "^3.1.5", optional = true }
+pypdf2 = { version = "^3.0.1", optional = true }
+pyyaml = { version = "^6.0.2", optional = true }
+python-docx = { version = "^1.1.2", optional = true }
+prompt-toolkit = { version = "^3.0.50", optional = true }
+bs4 = { version = "^0.0.2", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 antlr4-tools = "^0.2.1"
 
 [tool.poetry.group.test.dependencies]
+
+[tool.poetry.extras]
+data = ["pandas", "openpyxl", "pypdf2", "pyyaml", "python-docx", "prompt-toolkit", "bs4"]
 
 [tool.poetry.scripts]
 xplore-path = "xplore_path.repl.repl:main"
