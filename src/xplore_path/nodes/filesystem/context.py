@@ -12,6 +12,7 @@ from xplore_path.nodes.filesystem.file_loader import FileLoader
 from xplore_path.nodes.filesystem.file_loaders.allen_brain_institute_api.abi_file_loader import AbiFileLoader
 from xplore_path.nodes.filesystem.file_loaders.combined.combined_file_loader import CombinedFileLoader
 from xplore_path.nodes.filesystem.file_loaders.csv.csv_file_loader import CsvFileLoader
+from xplore_path.nodes.filesystem.file_loaders.py.py_file_loader import PyFileLoader
 from xplore_path.nodes.filesystem.file_loaders.tsv.tsv_file_loader import TsvFileLoader
 from xplore_path.nodes.filesystem.file_loaders.docx.docx_file_loader import DocxFileLoader
 from xplore_path.nodes.filesystem.file_loaders.html.html_file_loader import HtmlFileLoader
@@ -37,6 +38,7 @@ _DEFAULT_FILE_LOADER = CombinedFileLoader([
     HtmlFileLoader(),
     SqliteFileLoader(),
     AbiFileLoader(),
+    PyFileLoader(),
     # DefaultFileLoader()
 ])
 

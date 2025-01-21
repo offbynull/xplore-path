@@ -89,6 +89,11 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/X
 
 # TODOs
 
+* BUG: right now, passing an int into the filter does the same thing. that is, the following 2 are treated as equivalent
+  * /src/xplore_path/repl//*/body//Import//*[5]
+  * /src/xplore_path/repl//*/body//Import//*[position . = 5]
+  * latter grabs any node that's position 5th in its parent WHILE FORMER SHOULD SIMPLY GRAB THE 5TH RESULT IN HTE OUTPUT
+  * add new directive: index = 5?
 * TODO: extend the language to somehow handle cycles
   * examples of cycles:
     * python objects/collections may have cycles  
