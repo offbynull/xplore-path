@@ -7,7 +7,7 @@ from xplore_path.nodes.filesystem._cache import Cache
 
 class TestCacheCase(unittest.TestCase):
     def test_must_cache_and_load(self):
-        with TemporaryDirectory(delete=True) as d:
+        with TemporaryDirectory() as d:
             cache = Cache(Path(f'{d}/xplore_path_cache'), 1)
             self.assertEqual(cache.load('missing-key'), (False, None))
             cache.cache('key1', 'hi')

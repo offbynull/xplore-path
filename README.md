@@ -6,7 +6,7 @@ Xplore Path is a tool for quick-and-dirty data exploration, built for messy, unt
  * **Broad format support**: Search through CSVs, XLSXs, JSONs, YAMLs, DOCXs, PDFs, XMLs, HTMLs, ...
  * **Fuzzy search support**: Search using globs, regex, number ranges, or approximate string matching.
  * **Unified environment**: Search through disparate files and formats within a single context.
- * **Extendable**: Add functions and formats for your custom use cases (e.g. 3D scene graphs, flow cytometry, ...).
+ * **Extendable**: Add formats and functions for your custom use cases (e.g. 3D scene graphs, flow cytometry, ...).
 
 Xplore Path aims to be the first tool you reach for when exploring reasonably-sized data "thrown over the fence" by a colleague or partner. It does not aim to be a database or a storage engine.
 
@@ -17,7 +17,7 @@ The easiest way to get familiar with Xplore Path is to jump right in:
 1. `python --version && pip install poetry` - Ensure Python and Poetry are installed.
 2. `git clone https://github.com/offbynull/xplore-path.git` - Clone the repository.
 3. `cd xplore-path` - Enter the cloned repository.
-4. `poetry install` - Install the package.
+4. `poetry install --all-extras` - Install the package.
 5. `poetry run xplore-path --path ./playground` - Launch the Xplore Path REPL.
 
 The last step launches the Xplore Path REPL and sets the active directory to `./playground`, which contains dummy data (a mix of fabricated biological and general-purpose data).

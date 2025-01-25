@@ -3,7 +3,7 @@ from __future__ import annotations
 import pathlib
 import tarfile
 import zipfile
-from tempfile import TemporaryDirectory
+from tempfile import mkdtemp
 from typing import Any, Callable
 
 from xplore_path.node import Node, ParentBlock
@@ -12,7 +12,7 @@ from xplore_path.nodes.filesystem.context import NoticeType, FileSystemContext
 
 
 def _temp_dir() -> pathlib.Path:
-    return pathlib.Path(TemporaryDirectory(prefix='filesystem_path_intermediary', delete=False).name)
+    return pathlib.Path(mkdtemp(prefix='filesystem_path_intermediary'))
 
 
 class ArchiveNode(Node):
