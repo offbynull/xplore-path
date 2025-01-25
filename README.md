@@ -18,8 +18,7 @@ The easiest way to get familiar with Xplore Path is to jump right in:
 2. `git clone https://github.com/offbynull/xplore-path.git` - Clone the repository.
 3. `cd xplore-path` - Enter the cloned repository.
 4. `poetry install` - Install the package.
-5. `poetry shell` - Activate the package's environment. 
-6. `xplore-path --path ./playground` - Launch the Xplore Path REPL.
+5. `poetry run xplore-path --path ./playground` - Launch the Xplore Path REPL.
 
 The last step launches the Xplore Path REPL and sets the active directory to `./playground`, which contains dummy data (a mix of fabricated biological and general-purpose data).
 
