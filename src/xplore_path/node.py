@@ -65,6 +65,7 @@ class Node(ABC):
         self._label = None if parent is None else parent.child_label
         self._position = None if parent is None else parent.child_position
         self._value = value
+        self._full_position_cache = None
 
     @abstractmethod
     def children(self) -> list[Node]:
@@ -147,19 +148,25 @@ class Node(ABC):
             return Null()
         return self._position
 
-    def full_position(self) -> list[int]:
+    def full_position(self) -> tuple[int, ...]:
         """
         Get positions of nodes descending to this node, as if invoking ``position()`` on each element of
         ``ancestors()[1:] + [self]``.
 
         :return: Position of ancestors and this node with their respective parents.
         """
+        # NOTE: Because full_position() is invoked heavily by SequenceCollection to sort/deduplicate, a cache is used
+        #       so as not to recompute full position every time.
+        if self._full_position_cache is not None:
+            return self._full_position_cache
         p_list = []
         p = self
         while type(p) != Null:
             p_list.append(p)
             p = p.parent()
-        return [p.position() for p in reversed(p_list[:-1])]
+        ret = tuple(p.position() for p in reversed(p_list[:-1]))
+        self._full_position_cache = ret
+        return ret
 
     def ancestors(self) -> list[Node]:
         """
