@@ -10,7 +10,6 @@ class TestCase(unittest.TestCase):
         actual = HtmlFileLoader().load(
             Path(__file__).parent / 'test.html'
         )
-        print(f'{actual}')
         expected = XmlTag(name='html', attrs={}, text=None, values=[
             XmlTag(name='head', attrs={}, text=None, values=[
                 XmlTag(name='title', attrs={}, text='Example HTML', values=[])

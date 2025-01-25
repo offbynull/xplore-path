@@ -550,7 +550,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = self.context.collection
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p, only descendants of p
-            return self.visit(ctx.relPath())
+            rel_path = ctx.relPath()
+            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(rel_path, 'filter_'):
+                collection = self._apply_filter(collection, rel_path.filter_())
+            return collection
         finally:
             self.context.restore()
 
@@ -561,7 +565,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = SequenceCollection.from_unpacked([root] + root.descendants())
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
-            return self.visit(ctx.relPath())  # BUG: //* must return in document order, use position_in_parent of each path in the output to sort?
+            rel_path = ctx.relPath()
+            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(rel_path, 'filter_'):
+                collection = self._apply_filter(collection, rel_path.filter_())
+            return collection
         finally:
             self.context.restore()
 
@@ -574,7 +582,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = self.context.collection
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
-            return self.visit(ctx.relPath())
+            rel_path = ctx.relPath()
+            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(rel_path, 'filter_'):
+                collection = self._apply_filter(collection, rel_path.filter_())
+            return collection
         finally:
             self.context.restore()
 
@@ -586,7 +598,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             )
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p, only descendants of p
-            return self.visit(ctx.relPath())
+            rel_path = ctx.relPath()
+            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(rel_path, 'filter_'):
+                collection = self._apply_filter(collection, rel_path.filter_())
+            return collection
         finally:
             self.context.restore()
 
@@ -609,7 +625,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = SequenceCollection.from_unpacked(collection)
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
-            return self.visit(ctx.relPath())
+            rel_path = ctx.relPath()
+            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(rel_path, 'filter_'):
+                collection = self._apply_filter(collection, rel_path.filter_())
+            return collection
         finally:
             self.context.restore()
 
@@ -623,7 +643,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             )
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p's parent, only descendants of p's parent
-            return self.visit(ctx.relPath())
+            rel_path = ctx.relPath()
+            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(rel_path, 'filter_'):
+                collection = self._apply_filter(collection, rel_path.filter_())
+            return collection
         finally:
             self.context.restore()
 
@@ -634,7 +658,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = [e for e in collection.unpack if isinstance(e, Node)]
             collection = SequenceCollection.from_unpacked(collection)
             self.context.reset_collection(collection)
-            return self.visit(ctx.relPath())
+            rel_path = ctx.relPath()
+            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(rel_path, 'filter_'):
+                collection = self._apply_filter(collection, rel_path.filter_())
+            return collection
         finally:
             self.context.restore()
 
@@ -647,7 +675,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 itertools.chain(*([p] + p.descendants() for p in collection))
             )
             self.context.reset_collection(collection)
-            return self.visit(ctx.relPath())
+            rel_path = ctx.relPath()
+            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(rel_path, 'filter_'):
+                collection = self._apply_filter(collection, rel_path.filter_())
+            return collection
         finally:
             self.context.restore()
 
@@ -655,16 +687,23 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         # TODO: Pushing / popping state not required?
         try:
             self.context.save(_CollectionResetMode.RESET_WITH_SELF)
-            new_nodes = []
-            left_contexts = self.visit(ctx.relPath(0))
-            for left_node in left_contexts.unpack:
-                left_collection = SequenceCollection.from_unpacked([left_node])
-                self.context.save(left_collection)
-                right_contexts = self.visit(ctx.relPath(1))
-                for right_node in right_contexts.unpack:
-                    new_nodes.append(right_node)
+            left_relpath_rule = ctx.relPath(0)
+            right_relpath_rule = ctx.relPath(1)
+            left_collection = self.visit(left_relpath_rule)  # visitRelPathStep doesn't apply filter (applied below)
+            if hasattr(left_relpath_rule, 'filter_'):
+                left_collection = self._apply_filter(left_collection, left_relpath_rule.filter_())
+            final_nodes = []
+            for left_node in left_collection.unpack:
+                single_left_collection = SequenceCollection.from_unpacked([left_node])
+                self.context.save(single_left_collection)
+                nodes = self.visit(right_relpath_rule)  # visitRelPathStep doesn't apply filter (applied below)
+                for node in nodes.unpack:
+                    final_nodes.append(node)
                 self.context.restore()
-            return SequenceCollection.from_unpacked(new_nodes)
+            final_collection = SequenceCollection.from_unpacked(final_nodes)
+            if hasattr(right_relpath_rule, 'filter_'):
+                final_collection = self._apply_filter(final_collection, right_relpath_rule.filter_())
+            return final_collection
         finally:
             self.context.restore()
 
@@ -672,19 +711,28 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         # TODO: Pushing / popping state not required?
         try:
             self.context.save(_CollectionResetMode.RESET_WITH_SELF)
-            new_nodes = []
-            left_contexts = []
-            for p in self.visit(ctx.relPath(0)).unpack:
-                left_contexts.append(p)
-                left_contexts += p.descendants()
-            for left_node in left_contexts:
-                left_collection = SequenceCollection.from_unpacked([left_node])
-                self.context.save(left_collection)
-                right_contexts = self.visit(ctx.relPath(1))
-                for right_node in right_contexts.unpack:
-                    new_nodes.append(right_node)
+            left_relpath_rule = ctx.relPath(0)
+            right_relpath_rule = ctx.relPath(1)
+            left_collection = self.visit(left_relpath_rule)  # visitRelPathStep doesn't apply filter (applied below)
+            left_collection_with_descendants = []
+            for p in left_collection.unpack:
+                left_collection_with_descendants.append(p)
+                left_collection_with_descendants += p.descendants()
+            left_collection = SequenceCollection.from_unpacked(left_collection_with_descendants)
+            if hasattr(left_relpath_rule, 'filter_'):
+                left_collection = self._apply_filter(left_collection, left_relpath_rule.filter_())
+            final_nodes = []
+            for left_node in left_collection.unpack:
+                single_left_collection = SequenceCollection.from_unpacked([left_node])
+                self.context.save(single_left_collection)
+                nodes = self.visit(right_relpath_rule)  # visitRelPathStep doesn't apply filter (applied below)
+                for node in nodes.unpack:
+                    final_nodes.append(node)
                 self.context.restore()
-            return SequenceCollection.from_unpacked(new_nodes)
+            final_collection = SequenceCollection.from_unpacked(final_nodes)
+            if hasattr(right_relpath_rule, 'filter_'):
+                final_collection = self._apply_filter(final_collection, right_relpath_rule.filter_())
+            return final_collection
         finally:
             self.context.restore()
 
@@ -695,7 +743,12 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             ret = self.visit(ctx.reverseStep())
         else:
             raise ValueError('Unexpected')
-        ret = self._apply_filter(ret, ctx.filter_())
+        # NOTE: DO NOT APPLY FILTER HERE - Apply filters in visitRelPathChainChild() / visitRelPathChainDescendant(),
+        #       once all nodes have been collected. This is important because of the filters /a/b/c[int] and
+        #       /a/b/c[NumericRangeMatcher] are intended to be applied *once all nodes have been collected*. That is,
+        #       those filters end up grabbing specific indices from the final collection, so they can't be applied
+        #       unless the collection has everything in it.
+        # ret = self._apply_filter(ret, ctx.filter_())
         return ret
 
     def visitReverseStepParent(self, ctx: XplorePathGrammarParser.ReverseStepParentContext):
@@ -832,6 +885,20 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         if ctx is None:
             return collection
 
+        # If filter evaluates to number or NumericRangeMatcher, extract by index
+        # ----------------------------------------------------------------------
+        filter_res_exp = self.visit(ctx.expr())
+        # /a/b[int] - Return if index in the filter_res_exp set matches int.
+        if isinstance(filter_res_exp, SingleValueCollection) \
+                and type(filter_res_exp.single.value) in {float, int}:
+            return collection.filter(lambda idx, _: filter_res_exp.single.value == idx)
+        # /a/b[NumericRangeMatcher] - Return if index in the filter_res_exp set is in range
+        elif isinstance(filter_res_exp, SingleValueCollection) \
+                and type(filter_res_exp.single.value) == NumericRangeMatcher:
+            return collection.filter(lambda idx, _: filter_res_exp.single.value.match(idx))
+
+        # If filter evaluates to number or NumericRangeMatcher, apply filtering logic on each child
+        # -----------------------------------------------------------------------------------------
         # Explicitly get root for use in transformer(). This is done in case root changes by the time lazy evaluation
         # takes place (e.g. this used to happen when _apply_filter() was invoked by the joining logic, and may
         # potentially happen again). But, doing this adds confusion / complexity. The simplest thing to do would be to
@@ -843,54 +910,35 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         def transformer(idx: int, e: Entity) -> Entity | None:
             self.context.save(SequenceCollection.from_entities([e]), root)
             try:
-                result = self.visit(ctx.expr())
+                filter_res_exp = self.visit(ctx.expr())
                 # /a/b[bool] - Return if true.
-                if isinstance(result, SingleValueCollection) and type(result.single.value) == bool \
-                        and result.single.value == True:
+                if isinstance(filter_res_exp, SingleValueCollection) \
+                        and type(filter_res_exp.single.value) == bool \
+                        and filter_res_exp.single.value == True:
                     return e
-                # /a/b[int] - Return if index in the result set matches int.
-                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {float, int} \
-                        and result.single.value == idx:
-                    return e
-                # /a/b[numericrangematcher] - Return if index in the result set is in range
-                elif isinstance(result, SingleValueCollection) and type(result.single.value) == NumericRangeMatcher \
-                        and result.single.value.match(idx):
-                    return e
-                # /a/b[list] - Return if non-empty (e.g. result was a list of nodes looking for children, and some were
-                #              found: /a/b[./c]).
-                elif isinstance(result, SequenceCollection) and result:
+                # /a/b[list] - Return if non-empty (e.g. filter_res_exp was a list of nodes looking for children, and
+                #              some were found: /a/b[./c])
+                elif isinstance(filter_res_exp, SequenceCollection) and filter_res_exp:
                     return e
                 # (a,b,c)[matcher] - If list of non-nodes, matcher should match against value directly
-                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) \
-                        and not isinstance(e.value, Node) and result.single.value.match(e.value):
+                elif isinstance(filter_res_exp, SingleValueCollection) \
+                        and isinstance(filter_res_exp.single.value, Matcher) \
+                        and not isinstance(e.value, Node) and filter_res_exp.single.value.match(e.value):
                     return e
                 # /a/b[matcher] - If a node, return if has child with name matching label. Assuming that the
-                #                 numericrangematcher test above didn't match, it might match now.
-                elif isinstance(result, SingleValueCollection) and isinstance(result.single.value, Matcher) \
+                #                 NumericRangeMatcher test above didn't match, it might match now.
+                elif isinstance(filter_res_exp, SingleValueCollection) \
+                        and isinstance(filter_res_exp.single.value, Matcher) \
                         and isinstance(e.value, Node) \
-                        and any(result.single.value.match(c.label()) for c in e.value.children()):
+                        and any(filter_res_exp.single.value.match(c.label()) for c in e.value.children()):
                     return e
-                # /a/b[str_or_int] - Return if child exists matching str_or_int (coerced to match if possible).
-                #
-                #                    NOTE: You don't want to include bool in this test (e.g. /a/b[bool_str_or_int])
-                #                          because it'll break people's assumptions/expectations of how things should
-                #                          be interpreted. For example, imagine the expression /a/b[./c=some_val],
-                #                          where...
-                #
-                #                           * b has children with labels integer labels (0, 1, 2, 3, etc...).
-                #                           * ./c=some_val always evaluates to a False.
-                #
-                #                          Because ./c=some_val evaluates to False, that False will go on to be tested
-                #                          against the labels of b's children. Whenever a child label is an int, that
-                #                          False will get coerced to 0, meaning that child will get returned. The
-                #                          problem is that this isn't what most users expect when they see ./c=some_val.
-                #                          That is, what the test done further above for /a/b[bool] that simply returns
-                #                          b when the bool is True.
-                elif isinstance(result, SingleValueCollection) and type(result.single.value) in {str, int} \
+                # /a/b[str] - Return if child exists matching str (coerced to match if possible).
+                elif isinstance(filter_res_exp, SingleValueCollection) \
+                        and type(filter_res_exp.single.value) in {str} \
                         and isinstance(e.value, Node) \
                         and combine_transform_aggregate(
                             lhs=SequenceCollection.from_unpacked(c.label() for c in e.value.children()),
-                            rhs=result,
+                            rhs=filter_res_exp,
                             combine_mode=CombineMode.PRODUCT,
                             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(
                                 l=l_,
@@ -903,10 +951,11 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                         ).single.value:
                     return e
                 # (a,b,c)[any] - Return any values match (coerced to match if possible)
-                elif isinstance(result, SingleValueCollection) and not isinstance(e.value, Node) \
+                elif isinstance(filter_res_exp, SingleValueCollection) \
+                        and not isinstance(e.value, Node) \
                         and combine_transform_aggregate(
                             lhs=SingleValueCollection(e),
-                            rhs=result,
+                            rhs=filter_res_exp,
                             combine_mode=CombineMode.PRODUCT,
                             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(
                                 l=l_,
@@ -1198,5 +1247,12 @@ if __name__ == '__main__':
     # _test_with_fs('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
+
+    _test_with_fs('./', "/repl//*/body//Import//*[0]")
+    _test_with_fs('./', "/repl//*/body//Import//*[1]")
+    _test_with_fs('./', "/repl//*/body//Import//*[2]")
+    _test_with_fs('./', "/repl//*/body//Import//*[3]")
+    _test_with_fs('./', "/repl//*/body//Import//*[4]")
+    _test_with_fs('./', "/repl//*/body//Import//*")
 
     # _test_with_obj({}}, '$regex_extract((hello, yellow, mellow), "low?")')
