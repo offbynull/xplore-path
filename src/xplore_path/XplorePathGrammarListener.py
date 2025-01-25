@@ -449,30 +449,21 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#RelPathChainChild.
-    def enterRelPathChainChild(self, ctx:XplorePathGrammarParser.RelPathChainChildContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#relPath.
+    def enterRelPath(self, ctx:XplorePathGrammarParser.RelPathContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#RelPathChainChild.
-    def exitRelPathChainChild(self, ctx:XplorePathGrammarParser.RelPathChainChildContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#RelPathChainDescendant.
-    def enterRelPathChainDescendant(self, ctx:XplorePathGrammarParser.RelPathChainDescendantContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#RelPathChainDescendant.
-    def exitRelPathChainDescendant(self, ctx:XplorePathGrammarParser.RelPathChainDescendantContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#relPath.
+    def exitRelPath(self, ctx:XplorePathGrammarParser.RelPathContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#RelPathStep.
-    def enterRelPathStep(self, ctx:XplorePathGrammarParser.RelPathStepContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#step.
+    def enterStep(self, ctx:XplorePathGrammarParser.StepContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#RelPathStep.
-    def exitRelPathStep(self, ctx:XplorePathGrammarParser.RelPathStepContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#step.
+    def exitStep(self, ctx:XplorePathGrammarParser.StepContext):
         pass
 
 

@@ -551,9 +551,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p, only descendants of p
             rel_path = ctx.relPath()
-            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(rel_path, 'filter_'):
-                collection = self._apply_filter(collection, rel_path.filter_())
+            collection = self.visit(rel_path)
             return collection
         finally:
             self.context.restore()
@@ -566,9 +564,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
             rel_path = ctx.relPath()
-            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(rel_path, 'filter_'):
-                collection = self._apply_filter(collection, rel_path.filter_())
+            collection = self.visit(rel_path)
             return collection
         finally:
             self.context.restore()
@@ -583,9 +579,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
             rel_path = ctx.relPath()
-            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(rel_path, 'filter_'):
-                collection = self._apply_filter(collection, rel_path.filter_())
+            collection = self.visit(rel_path)
             return collection
         finally:
             self.context.restore()
@@ -599,9 +593,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p, only descendants of p
             rel_path = ctx.relPath()
-            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(rel_path, 'filter_'):
-                collection = self._apply_filter(collection, rel_path.filter_())
+            collection = self.visit(rel_path)
             return collection
         finally:
             self.context.restore()
@@ -626,9 +618,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)
             rel_path = ctx.relPath()
-            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(rel_path, 'filter_'):
-                collection = self._apply_filter(collection, rel_path.filter_())
+            collection = self.visit(rel_path)
             return collection
         finally:
             self.context.restore()
@@ -644,9 +634,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = self._apply_filter(collection, ctx.filter_())
             self.context.reset_collection(collection)  # will not include p's parent, only descendants of p's parent
             rel_path = ctx.relPath()
-            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(rel_path, 'filter_'):
-                collection = self._apply_filter(collection, rel_path.filter_())
+            collection = self.visit(rel_path)
             return collection
         finally:
             self.context.restore()
@@ -659,9 +647,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             collection = SequenceCollection.from_unpacked(collection)
             self.context.reset_collection(collection)
             rel_path = ctx.relPath()
-            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(rel_path, 'filter_'):
-                collection = self._apply_filter(collection, rel_path.filter_())
+            collection = self.visit(rel_path)
             return collection
         finally:
             self.context.restore()
@@ -676,79 +662,46 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             )
             self.context.reset_collection(collection)
             rel_path = ctx.relPath()
-            collection = self.visit(rel_path)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(rel_path, 'filter_'):
-                collection = self._apply_filter(collection, rel_path.filter_())
+            collection = self.visit(rel_path)
             return collection
         finally:
             self.context.restore()
 
-    def visitRelPathChainChild(self, ctx: XplorePathGrammarParser.RelPathChainChildContext):
+    def visitRelPath(self, ctx: XplorePathGrammarParser.RelPathContext):
         # TODO: Pushing / popping state not required?
         try:
             self.context.save(_CollectionResetMode.RESET_WITH_SELF)
-            left_relpath_rule = ctx.relPath(0)
-            right_relpath_rule = ctx.relPath(1)
-            left_collection = self.visit(left_relpath_rule)  # visitRelPathStep doesn't apply filter (applied below)
-            if hasattr(left_relpath_rule, 'filter_'):
-                left_collection = self._apply_filter(left_collection, left_relpath_rule.filter_())
-            final_nodes = []
-            for left_node in left_collection.unpack:
-                single_left_collection = SequenceCollection.from_unpacked([left_node])
-                self.context.save(single_left_collection)
-                nodes = self.visit(right_relpath_rule)  # visitRelPathStep doesn't apply filter (applied below)
-                for node in nodes.unpack:
-                    final_nodes.append(node)
-                self.context.restore()
-            final_collection = SequenceCollection.from_unpacked(final_nodes)
-            if hasattr(right_relpath_rule, 'filter_'):
-                final_collection = self._apply_filter(final_collection, right_relpath_rule.filter_())
-            return final_collection
+            collection = self.visit(ctx.step(0))
+            child_cnt = ctx.getChildCount()
+            child_idx = 1
+            while child_idx < child_cnt:
+                separator = ctx.getChild(child_idx)
+                if separator.symbol.type == XplorePathGrammarLexer.SS:
+                    collection_with_descendants = []
+                    for p in collection.unpack:
+                        collection_with_descendants.append(p)
+                        collection_with_descendants += p.descendants()
+                    collection = SequenceCollection.from_unpacked(collection_with_descendants)
+                elif separator.symbol.type == XplorePathGrammarLexer.SLASH:
+                    ...
+                else:
+                    raise ValueError('Unexpected')
+                self.context.reset_collection(collection)
+                step = ctx.getChild(child_idx + 1)
+                collection = self.visit(step)
+                child_idx += 2
+            return collection
         finally:
             self.context.restore()
 
-    def visitRelPathChainDescendant(self, ctx: XplorePathGrammarParser.RelPathChainDescendantContext):
-        # TODO: Pushing / popping state not required?
-        try:
-            self.context.save(_CollectionResetMode.RESET_WITH_SELF)
-            left_relpath_rule = ctx.relPath(0)
-            right_relpath_rule = ctx.relPath(1)
-            left_collection = self.visit(left_relpath_rule)  # visitRelPathStep doesn't apply filter (applied below)
-            left_collection_with_descendants = []
-            for p in left_collection.unpack:
-                left_collection_with_descendants.append(p)
-                left_collection_with_descendants += p.descendants()
-            left_collection = SequenceCollection.from_unpacked(left_collection_with_descendants)
-            if hasattr(left_relpath_rule, 'filter_'):
-                left_collection = self._apply_filter(left_collection, left_relpath_rule.filter_())
-            final_nodes = []
-            for left_node in left_collection.unpack:
-                single_left_collection = SequenceCollection.from_unpacked([left_node])
-                self.context.save(single_left_collection)
-                nodes = self.visit(right_relpath_rule)  # visitRelPathStep doesn't apply filter (applied below)
-                for node in nodes.unpack:
-                    final_nodes.append(node)
-                self.context.restore()
-            final_collection = SequenceCollection.from_unpacked(final_nodes)
-            if hasattr(right_relpath_rule, 'filter_'):
-                final_collection = self._apply_filter(final_collection, right_relpath_rule.filter_())
-            return final_collection
-        finally:
-            self.context.restore()
-
-    def visitRelPathStep(self, ctx: XplorePathGrammarParser.RelPathStepContext):
+    def visitStep(self, ctx: XplorePathGrammarParser.StepContext):
         if ctx.forwardStep():
             ret = self.visit(ctx.forwardStep())
         elif ctx.reverseStep():
             ret = self.visit(ctx.reverseStep())
         else:
             raise ValueError('Unexpected')
-        # NOTE: DO NOT APPLY FILTER HERE - Apply filters in visitRelPathChainChild() / visitRelPathChainDescendant(),
-        #       once all nodes have been collected. This is important because of the filters /a/b/c[int] and
-        #       /a/b/c[NumericRangeMatcher] are intended to be applied *once all nodes have been collected*. That is,
-        #       those filters end up grabbing specific indices from the final collection, so they can't be applied
-        #       unless the collection has everything in it.
-        # ret = self._apply_filter(ret, ctx.filter_())
+        ret = self._apply_filter(ret, ctx.filter_())
         return ret
 
     def visitReverseStepParent(self, ctx: XplorePathGrammarParser.ReverseStepParentContext):
@@ -1248,11 +1201,12 @@ if __name__ == '__main__':
     # _test_with_fs('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
     # _test_with_fs('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
 
-    _test_with_fs('./', "/repl//*/body//Import//*[0]")
-    _test_with_fs('./', "/repl//*/body//Import//*[1]")
-    _test_with_fs('./', "/repl//*/body//Import//*[2]")
-    _test_with_fs('./', "/repl//*/body//Import//*[3]")
-    _test_with_fs('./', "/repl//*/body//Import//*[4]")
-    _test_with_fs('./', "/repl//*/body//Import//*")
+    _test_with_fs('./', "/repl//*/body//Import/*[0]")
+    # _test_with_fs('./', "/repl//*/body//Import//*[0]")
+    # _test_with_fs('./', "/repl//*/body//Import//*[1]")
+    # _test_with_fs('./', "/repl//*/body//Import//*[2]")
+    # _test_with_fs('./', "/repl//*/body//Import//*[3]")
+    # _test_with_fs('./', "/repl//*/body//Import//*[4]")
+    # _test_with_fs('./', "/repl//*/body//Import//*")
 
     # _test_with_obj({}}, '$regex_extract((hello, yellow, mellow), "low?")')
