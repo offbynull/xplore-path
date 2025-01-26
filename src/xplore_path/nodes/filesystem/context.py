@@ -25,24 +25,6 @@ from xplore_path.nodes.filesystem.file_loaders.xml.xml_file_loader import XmlFil
 from xplore_path.nodes.filesystem.file_loaders.yaml.yaml_file_loader import YamlFileLoader
 
 
-_DEFAULT_FILE_LOADER = CombinedFileLoader([
-    TextFileLoader(),
-    JsonFileLoader(),
-    YamlFileLoader(),
-    PdfFileLoader(),
-    CsvFileLoader(),
-    TsvFileLoader(),
-    XlsxFileLoader(),
-    DocxFileLoader(),
-    XmlFileLoader(),
-    HtmlFileLoader(),
-    SqliteFileLoader(),
-    AbiFileLoader(),
-    PyFileLoader(),
-    # DefaultFileLoader()
-])
-
-
 class NoticeType(Enum):
     """
     Event notice type.
@@ -74,6 +56,24 @@ class NoticeType(Enum):
 
 
 class FileSystemContext:
+    DEFAULT_FILE_LOADER = CombinedFileLoader([
+        TextFileLoader(),
+        JsonFileLoader(),
+        YamlFileLoader(),
+        PdfFileLoader(),
+        CsvFileLoader(),
+        TsvFileLoader(),
+        XlsxFileLoader(),
+        DocxFileLoader(),
+        XmlFileLoader(),
+        HtmlFileLoader(),
+        SqliteFileLoader(),
+        AbiFileLoader(),
+        PyFileLoader(),
+        # DefaultFileLoader()
+    ])
+    """Default ``FileLoader``, targeting many common formats."""
+
     """
     ``FileSystemNode`` context.
     """
@@ -88,7 +88,7 @@ class FileSystemContext:
         Construct a ``FileSystemContext`` object.
 
         :param file_loader: ``FileLoader`` to use when loading files (typically a ``CombinedFileLoader`` targeting many
-            ``FileLoader``\s). If ``None``, uses default ``FileLoader``\s.
+            ``FileLoader``\s). If ``None``, uses default ``FileSystemContext.DEFAULT_FILE_LOADER``.
         :param workspace: Directory in which to store cache and temporary files. If ``None``, uses the
             `'xplore_path_cache'` subdirectory in the OS's temporary directory.
         :param cache_only_access: If ``True``, files are only ever loaded from cache, meaning that they aren't loaded if
@@ -96,7 +96,7 @@ class FileSystemContext:
         :param cache_notifier: Callback invoked to notify of data loading / caching events.  If ``None``, not invoked.
         """
         if file_loader is None:
-            file_loader = _DEFAULT_FILE_LOADER
+            file_loader = FileSystemContext.DEFAULT_FILE_LOADER
         self.file_loader = file_loader
         if workspace is None:
             workspace = pathlib.Path(f'{gettempdir()}/xplore_path_cache')

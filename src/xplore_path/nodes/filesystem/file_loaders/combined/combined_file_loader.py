@@ -17,22 +17,25 @@ class CombinedFileLoader(FileLoader):
 
         :param loaders: Inner ``FileLoader``\s.
         """
-        self.loaders = loaders
+        self._loaders = loaders[:]
 
     def is_loadable(self, p: pathlib.Path) -> bool:
-        return any(l.is_loadable(p) for l in self.loaders)
+        return any(l.is_loadable(p) for l in self._loaders)
 
     def is_cachable(self, p: pathlib.Path) -> bool:
-        return next(l.is_cachable(p) for l in self.loaders if l.is_loadable(p))
+        return next(l.is_cachable(p) for l in self._loaders if l.is_loadable(p))
 
     def node_creator(self, p: pathlib.Path) -> NODE_CREATOR:
-        return next(l.node_creator(p) for l in self.loaders if l.is_loadable(p))
+        return next(l.node_creator(p) for l in self._loaders if l.is_loadable(p))
 
     def load(self, p: pathlib.Path) -> Any:
-        for l in self.loaders:
+        for l in self._loaders:
             if l.is_loadable(p):
                 try:
                     return l.load(p)
                 except Exception:
                     ...
         return None
+
+    def include(self, loader: FileLoader) -> CombinedFileLoader:
+        return CombinedFileLoader(self._loaders + [loader])

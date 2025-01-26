@@ -10,21 +10,93 @@ Xplore Path is a tool for quick-and-dirty data exploration, built for messy, unt
 
 Xplore Path aims to be the first tool you reach for when exploring reasonably-sized data "thrown over the fence" by a colleague or partner. It does not aim to be a database or a storage engine.
 
-## Quick-Start Guide
+To get started, jump to [REPL Usage Guide](#repl-usage-guide).
 
-The easiest way to get familiar with Xplore Path is to jump right in:
+<details><summary>Table of Contents</summary>
 
-1. `python --version && pip install poetry` - Ensure Python and Poetry are installed.
-2. `git clone https://github.com/offbynull/xplore-path.git` - Clone the repository.
-3. `cd xplore-path` - Enter the cloned repository.
-4. `poetry install --all-extras` - Install the package.
-5. `poetry run xplore-path --path ./playground` - Launch the Xplore Path REPL.
+<!-- TOC -->
+* [Xplore Path](#xplore-path)
+  * [REPL Usage Guide](#repl-usage-guide)
+  * [Library Usage Guide](#library-usage-guide)
+  * [Extension Guide](#extension-guide)
+    * [Custom Formats](#custom-formats)
+    * [Custom Functions](#custom-functions)
+  * [TODOs](#todos)
+<!-- TOC -->
 
-The last step launches the Xplore Path REPL and sets the active directory to `./playground`, which contains dummy data (a mix of fabricated biological and general-purpose data).
+</details>
+
+## REPL Usage Guide
+
+To use the Xplore Path REPL, install it and launch `xplore-path` executable using one of the methods below.
+
+<details><summary>Install and launch</summary>
+
+1. Ensure Python is installed.
+
+   ```bash
+   python --version
+   ```
+
+2. Install xplore-path dependency.
+
+   ```bash
+   pip install git+https://github.com/offbynull/xplore-path.git@main#egg=xplore_path[data_repl]
+   ```
+  
+3. Download xplore-path repository as zip and pull out the playground directory.
+
+   ```bash
+   wget https://github.com/offbynull/xplore-path/archive/refs/heads/main.zip -O xplore-path-main.zip
+   unzip xplore-path-main.zip "xplore-path-main/playground/*" -d extracted
+   ```
+
+4. Launch Xplore Path REPL.
+
+   ```bash
+   xplore-path --path extracted/xplore-path-main/playground
+   ```
+
+</details>
+  
+<details><summary>Install and launch in development mode</summary>
+
+The following commands install Xplore Path in development mode, as if you're developing Xplore Path. Installing in development mode is best if you're planning on extending Xplore Path's functionality.
+
+1. Ensure Python and Poetry are installed.
+
+   ```bash
+   python --version
+   pip install poetry
+   ```
+
+2. Clone the repository.
+
+   ```bash
+   git clone https://github.com/offbynull/xplore-path.git
+   cd xplore-path
+   ```
+
+3. Install Xplore Path
+
+   ```bash
+   poetry install --all-extras
+   ```
+
+4. Launch Xplore Path REPL
+
+   ```bash
+   # Launch Xplore Path REPL
+   poetry run xplore-path --path playground
+   ```
+
+</details>
+
+Regardless of the installation method, the last step launches the REPL with the active directory set to `playground`. 
 
 ![Screenshot of REPL interface](repl_example.png)
 
-Queries use a syntax inspired by XPath, where the start of the hierarchy is the `./playground` directory. Try running a few of the example queries shown below.
+The `playground` directory contains a mix of fabricated biological and general-purpose data, spread across many file formats. Xplore Path lets you query this data as if it were a single unified hierarchy. Try running a few of the example queries shown below.
 
 <details><summary>Example queries</summary>
 
@@ -64,12 +136,11 @@ Queries use a syntax inspired by XPath, where the start of the hierarchy is the 
 
 * `($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(.//l, '\d{7}') = $regex_extract(.//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
 
-The query above is made up of thw two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` amd `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists grabs the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
+The query above is made up of the two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` amd `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists grabs the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
 
 :warning: **Xplore Path joins are currently slow.** At the moment, the joining logic hasn't been optimized. Expect joins to be incredibly slow: O(n^2).
 
 </details>
-
 
 If you've used XPath before, the queries above should feel familiar as Xplore Path's query language is heavily inspired by XPath. In addition to basic XPath syntax, Xplore Path provides several major updates:
 
@@ -86,7 +157,169 @@ If you've used XPath before, the queries above should feel familiar as Xplore Pa
 
 The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/XplorePathGrammar.g4).
 
-# TODOs
+## Library Usage Guide
+
+To use XplorePath as a library, install it directly from GitHub using whatever your build management tool of choice is (e.g. pip, poetry, ...). For example, to install via pip ...
+
+```bash
+# Install xplore-path (standalone)
+pip install git+https://github.com/offbynull/xplore-path.git@main
+# Install xplore-path (with REPL and file type support)
+pip install git+https://github.com/offbynull/xplore-path.git@main#egg=xplore_path[data_repl]
+```
+
+The `Evaluator` class allows you to use an Xplore Path expression to walk a hierarchy. A hierarchy is represented using the `Node` class. In the example below, `PythonObjectNode` is a sub-class of `Node` that represents nested Python collections (`dict`, `list`, `tuple`, ...) as a hierarchy.
+
+```python
+from xplore_path.node import Node
+from xplore_path.evaluator import Evaluator
+from xplore_path.nodes.python_object.python_object_node import PythonObjectNode
+
+
+# Evaluate expression
+evaluator = Evaluator()
+result = evaluator.evaluate(
+    root=PythonObjectNode(
+        parent=None,
+        value={'a': {'b': ['c', 'd', 'e', 'f']}, 'y': {3, 4}, 'z': (5, 6)}
+    ),
+    expr='//*'
+)
+
+# Print results
+for v in result.unpack:
+    if isinstance(v, Node):
+        print(f'{v.full_label()}: {v.value()}')
+    else:
+        print(f'{v}')
+```
+
+## Extension Guide
+
+The subsections below describe how to extend Xplore Path's functionality via custom functions and hierarchy formats. Ensure you've gone through both the [REPL Usage Guide](#repl-usage-guide) and [Library Usage Guide](#library-usage-guide) before continuing. 
+
+### Custom Formats
+
+The easiest way to support your custom hierarchy is to simply convert it to a set of nested collections and expose it via `PythonObjectNode`.
+
+```python
+from xplore_path.nodes.python_object.python_object_node import PythonObjectNode
+
+
+node = PythonObjectNode(
+    parent=None,
+    value={'a': {'b': ['c', 'd', 'e', 'f']}, 'y': {3, 4}, 'z': (5, 6)}
+)
+```
+
+Otherwise, a hierarchy can be exposed by implementing it as sub-classes of `Node`. Each `Node` sub-class must include the method `children()`, which returns the children of that `Node` instance. In the example below, the `CustomNode` class exposes a set of nested collections as a hierarchy accessible by Xplore Path (similar to `PythonObjectNode` above).
+
+```python
+from xplore_path.null import Null
+from xplore_path.node import Node, ParentBlock
+
+
+class CustomNode(Node):
+    def __init__(
+            self,
+            parent: ParentBlock | None,  # None for root
+            value: dict | set | list | tuple
+    ):
+        if value is None:
+            value = Null()
+        super().__init__(parent, value if type(value) in {bool, int, float, str, Null} else None)
+        self._data = value
+
+    def children(self) -> list[Node]:
+        this = self._data
+        ret = []
+        if isinstance(this, dict):
+            for i, k in enumerate(this.keys()):
+                ret += [CustomNode(ParentBlock(self, i, k), this[k])]
+        elif isinstance(this, set):
+            for i, v in enumerate(this):
+                return [CustomNode(ParentBlock(self, i, i), v)]
+        elif isinstance(this, (list, tuple)):
+            for i, v in enumerate(this):
+                ret += [CustomNode(ParentBlock(self, i, i), v)]
+        return ret
+```
+
+If working with the REPL, chances are you want to add support for custom file formats to show up in the hierarchy. To support a new file format, a custom `FileLoader` for that format must be included in the context of the  `FileSystemNode` that gets generated within the REPL (see `xplore_path.repl` package). A `FileLoader` identifies if a file is of the expected file format, loads that file, and transforms the loaded data into a `Node` hierarchy. In the example below, `CustomFileLoader` loads up JSON data as a hierarchy (similar to the built-in `JsonFileLoader` provided by XplorePath).
+
+```python
+import json
+from typing import Any
+from pathlib import Path
+from xplore_path.nodes.filesystem.filesystem_node import FileSystemNode
+from xplore_path.nodes.filesystem.context import FileSystemContext
+from xplore_path.nodes.filesystem.file_loader import FileLoader, NODE_CREATOR
+
+
+class CustomFileLoader(FileLoader):
+    def is_loadable(self, p: Path) -> bool:
+        return p.suffix == '.json'
+
+    def load(self, p: Path) -> Any:
+        return json.loads(p.read_text())
+    
+    def node_creator(self, p: Path) -> NODE_CREATOR:
+        return CustomNode
+
+
+node = FileSystemNode(
+    None,
+    fs_path=Path('~').expanduser(),
+    ctx=FileSystemContext(
+        file_loader=FileSystemContext.DEFAULT_FILE_LOADER
+            .include(CustomFileLoader())
+    )
+)
+```
+
+The Xplore Path codebase has many other built-in examples of `FileLoader` that you can reference. 
+
+### Custom Functions
+
+An Xplore Path function is a class that inherits from `xplore_path.invocable.Invocable`. The class must include the method `invoke()`, which ...
+
+* takes a single parameter of a type `list[Collection]` that holds the arguments passed into the function. 
+* returns a `Collection` containing the result of the function.
+
+The example `Invocable` below counts the numbers of items within the first argument.
+
+```python
+from xplore_path.invocable import Invocable
+from xplore_path.collection import Collection
+from xplore_path.collections_.single_value_collection import SingleValueCollection
+
+
+class CountInvocable(Invocable):
+    def invoke(self, args: list[Collection]) -> Collection:
+        return SingleValueCollection(sum(1 for _ in args[0]))
+```
+
+To make the function available for use by expressions, it must be passed into the constructor of the `Evaluator` running those expressions as a variable.
+
+```python
+from xplore_path.evaluator import Evaluator
+from xplore_path.nodes.python_object.python_object_node import PythonObjectNode
+from xplore_path.collections_.single_value_collection import SingleValueCollection
+
+
+evaluator = Evaluator(
+    variables={'count': SingleValueCollection(CountInvocable())}
+)
+result = evaluator.evaluate(
+    root=PythonObjectNode(
+        parent=None,
+        value={'a': {'b': ['c', 'd', 'e', 'f']}, 'y': {3, 4}, 'z': (5, 6)}
+    ),
+    expr='$count(//*)'
+)
+```
+
+## TODOs
 
 * TODO: extend the language to somehow handle cycles
   * examples of cycles:
@@ -95,15 +328,10 @@ The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/X
   * mark edges leading to cycle as a "weak" link that's traversed only once?
     * // operator will stop when it's seen a node more than once?
     * // operator takes an optional parameter for how many times to step over the same weak edge before stopping? 
-* TODO: best effort output to CSV/JSON/YAML/XML/HTML?
-* TODO: test python_object_path
-* TODO: test mirror_path
-* TODO: test simple_path
-* TODO: test dummy_path
+* TODO: best effort output to ~~CSV~~/JSON/YAML/XML/HTML?
 * TODO: path should have metadata?
   * e.g. shell looks for a key that means that it hides the child in the output?
   * e.g. shell looks for a key that means it can preview children in the output? (e.g. if there is no value, show first 3 children inline where value should be? or display that it has children / is terminal?)
-* TODO: comparison operators - ADD MODIFIER THAT MAKES IT STRICT (no coercions allowed except int/float)
 * TODO: filesystem path - for each parsed file, inject invocations that can re-work the file
 * TODO: change syntax so keywords must be followed by ::, ENFORCE IN LEXER (so people can still use the keywords as-is)
 * TODO: add callback that notifies of what's happening when evaluation is running

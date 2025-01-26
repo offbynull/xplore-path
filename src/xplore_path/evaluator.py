@@ -1044,7 +1044,7 @@ class Evaluator:
     """
     Expression evaluator.
     """
-    _DEFAULT_VARIABLES = {
+    DEFAULT_VARIABLES = {
         'distinct': SingleValueCollection(DistinctInvocable()),
         'count': SingleValueCollection(CountInvocable()),
         'frequency_count': SingleValueCollection(FrequencyCountInvocable()),
@@ -1053,6 +1053,7 @@ class Evaluator:
         'whitespace_remove': SingleValueCollection(WhitespaceRemoveInvocable()),
         'regex_extract': SingleValueCollection(RegexExtractInvocable())
     }
+    """Default variables, providing commonly needed functions / data."""
 
     def __init__(
             self,
@@ -1061,16 +1062,12 @@ class Evaluator:
         """
         Construct an ``Evaluator`` instance.
 
-        :param variables: Variables available to expressions being evaluated, or ``None`` if there are no variables
-            (equivalent to passing in an empty dictionary). For example, when this evaluator encounters an expression
-            with the variable ``$aaa``, it'll map that variable to key ``aaa`` within this dictionary.
-
-            Note that the evaluator injects a default set of variables as a baseline (see ``_DEFAULT_VARIABLES``), with
-            the variables in this dictionary being added on top of (or replacing) those variables.
+        :param variables: Variables available to expressions being evaluated. If ``None``, uses default
+            ``Evaluator.DEFAULT_VARIABLES``.
         """
         if variables is None:
-            variables = {}
-        self.variables = Evaluator._DEFAULT_VARIABLES | variables  # Same key? _DEFAULT_VARIABLES loses
+            variables = Evaluator.DEFAULT_VARIABLES.copy()
+        self.variables = variables
 
     def evaluate(
             self,
