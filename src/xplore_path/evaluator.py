@@ -37,10 +37,7 @@ from xplore_path.matchers.strict_matcher import StrictMatcher
 from xplore_path.matchers.wildcard_matcher import WildcardMatcher
 from xplore_path.null import Null
 from xplore_path.node import Node, ParentBlock
-from xplore_path.nodes.filesystem.context import FileSystemContext
-from xplore_path.nodes.filesystem.filesystem_node import FileSystemNode
 from xplore_path.nodes.mirror.mirror_node import MirrorNode
-from xplore_path.nodes.python_object.python_object_node import PythonObjectNode
 from xplore_path.nodes.simple.simple_node import SimpleNode
 from xplore_path.raise_parse_error_listener import RaiseParseErrorListener
 
@@ -1118,92 +1115,97 @@ class Evaluator:
         return tree.accept(visitor)
 
 
-def _test_with_obj(root_obj, expr):
-    print(f'---- res for {expr}')
-    node = PythonObjectNode.create_root_path(root_obj)
-    ret = Evaluator().evaluate(node, expr)
-    if isinstance(ret, SequenceCollection):
-        for v in ret:
-            print(f'  {v}')
-        return ret
-    else:
-        print(f'  {ret}')
-
-
-def _test_with_fs(dir_, expr):
-    print(f'---- res for {expr}')
-    fs_node = FileSystemNode.create_root_path(
-        dir_,
-        FileSystemContext(
-            cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
-        )
-    )
-    ret = Evaluator().evaluate(fs_node, expr)
-    if isinstance(ret, SequenceCollection):
-        for v in ret:
-            print(f'  {v}')
-        return ret
-    else:
-        print(f'  {ret}')
-
-
-if __name__ == '__main__':
-    ...
-    # _test_with_fs('~', '/*')
-    # _test_with_fs('~', '/test.json//*')
-    # _test_with_fs('~', '/test.json/address/city')
-    # _test_with_fs('~', '/test.xml//*')
-    # _test_with_fs('~', '/test.html//*')
-    # _test_with_fs('~/Downloads', '/pycharm-community-2024.3.1.tar.gz/*')
-    # _test_with_fs('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'")
-    # _test_with_fs('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'//*")
-    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies//*")
-    # _test_with_fs('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
-    # _test_with_fs('~', '/test.yaml//*')
-    # _test_with_fs('~', '/test.csv/*/Name')
-    # _test_with_fs('~', '/test.csv/*/Name[. = "John Doe"]')
-    # _test_with_fs('~', '/test.csv/*')
-    # _test_with_fs('~', '/test.csv/*[./Name = f"John Do"]')
-    # _test_with_fs('~', '/test.csv/*[f"John Do" = ./Name]')
-    # _test_with_fs('~', '/test.csv/*[r"J.*" = ./Name]')
-    # _test_with_fs('~', '(/test.csv/*)[./Name/r"J.*"]')
-
-    # _test_with_fs('~', '/Downloads/*')
-    # _test_with_fs('~', '/Downloads/"parabilis.zip"/*')
-    # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/*')
-    # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/*')
-    # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/modules.xml//*')
-
-    # _test_with_fs('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
-    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
-    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
-    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* inner join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
-    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* left join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
-    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* right join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
-    # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'")
-    # _test_with_fs('~/Downloads', "$count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
-    # _test_with_fs('~/Downloads', "$distinct(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
-    # _test_with_fs('~/Downloads', "$frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
-    # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))/*")
-    # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))//*")
-    # _test_with_fs('~/Downloads', "$distinct($regex_extract(/mouse_assays.zip/*/0/GO_Term, '\d{7}'))")
-    # _test_with_fs('~/Downloads', "/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*")
-    # _test_with_fs('~/Downloads', "$regex_extract(/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*, '\\d{7}')")
-    # _test_with_fs('~/Downloads', "$distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\\d{7}') = $regex_extract(//r//id, '\\d{7}')]")
-    # _test_with_fs('~/Downloads', "//*")
-    # _test_with_fs('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[./*=Well]")
-    # _test_with_fs('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]")
-    # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
-    # _test_with_fs('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
-    # _test_with_fs('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
-    # _test_with_fs('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
-
-    _test_with_fs('./', "/repl//*/body//Import/*[0]")
-    # _test_with_fs('./', "/repl//*/body//Import//*[0]")
-    # _test_with_fs('./', "/repl//*/body//Import//*[1]")
-    # _test_with_fs('./', "/repl//*/body//Import//*[2]")
-    # _test_with_fs('./', "/repl//*/body//Import//*[3]")
-    # _test_with_fs('./', "/repl//*/body//Import//*[4]")
-    # _test_with_fs('./', "/repl//*/body//Import//*")
-
-    # _test_with_obj({}}, '$regex_extract((hello, yellow, mellow), "low?")')
+# from xplore_path.nodes.filesystem.context import FileSystemContext
+# from xplore_path.nodes.filesystem.filesystem_node import FileSystemNode
+# from xplore_path.nodes.python_object.python_object_node import PythonObjectNode
+#
+#
+# def _test_with_obj(root_obj, expr):
+#     print(f'---- res for {expr}')
+#     node = PythonObjectNode.create_root_path(root_obj)
+#     ret = Evaluator().evaluate(node, expr)
+#     if isinstance(ret, SequenceCollection):
+#         for v in ret:
+#             print(f'  {v}')
+#         return ret
+#     else:
+#         print(f'  {ret}')
+#
+#
+# def _test_with_fs(dir_, expr):
+#     print(f'---- res for {expr}')
+#     fs_node = FileSystemNode.create_root_path(
+#         dir_,
+#         FileSystemContext(
+#             cache_notifier=lambda notice_type, real_path: print(f'{notice_type}: {real_path}')
+#         )
+#     )
+#     ret = Evaluator().evaluate(fs_node, expr)
+#     if isinstance(ret, SequenceCollection):
+#         for v in ret:
+#             print(f'  {v}')
+#         return ret
+#     else:
+#         print(f'  {ret}')
+#
+#
+# if __name__ == '__main__':
+#     ...
+#     # _test_with_fs('~', '/*')
+#     # _test_with_fs('~', '/test.json//*')
+#     # _test_with_fs('~', '/test.json/address/city')
+#     # _test_with_fs('~', '/test.xml//*')
+#     # _test_with_fs('~', '/test.html//*')
+#     # _test_with_fs('~/Downloads', '/pycharm-community-2024.3.1.tar.gz/*')
+#     # _test_with_fs('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'")
+#     # _test_with_fs('~/Downloads', "/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'//*")
+#     # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies//*")
+#     # _test_with_fs('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
+#     # _test_with_fs('~', '/test.yaml//*')
+#     # _test_with_fs('~', '/test.csv/*/Name')
+#     # _test_with_fs('~', '/test.csv/*/Name[. = "John Doe"]')
+#     # _test_with_fs('~', '/test.csv/*')
+#     # _test_with_fs('~', '/test.csv/*[./Name = f"John Do"]')
+#     # _test_with_fs('~', '/test.csv/*[f"John Do" = ./Name]')
+#     # _test_with_fs('~', '/test.csv/*[r"J.*" = ./Name]')
+#     # _test_with_fs('~', '(/test.csv/*)[./Name/r"J.*"]')
+#
+#     # _test_with_fs('~', '/Downloads/*')
+#     # _test_with_fs('~', '/Downloads/"parabilis.zip"/*')
+#     # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/*')
+#     # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/*')
+#     # _test_with_fs('~', '/Downloads/"parabilis.zip"/parabilis/".idea"/modules.xml//*')
+#
+#     # _test_with_fs('~/Downloads', "2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2')")
+#     # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 2'")
+#     # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*[./'Unnamed: 2' = (2025 - (/Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/*/'Unnamed: 2'))]")
+#     # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* inner join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
+#     # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* left join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
+#     # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/* right join /Healthcare-Insurance-Sample-Data.xlsx/'Healthcare Insurance'/* on [./1/'Unnamed: 2' = (2025 - ./2/'Unnamed: 2')]")  # Shows up as [None]: None  because value is none, but data is there under children
+#     # _test_with_fs('~/Downloads', "/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'")
+#     # _test_with_fs('~/Downloads', "$count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+#     # _test_with_fs('~/Downloads', "$distinct(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+#     # _test_with_fs('~/Downloads', "$frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3')")
+#     # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))/*")
+#     # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))//*")
+#     # _test_with_fs('~/Downloads', "$distinct($regex_extract(/mouse_assays.zip/*/0/GO_Term, '\d{7}'))")
+#     # _test_with_fs('~/Downloads', "/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*")
+#     # _test_with_fs('~/Downloads', "$regex_extract(/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']/*, '\\d{7}')")
+#     # _test_with_fs('~/Downloads', "$distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(//l, '\\d{7}') = $regex_extract(//r//id, '\\d{7}')]")
+#     # _test_with_fs('~/Downloads', "//*")
+#     # _test_with_fs('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[./*=Well]")
+#     # _test_with_fs('~/Downloads', "/mouse_assays.zip/Mouse_Assay_001.csv/*[.//*=Well]")
+#     # _test_with_fs('~/Downloads', "($frequency_count(/Netflix-Movies-Sample-Data.xlsx/Movies/*/'Unnamed: 3'))[. >= 5]")  # doesn't work, should filter to >= 5 counts
+#     # _test_with_fs('~/Downloads', "$whitespace_collapse(['hello    world', 'hello world', 'helloworld'])")
+#     # _test_with_fs('~/Downloads', "$whitespace_remove(['hello    world', 'hello world', 'helloworld'])")
+#     # _test_with_fs('~/Downloads', "/uniprotkb_mouse_601_to_800_seqlen.json/results/*/genes[.//geneName/value = 'Zmat1']//geneName/value")
+#
+#     _test_with_fs('./', "/repl//*/body//Import/*[0]")
+#     # _test_with_fs('./', "/repl//*/body//Import//*[0]")
+#     # _test_with_fs('./', "/repl//*/body//Import//*[1]")
+#     # _test_with_fs('./', "/repl//*/body//Import//*[2]")
+#     # _test_with_fs('./', "/repl//*/body//Import//*[3]")
+#     # _test_with_fs('./', "/repl//*/body//Import//*[4]")
+#     # _test_with_fs('./', "/repl//*/body//Import//*")
+#
+#     # _test_with_obj({}}, '$regex_extract((hello, yellow, mellow), "low?")')
