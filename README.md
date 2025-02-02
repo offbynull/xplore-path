@@ -108,6 +108,8 @@ Try running a few of the example queries shown below. If you've used XPath befor
 * `/mouse_assays.zip/Mouse_Assay_001.csv//*` - List first mouse assay's data.
 * `/mouse_assays.zip/r'.*001.csv'//*` - List first mouse assay's data, but using regex to identify the first assay.
 * `/mouse_assays.zip/g'*001.csv'//*` - List first mouse assay's data, but using glob to identify the first assay.
+* `/mouse_assays.zip/*/0/Plate_Type` - List plate type for each mouse assay.
+* `/mouse_assays.zip/Mouse_Assay_001.csv/0/Plate_Type` - List plate type for first mouse assay.
 * `/goslim_mouse.json//*` - List mouse gene ontology entries.
 * `/goslim_mouse.json//(id, lbl)` - List mouse gene ontology ids and labels.
 * `/goslim_mouse.json//r'id|lbl'` - List mouse gene ontology ids and labels, but using regex.
