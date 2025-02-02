@@ -96,9 +96,11 @@ Regardless of the installation method, the last step launches the REPL with the 
 
 ![Screenshot of REPL interface](repl_example.png)
 
-The `playground` directory contains a mix of fabricated biological and general-purpose data, spread across many file formats. Xplore Path lets you query this data as if it were a single unified hierarchy. Try running a few of the example queries shown below.
+The `playground` directory contains a mix of fabricated biological and general-purpose data, spread across many file formats. Xplore Path lets you query this data as if it were a single unified hierarchy.
 
-<details><summary>Example queries</summary>
+Try running a few of the example queries shown below. If you've used XPath before, the queries below should feel familiar as Xplore Path's query language is heavily inspired by XPath.
+
+<details><summary>Walking hierarchy</summary>
 
 * `/*` - List top-level files.
 * `//*` - List all data.
@@ -107,6 +109,15 @@ The `playground` directory contains a mix of fabricated biological and general-p
 * `/mouse_assays.zip/r'.*001.csv'//*` - List first mouse assay's data, but using regex to identify the first assay.
 * `/mouse_assays.zip/g'*001.csv'//*` - List first mouse assay's data, but using glob to identify the first assay.
 * `/goslim_mouse.json//*` - List mouse gene ontology entries.
+* `/goslim_mouse.json//(id, lbl)` - List mouse gene ontology ids and labels.
+* `/goslim_mouse.json//r'id|lbl'` - List mouse gene ontology ids and labels, but using regex.
+
+</details>
+
+<details><summary>Walking hierarchy, with filters</summary>
+
+* `/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']` - List mouse assays targeting gene Cd40.
+* `/mouse_assays.zip//*/GO_Term[. = g'GO:*']` - For each mouse assay, list the gene ontology terms used.
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//*` - List mouse gene ontology entries related to neuro.
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//id` - List mouse gene ontology entries related to neuro, ids only.
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl` - List mouse gene ontology entries related to neuro, labels only.
@@ -115,15 +126,7 @@ The `playground` directory contains a mix of fabricated biological and general-p
 
 </details>
 
-<details><summary>Example queries with filtering</summary>
-
-* `/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']` - List mouse assays targeting gene Cd40.
-* `/mouse_assays.zip//*/GO_Term[. = g'GO:*']` - For each mouse assay, list the gene ontology terms used.
-* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//id` - List mouse gene ontology related to neuro, cleaned ids only.
-
-</details>
-
-<details><summary>Example queries fed into function</summary>
+<details><summary>Walking hierarchy, with filters and functions</summary>
 
 * `$count(/*)` - Count top-level files.
 * `$distinct(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])` - Across all mouse assays, list distinct gene ontology terms used.
@@ -132,7 +135,7 @@ The `playground` directory contains a mix of fabricated biological and general-p
 
 </details>
 
-<details><summary>Example queries with joins</summary>
+<details><summary>Joining hierarchy</summary>
 
 * `($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(.//l, '\d{7}') = $regex_extract(.//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
 
@@ -142,7 +145,7 @@ The query above is made up of the two sub-queries `$distinct(/mouse_assays.zip/*
 
 </details>
 
-If you've used XPath before, the queries above should feel familiar as Xplore Path's query language is heavily inspired by XPath. In addition to basic XPath syntax, Xplore Path provides several major updates:
+As highlighted in a few of the above examples, Xplore Path's syntax enhances basic XPath syntax in several helpful ways:
 
 * Fuzzy matching is available in various forms.
   * Prefix a string with `i` for case-insensitive matching (e.g. `i'HeLLo'`) 
