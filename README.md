@@ -111,8 +111,8 @@ Try running a few of the example queries shown below. If you've used XPath befor
 * `/mouse_assays.zip/*/0/Plate_Type` - List plate type for each mouse assay.
 * `/mouse_assays.zip/Mouse_Assay_001.csv/0/Plate_Type` - List plate type for first mouse assay.
 * `/goslim_mouse.json//*` - List mouse gene ontology entries.
-* `/goslim_mouse.json//(id, lbl)` - List mouse gene ontology ids and labels.
-* `/goslim_mouse.json//r'id|lbl'` - List mouse gene ontology ids and labels, but using regex.
+* `/goslim_mouse.json//(id, lbl)` - List mouse gene ontology IDs and labels.
+* `/goslim_mouse.json//r'id|lbl'` - List mouse gene ontology IDs and labels, but using regex.
 
 </details>
 
@@ -121,10 +121,10 @@ Try running a few of the example queries shown below. If you've used XPath befor
 * `/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']` - List mouse assays targeting gene Cd40.
 * `/mouse_assays.zip//*/GO_Term[. = g'GO:*']` - For each mouse assay, list the gene ontology terms used.
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//*` - List mouse gene ontology entries related to neuro.
-* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//id` - List mouse gene ontology entries related to neuro, ids only.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//id` - List mouse gene ontology entries related to neuro, IDs only.
 * `/goslim_mouse.json//*[./meta//val = g'*neuro*']//lbl` - List mouse gene ontology entries related to neuro, labels only.
-* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//(id, lbl)` - List mouse gene ontology entries related to neuro, ids and labels.
-* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//r'id|lbl'` - List mouse gene ontology entries related to neuro, ids and labels using regex.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//(id, lbl)` - List mouse gene ontology entries related to neuro, IDs and labels.
+* `/goslim_mouse.json//*[./meta//val = g'*neuro*']//r'id|lbl'` - List mouse gene ontology entries related to neuro, IDs and labels using regex.
 
 </details>
 
@@ -133,7 +133,7 @@ Try running a few of the example queries shown below. If you've used XPath befor
 * `$count(/*)` - Count top-level files.
 * `$distinct(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])` - Across all mouse assays, list distinct gene ontology terms used.
 * `$frequency_count(/mouse_assays.zip//*/GO_Term[. = g'GO:*'])//*` - Across all mouse assays,  count how often each gene ontology term appears.
-* `$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\d{7}')` - List mouse gene ontology related to neuro, cleaned ids only.
+* `$regex_extract(/goslim_mouse.json//*[./meta//val = g'*neuro*']//id, '\d{7}')` - List mouse gene ontology related to neuro, cleaned IDs only.
 
 </details>
 
