@@ -4,7 +4,7 @@ Xplore Path is a tool for quick-and-dirty data exploration, built for messy, unt
 
  * **Simple syntax**: Query data with an intuitive, XPath-like syntax.
  * **Broad format support**: Search through CSVs, XLSXs, JSONs, YAMLs, DOCXs, PDFs, XMLs, HTMLs, ...
- * **Fuzzy search support**: Search using globs, regex, number ranges, or approximate string matching.
+ * **Fuzzy search support**: Search using globs, regexs, fuzzy strings, and numeric tolerances.
  * **Unified environment**: Search through disparate files and formats within a single context.
  * **Extendable**: Add formats and functions for your custom use cases (e.g. 3D scene graphs, flow cytometry, ...).
 
