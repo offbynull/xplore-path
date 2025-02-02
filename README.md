@@ -339,8 +339,7 @@ result = evaluator.evaluate(
   * e.g. shell looks for a key that means it can preview children in the output? (e.g. if there is no value, show first 3 children inline where value should be? or display that it has children / is terminal?)
 * TODO: filesystem path - for each parsed file, inject invocations that can re-work the file
 * TODO: change syntax so keywords must be followed by ::, ENFORCE IN LEXER (so people can still use the keywords as-is)
-* TODO: add callback that notifies of what's happening when evaluation is running
-* TODO: update syntax so variable calls can go into path expression without wrapping e.g. $var(a,b,c)/d/e instead of ($var(a,b,c))/d/e 
+* TODO: add callback that notifies of what's happening when evaluation is running 
 * TODO: test complex math (order of operations)
 * TODO: cache all_children() in PythonObjectPath + stream all_children() in other paths + take in max argument to cap number of children
 * TODO: make use of variables in REPL - store results in var names and use those var names in queries
