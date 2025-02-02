@@ -3,7 +3,6 @@ from collections import defaultdict
 
 from xplore_path.collection import Collection
 from xplore_path.node import Node
-from xplore_path.evaluator import _test_with_fs
 
 import pandas as pd
 
@@ -51,29 +50,29 @@ class CsvOutputter(Outputter):
         df.to_csv(write_path)
 
 
-if __name__ == '__main__':
-    collection = _test_with_fs('~/Downloads', "/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']//*")
-    file_path = pathlib.Path('~/output_test.csv').expanduser()
-    CsvOutputter().output(collection, file_path)
-
-    import platform
-    import subprocess
-    import os
-    def open_file(file_path):
-        system = platform.system()
-        try:
-            if system == "Windows":
-                os.startfile(file_path)
-            elif system == "Darwin":  # macOS
-                subprocess.run(["open", file_path], check=True)
-            else:  # Linux/Unix
-                subprocess.run(["xdg-open", file_path], check=True)
-        except FileNotFoundError:
-            print(f"No associated application found to open {file_path}")
-        except Exception as e:
-            print(f"Error: {e}")
-
-    open_file(file_path)
+# if __name__ == '__main__':
+#     collection = _test_with_fs('~/Downloads', "/mouse_assays.zip/*[.//g'*Gene*' = g'*Cd40*']//*")
+#     file_path = pathlib.Path('~/output_test.csv').expanduser()
+#     CsvOutputter().output(collection, file_path)
+#
+#     import platform
+#     import subprocess
+#     import os
+#     def open_file(file_path):
+#         system = platform.system()
+#         try:
+#             if system == "Windows":
+#                 os.startfile(file_path)
+#             elif system == "Darwin":  # macOS
+#                 subprocess.run(["open", file_path], check=True)
+#             else:  # Linux/Unix
+#                 subprocess.run(["xdg-open", file_path], check=True)
+#         except FileNotFoundError:
+#             print(f"No associated application found to open {file_path}")
+#         except Exception as e:
+#             print(f"Error: {e}")
+#
+#     open_file(file_path)
 
 
 
