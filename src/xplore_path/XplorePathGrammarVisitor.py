@@ -24,11 +24,6 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprAtomicOrEncapsulate.
-    def visitExprAtomicOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrEncapsulateContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XplorePathGrammarParser#ExprSetIntersect.
     def visitExprSetIntersect(self, ctx:XplorePathGrammarParser.ExprSetIntersectContext):
         return self.visitChildren(ctx)
@@ -69,6 +64,11 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
+    def visitExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
     def visitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
         return self.visitChildren(ctx)
@@ -79,11 +79,6 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapOrVar.
-    def visitExprWrapOrVar(self, ctx:XplorePathGrammarParser.ExprWrapOrVarContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XplorePathGrammarParser#ExprPath.
     def visitExprPath(self, ctx:XplorePathGrammarParser.ExprPathContext):
         return self.visitChildren(ctx)
@@ -91,6 +86,16 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#ExprPathInvoke.
     def visitExprPathInvoke(self, ctx:XplorePathGrammarParser.ExprPathInvokeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAtomic.
+    def visitExprAtomic(self, ctx:XplorePathGrammarParser.ExprAtomicContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprWrapOrVar.
+    def visitExprWrapOrVar(self, ctx:XplorePathGrammarParser.ExprWrapOrVarContext):
         return self.visitChildren(ctx)
 
 
@@ -199,63 +204,28 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathAtRoot.
-    def visitPathAtRoot(self, ctx:XplorePathGrammarParser.PathAtRootContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#path.
+    def visitPath(self, ctx:XplorePathGrammarParser.PathContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromRoot.
-    def visitPathFromRoot(self, ctx:XplorePathGrammarParser.PathFromRootContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#pathAbsolute.
+    def visitPathAbsolute(self, ctx:XplorePathGrammarParser.PathAbsoluteContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromRootAny.
-    def visitPathFromRootAny(self, ctx:XplorePathGrammarParser.PathFromRootAnyContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#pathRelative.
+    def visitPathRelative(self, ctx:XplorePathGrammarParser.PathRelativeContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathAtSelf.
-    def visitPathAtSelf(self, ctx:XplorePathGrammarParser.PathAtSelfContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#pathInner.
+    def visitPathInner(self, ctx:XplorePathGrammarParser.PathInnerContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromSelf.
-    def visitPathFromSelf(self, ctx:XplorePathGrammarParser.PathFromSelfContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromSelfAny.
-    def visitPathFromSelfAny(self, ctx:XplorePathGrammarParser.PathFromSelfAnyContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#PathAtParent.
-    def visitPathAtParent(self, ctx:XplorePathGrammarParser.PathAtParentContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromParent.
-    def visitPathFromParent(self, ctx:XplorePathGrammarParser.PathFromParentContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromParentAny.
-    def visitPathFromParentAny(self, ctx:XplorePathGrammarParser.PathFromParentAnyContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromNested.
-    def visitPathFromNested(self, ctx:XplorePathGrammarParser.PathFromNestedContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#PathFromNestedAny.
-    def visitPathFromNestedAny(self, ctx:XplorePathGrammarParser.PathFromNestedAnyContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#relPath.
-    def visitRelPath(self, ctx:XplorePathGrammarParser.RelPathContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#pathSeperator.
+    def visitPathSeperator(self, ctx:XplorePathGrammarParser.PathSeperatorContext):
         return self.visitChildren(ctx)
 
 

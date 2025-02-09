@@ -157,18 +157,22 @@ expr
     | expr relOp expr coerceFallback?                   # ExprComparison
     | expr addOp expr coerceFallback?                   # ExprAdditive
     | expr mulOp expr coerceFallback?                   # ExprMultiplicative
-    | atomicOrEncapsulate                               # ExprAtomicOrEncapsulate
+    | negateOrPathOrAtomic                              # ExprAtomicOrPathOrEncapsulate
     ;
 
-// Why isn't atomicOrEncapsulate directly tied embedded within expr? It was, and the ExprUnary alternative was defined
+// Why isn't negateOrPathOrAtomic directly tied embedded within expr? It was, and the ExprUnary alternative was defined
 // as "(MINUS | PLUS) expr". This worked fine except that when you did something like -1-1, it evaluated as -(1-1)
 // instead of (-1)-1. The later evaluation is the correct evaluation order, and that's what happens now with this
 // current grammar.
-atomicOrEncapsulate
-    : (MINUS | PLUS) atomicOrEncapsulate coerceFallback?  # ExprUnary
-    | wrapOrVar                                           # ExprWrapOrVar
-    | path                                                # ExprPath        // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
-    | path argumentList filter?                           # ExprPathInvoke  // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
+negateOrPathOrAtomic
+    : (MINUS | PLUS) negateOrPathOrAtomic coerceFallback?  # ExprUnary
+    | path                                                 # ExprPath        // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
+    | path argumentList filter?                            # ExprPathInvoke  // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
+    | atomic                                               # ExprAtomic
+    ;
+
+atomic
+    : wrapOrVar                                           # ExprWrapOrVar
     | matcher                                             # ExprMatcher
     | literal                                             # ExprLiteral
     ;
@@ -232,21 +236,25 @@ orOp
     ;
 
 path
-    : SLASH filter?                # PathAtRoot
-    | SLASH filter? relPath        # PathFromRoot
-    | SS filter? relPath           # PathFromRootAny
-    | D filter?                    # PathAtSelf
-    | D filter? SLASH relPath      # PathFromSelf
-    | D filter? SS relPath         # PathFromSelfAny
-    | DD filter?                   # PathAtParent
-    | DD filter? SLASH relPath     # PathFromParent
-    | DD filter? SS relPath        # PathFromParentAny
-    | wrapOrVar SLASH relPath      # PathFromNested
-    | wrapOrVar SS relPath         # PathFromNestedAny
+    : pathAbsolute | pathRelative
     ;
 
-relPath
-    : step ( ( SS | SLASH ) step )*
+pathAbsolute
+    : (SLASH filter? pathInner?)
+    | (SS pathInner)
+    ;
+
+pathRelative
+    : ((D | DD) filter? pathAbsolute?)
+    | (wrapOrVar pathAbsolute)
+    ;
+
+pathInner
+    : step (pathSeperator step)*
+    ;
+
+pathSeperator
+    : SLASH | SS | QM
     ;
 
 step
@@ -254,23 +262,23 @@ step
     ;
 
 forwardStep
-    : KW_CHILD COLONCOLON atomicOrEncapsulate               # ForwardStepChild
-    | KW_DESCENDANT COLONCOLON atomicOrEncapsulate          # ForwardStepDescendant
-    | KW_SELF COLONCOLON atomicOrEncapsulate                # ForwardStepSelf
-    | KW_DESCENDANT_OR_SELF COLONCOLON atomicOrEncapsulate  # ForwardStepDescendantOrSelf
-    | KW_FOLLOWING_SIBLING COLONCOLON atomicOrEncapsulate   # ForwardStepFollowingSibling
-    | KW_FOLLOWING COLONCOLON atomicOrEncapsulate           # ForwardStepFollowing
-    | D                                                     # ForwardStepDirectSelf
-    | atomicOrEncapsulate                                   # ForwardStepValue
+    : KW_CHILD COLONCOLON atomic               # ForwardStepChild
+    | KW_DESCENDANT COLONCOLON atomic          # ForwardStepDescendant
+    | KW_SELF COLONCOLON atomic                # ForwardStepSelf
+    | KW_DESCENDANT_OR_SELF COLONCOLON atomic  # ForwardStepDescendantOrSelf
+    | KW_FOLLOWING_SIBLING COLONCOLON atomic   # ForwardStepFollowingSibling
+    | KW_FOLLOWING COLONCOLON atomic           # ForwardStepFollowing
+    | D                                        # ForwardStepDirectSelf
+    | atomic                                   # ForwardStepValue
     ;
 
 reverseStep
-    : KW_PARENT COLONCOLON atomicOrEncapsulate             # ReverseStepParent
-    | KW_ANCESTOR COLONCOLON atomicOrEncapsulate           # ReverseStepAncestor
-    | KW_PRECEDING_SIBLING COLONCOLON atomicOrEncapsulate  # ReverseStepPrecedingSibling
-    | KW_PRECEDING COLONCOLON atomicOrEncapsulate          # ReverseStepPreceding
-    | KW_ANCESTOR_OR_SELF COLONCOLON atomicOrEncapsulate   # ReverseStepAncestorOrSelf
-    | DD                                                   # ReverseStepDirectParent
+    : KW_PARENT COLONCOLON atomic             # ReverseStepParent
+    | KW_ANCESTOR COLONCOLON atomic           # ReverseStepAncestor
+    | KW_PRECEDING_SIBLING COLONCOLON atomic  # ReverseStepPrecedingSibling
+    | KW_PRECEDING COLONCOLON atomic          # ReverseStepPreceding
+    | KW_ANCESTOR_OR_SELF COLONCOLON atomic   # ReverseStepAncestorOrSelf
+    | DD                                      # ReverseStepDirectParent
     ;
 
 literal

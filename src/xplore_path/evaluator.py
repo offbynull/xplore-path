@@ -136,6 +136,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         ret = self._invoke(ret, ctx.argumentList(), ctx.filter_())
         return ret
 
+    def visitExprAtomic(self, ctx: XplorePathGrammarParser.ExprAtomicContext):
+        return self.visit(ctx.atomic())
+
     def visitExprLiteral(self, ctx: XplorePathGrammarParser.ExprLiteralContext):
         return self.visit(ctx.literal())
 
@@ -166,7 +169,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             fallback = self.visit(ctx.coerceFallback())
         else:
             fallback = DiscardFallbackMode()
-        inner = self.visit(ctx.atomicOrEncapsulate())
+        inner = self.visit(ctx.negateOrPathOrAtomic())
         if ctx.MINUS():
             inner = inner.transform(lambda _, e: e.coerce(float), fallback)
             inner = inner.transform_unpacked(lambda _, v: -v, ErrorFallbackMode())
@@ -175,8 +178,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             return inner  # Keep it as-is -- not required to do any manipulation here
         raise ValueError('Unexpected')
 
-    def visitExprAtomicOrEncapsulate(self, ctx: XplorePathGrammarParser.ExprAtomicOrEncapsulateContext):
-        return self.visit(ctx.atomicOrEncapsulate())
+    def visitExprAtomicOrPathOrEncapsulate(self, ctx: XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
+        return self.visit(ctx.negateOrPathOrAtomic())
 
     def _invoke(self, collection, arglist_ctx, result_filter_ctx):
         # if ctx.coerceFallback():
@@ -532,139 +535,68 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitExprEmptyList(self, ctx: XplorePathGrammarParser.ExprEmptyListContext):
         return SequenceCollection.empty()
 
-    def visitPathAtRoot(self, ctx: XplorePathGrammarParser.PathAtRootContext):
+    def visitPath(self, ctx: XplorePathGrammarParser.PathContext):
+        self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
         try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_ROOT)
-            collection = self.context.collection
+            if ctx.pathAbsolute():
+                self.context.reset_collection(_CollectionResetMode.RESET_WITH_ROOT)
+                return self.visit(ctx.pathAbsolute())
+            elif ctx.pathRelative():
+                return self.visit(ctx.pathRelative())
+            else:
+                raise ValueError('Unexpected')
+        finally:
+            self.context.restore()
+
+    def visitPathAbsolute(self, ctx: XplorePathGrammarParser.PathAbsoluteContext):
+        self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
+        try:
+            # Get top-level nodes
+            if ctx.SLASH():
+                collection = self.context.collection
+            elif ctx.SS():
+                root = next(iter(self.context.collection.unpack))
+                collection = SequenceCollection.from_unpacked([root] + root.descendants())
+                collection = self._apply_filter(collection, ctx.filter_())
+            else:
+                raise ValueError('Unexpected')
+            # Filter top-level nodes
             collection = self._apply_filter(collection, ctx.filter_())
+            # Walk into top-level nodes
+            if ctx.pathInner():
+                self.context.reset_collection(collection)
+                collection = self.visit(ctx.pathInner())
             return collection
         finally:
             self.context.restore()
 
-    def visitPathFromRoot(self, ctx: XplorePathGrammarParser.PathFromRootContext):
+    def visitPathRelative(self, ctx: XplorePathGrammarParser.PathRelativeContext):
+        self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
         try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_ROOT)
-            collection = self.context.collection
+            # Get top-level nodes
+            if ctx.D():
+                collection = self.context.collection
+            elif ctx.DD():
+                collection = [e.parent() for e in self.context.collection.unpack]
+                collection = [e for e in collection if type(e) != Null]
+                collection = SequenceCollection.from_unpacked(collection)
+            elif ctx.wrapOrVar():
+                collection = self.visit(ctx.wrapOrVar())
+                collection = [e for e in collection.unpack if isinstance(e, Node)]
+                collection = SequenceCollection.from_unpacked(collection)
+            else:
+                raise ValueError('Unexpected')
+            # Filter top-level nodes
             collection = self._apply_filter(collection, ctx.filter_())
-            self.context.reset_collection(collection)  # will not include p, only descendants of p
-            rel_path = ctx.relPath()
-            collection = self.visit(rel_path)
+            # Walk into top-level nodes
+            if ctx.pathAbsolute():
+                self.context.reset_collection(collection)
+                collection = self.visit(ctx.pathAbsolute())
             return collection
         finally:
             self.context.restore()
 
-    def visitPathFromRootAny(self, ctx: XplorePathGrammarParser.PathFromRootAnyContext):
-        try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_ROOT)
-            root = next(iter(self.context.collection.unpack))
-            collection = SequenceCollection.from_unpacked([root] + root.descendants())
-            collection = self._apply_filter(collection, ctx.filter_())
-            self.context.reset_collection(collection)
-            rel_path = ctx.relPath()
-            collection = self.visit(rel_path)
-            return collection
-        finally:
-            self.context.restore()
-
-    def visitPathAtSelf(self, ctx: XplorePathGrammarParser.PathAtSelfContext):
-        return self.context.collection
-
-    def visitPathFromSelf(self, ctx: XplorePathGrammarParser.PathFromSelfContext):
-        try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
-            collection = self.context.collection
-            collection = self._apply_filter(collection, ctx.filter_())
-            self.context.reset_collection(collection)
-            rel_path = ctx.relPath()
-            collection = self.visit(rel_path)
-            return collection
-        finally:
-            self.context.restore()
-
-    def visitPathFromSelfAny(self, ctx: XplorePathGrammarParser.PathFromSelfAnyContext):
-        try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
-            collection = SequenceCollection.from_unpacked(
-                itertools.chain(*([p] + p.descendants() for p in self.context.collection.unpack))
-            )
-            collection = self._apply_filter(collection, ctx.filter_())
-            self.context.reset_collection(collection)  # will not include p, only descendants of p
-            rel_path = ctx.relPath()
-            collection = self.visit(rel_path)
-            return collection
-        finally:
-            self.context.restore()
-
-    def visitPathAtParent(self, ctx: XplorePathGrammarParser.PathAtParentContext):
-        try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
-            collection = [e.parent() for e in self.context.collection.unpack]
-            collection = [e for e in collection if type(e) != Null]
-            collection = SequenceCollection.from_unpacked(collection)
-            collection = self._apply_filter(collection, ctx.filter_())
-            return collection
-        finally:
-            self.context.restore()
-
-    def visitPathFromParent(self, ctx: XplorePathGrammarParser.PathFromParentContext):
-        try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
-            collection = [e.parent() for e in self.context.collection.unpack]
-            collection = [e for e in collection if type(e) != Null]
-            collection = SequenceCollection.from_unpacked(collection)
-            collection = self._apply_filter(collection, ctx.filter_())
-            self.context.reset_collection(collection)
-            rel_path = ctx.relPath()
-            collection = self.visit(rel_path)
-            return collection
-        finally:
-            self.context.restore()
-
-    def visitPathFromParentAny(self, ctx: XplorePathGrammarParser.PathFromParentAnyContext):
-        try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
-            collection = [e.parent() for e in self.context.collection.unpack]
-            collection = [e for e in collection if type(e) != Null]
-            collection = SequenceCollection.from_unpacked(
-                itertools.chain(*(p.descendants() for p in collection))
-            )
-            collection = self._apply_filter(collection, ctx.filter_())
-            self.context.reset_collection(collection)  # will not include p's parent, only descendants of p's parent
-            rel_path = ctx.relPath()
-            collection = self.visit(rel_path)
-            return collection
-        finally:
-            self.context.restore()
-
-    def visitPathFromNested(self, ctx: XplorePathGrammarParser.PathFromNestedContext):
-        try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
-            collection = self.visit(ctx.wrapOrVar())
-            collection = [e for e in collection.unpack if isinstance(e, Node)]
-            collection = SequenceCollection.from_unpacked(collection)
-            self.context.reset_collection(collection)
-            rel_path = ctx.relPath()
-            collection = self.visit(rel_path)
-            return collection
-        finally:
-            self.context.restore()
-
-    def visitPathFromNestedAny(self, ctx: XplorePathGrammarParser.PathFromNestedAnyContext):
-        try:
-            self.context.save(new_collection=_CollectionResetMode.RESET_WITH_SELF)
-            collection = self.visit(ctx.wrapOrVar())
-            collection = [e for e in collection.unpack if isinstance(e, Node)]
-            collection = SequenceCollection.from_unpacked(
-                itertools.chain(*([p] + p.descendants() for p in collection))
-            )
-            self.context.reset_collection(collection)
-            rel_path = ctx.relPath()
-            collection = self.visit(rel_path)
-            return collection
-        finally:
-            self.context.restore()
-
-    def visitRelPath(self, ctx: XplorePathGrammarParser.RelPathContext):
+    def visitPathInner(self, ctx: XplorePathGrammarParser.PathInnerContext):
         # TODO: Pushing / popping state not required?
         try:
             self.context.save(_CollectionResetMode.RESET_WITH_SELF)
@@ -673,13 +605,13 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             child_idx = 1
             while child_idx < child_cnt:
                 separator = ctx.getChild(child_idx)
-                if separator.symbol.type == XplorePathGrammarLexer.SS:
+                if separator.SS():
                     collection_with_descendants = []
                     for p in collection.unpack:
                         collection_with_descendants.append(p)
                         collection_with_descendants += p.descendants()
                     collection = SequenceCollection.from_unpacked(collection_with_descendants)
-                elif separator.symbol.type == XplorePathGrammarLexer.SLASH:
+                elif separator.SLASH():
                     ...
                 else:
                     raise ValueError('Unexpected')
@@ -709,7 +641,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 if type(parent_node) != Null:
                     new_nodes.append(parent_node)
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitReverseStepAncestor(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
         new_nodes = []
@@ -718,7 +650,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 new_nodes += e.ancestors()
         new_nodes = new_nodes[::-1]
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitReverseStepPreceding(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
         new_nodes = []
@@ -726,7 +658,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             if isinstance(e, Node):
                 new_nodes += e.preceding()
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitReverseStepPrecedingSibling(self, ctx: XplorePathGrammarParser.ReverseStepPrecedingContext):
         new_nodes = []
@@ -734,7 +666,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             if isinstance(e, Node):
                 new_nodes += e.preceding_sibling()
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitReverseStepAncestorOrSelf(self, ctx: XplorePathGrammarParser.ReverseStepAncestorOrSelfContext):
         new_nodes = []
@@ -744,7 +676,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 new_nodes += e.ancestors()
         new_nodes = new_nodes[::-1]
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitReverseStepDirectParent(self, ctx: XplorePathGrammarParser.ReverseStepDirectParentContext):
         new_nodes = []
@@ -761,7 +693,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             if isinstance(e, Node):
                 new_nodes += e.children()
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitForwardStepDescendant(self, ctx: XplorePathGrammarParser.ForwardStepDescendantContext):
         new_nodes = []
@@ -769,10 +701,10 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             if isinstance(e, Node):
                 new_nodes += e.descendants()
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitForwardStepSelf(self, ctx: XplorePathGrammarParser.ForwardStepSelfContext):
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitForwardStepDescendantOrSelf(self, ctx: XplorePathGrammarParser.ForwardStepDescendantOrSelfContext):
         new_nodes = []
@@ -781,7 +713,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 new_nodes.append(e)
                 new_nodes += e.descendants()
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitForwardStepFollowingSibling(self, ctx: XplorePathGrammarParser.ForwardStepFollowingSiblingContext):
         new_nodes = []
@@ -789,7 +721,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             if isinstance(e, Node):
                 new_nodes += e.following_sibling()
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitForwardStepFollowing(self, ctx: XplorePathGrammarParser.ForwardStepFollowingContext):
         new_nodes = []
@@ -797,7 +729,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             if isinstance(e, Node):
                 new_nodes += e.following()
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitForwardStepValue(self, ctx: XplorePathGrammarParser.ForwardStepValueContext):
         new_nodes = []
@@ -805,7 +737,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             if isinstance(e, Node):
                 new_nodes += e.children()
         self.context.reset_collection(SequenceCollection.from_unpacked(new_nodes))
-        return self._walk_down(self.visit(ctx.atomicOrEncapsulate()))
+        return self._walk_down(self.visit(ctx.atomic()))
 
     def visitForwardStepDirectSelf(self, ctx: XplorePathGrammarParser.ForwardStepDirectSelfContext):
         return self.context.collection  # Return existing
@@ -837,15 +769,19 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
 
         # If filter evaluates to number or NumericRangeMatcher, extract by index
         # ----------------------------------------------------------------------
-        filter_res_exp = self.visit(ctx.expr())
-        # /a/b[int] - Return if index in the filter_res_exp set matches int.
-        if isinstance(filter_res_exp, SingleValueCollection) \
-                and type(filter_res_exp.single.value) in {float, int}:
-            return collection.filter(lambda idx, _: filter_res_exp.single.value == idx)
-        # /a/b[NumericRangeMatcher] - Return if index in the filter_res_exp set is in range
-        elif isinstance(filter_res_exp, SingleValueCollection) \
-                and type(filter_res_exp.single.value) == NumericRangeMatcher:
-            return collection.filter(lambda idx, _: filter_res_exp.single.value.match(idx))
+        try:
+            self.context.save(collection)
+            filter_res_exp = self.visit(ctx.expr())
+            # /a/b[int] - Return if index in the filter_res_exp set matches int.
+            if isinstance(filter_res_exp, SingleValueCollection) \
+                    and type(filter_res_exp.single.value) in {float, int}:
+                return collection.filter(lambda idx, _: filter_res_exp.single.value == idx)
+            # /a/b[NumericRangeMatcher] - Return if index in the filter_res_exp set is in range
+            elif isinstance(filter_res_exp, SingleValueCollection) \
+                    and type(filter_res_exp.single.value) == NumericRangeMatcher:
+                return collection.filter(lambda idx, _: filter_res_exp.single.value.match(idx))
+        finally:
+            self.context.restore()
 
         # If filter evaluates to number or NumericRangeMatcher, apply filtering logic on each child
         # -----------------------------------------------------------------------------------------
