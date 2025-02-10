@@ -75,6 +75,7 @@ KW_JOIN                   : 'join';
 KW_CONCATENATE            : 'concat';
 KW_TRUE                   : 'true';
 KW_FALSE                  : 'false';
+KW_NOT                    : 'not';
 KW_NULL                   : 'null';
 
 RegexMatcher      : 'r' FragStringLiteral;
@@ -152,6 +153,7 @@ expr
     | expr (KW_UNION | P) expr                          # ExprSetUnion
     | KW_LABEL expr                                     # ExprExtractLabel
     | KW_POSITION expr                                  # ExprExtractPosition
+    | KW_NOT expr coerceFallback?                       # ExprNot
     | expr orOp expr coerceFallback?                    # ExprOr
     | expr andOp expr coerceFallback?                   # ExprAnd
     | expr relOp expr coerceFallback?                   # ExprComparison

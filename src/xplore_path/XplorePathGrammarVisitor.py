@@ -14,11 +14,6 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprAnd.
-    def visitExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by XplorePathGrammarParser#ExprBoolAggregate.
     def visitExprBoolAggregate(self, ctx:XplorePathGrammarParser.ExprBoolAggregateContext):
         return self.visitChildren(ctx)
@@ -36,6 +31,26 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#ExprExtractLabel.
     def visitExprExtractLabel(self, ctx:XplorePathGrammarParser.ExprExtractLabelContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprNot.
+    def visitExprNot(self, ctx:XplorePathGrammarParser.ExprNotContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
+    def visitExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
+    def visitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAnd.
+    def visitExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
         return self.visitChildren(ctx)
 
 
@@ -61,16 +76,6 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by XplorePathGrammarParser#ExprJoin.
     def visitExprJoin(self, ctx:XplorePathGrammarParser.ExprJoinContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
-    def visitExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
-    def visitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
         return self.visitChildren(ctx)
 
 

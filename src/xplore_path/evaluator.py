@@ -457,6 +457,13 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             aggregate_mode=self._to_aggregate_mode(ctx.relOp())
         )
 
+    def visitExprNot(self, ctx: XplorePathGrammarParser.ExprNotContext):
+        fallback_mode = self._to_fallback_mode(ctx, DiscardFallbackMode())
+        r = self.visit(ctx.expr())
+        r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
+        r = r.transform(lambda _, e: Entity(not e.value), fallback_mode)
+        return r
+
     def visitExprOr(self, ctx: XplorePathGrammarParser.ExprAndContext):
         op = lambda lv, rv: lv or rv
         op_required_type = bool

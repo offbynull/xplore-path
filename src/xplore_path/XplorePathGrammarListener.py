@@ -17,15 +17,6 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprAnd.
-    def enterExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprAnd.
-    def exitExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
-        pass
-
-
     # Enter a parse tree produced by XplorePathGrammarParser#ExprBoolAggregate.
     def enterExprBoolAggregate(self, ctx:XplorePathGrammarParser.ExprBoolAggregateContext):
         pass
@@ -59,6 +50,42 @@ class XplorePathGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XplorePathGrammarParser#ExprExtractLabel.
     def exitExprExtractLabel(self, ctx:XplorePathGrammarParser.ExprExtractLabelContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprNot.
+    def enterExprNot(self, ctx:XplorePathGrammarParser.ExprNotContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprNot.
+    def exitExprNot(self, ctx:XplorePathGrammarParser.ExprNotContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
+    def enterExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
+    def exitExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprAdditive.
+    def enterExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
+    def exitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprAnd.
+    def enterExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprAnd.
+    def exitExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
         pass
 
 
@@ -104,24 +131,6 @@ class XplorePathGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by XplorePathGrammarParser#ExprJoin.
     def exitExprJoin(self, ctx:XplorePathGrammarParser.ExprJoinContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
-    def enterExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
-    def exitExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprAdditive.
-    def enterExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
-    def exitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
         pass
 
 
