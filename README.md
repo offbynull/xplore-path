@@ -12,19 +12,16 @@ Xplore Path aims to be the first tool you reach for when exploring reasonably-si
 
 To get started, jump to [REPL Usage Guide](#repl-usage-guide).
 
-<details><summary>Table of Contents</summary>
-
 <!-- TOC -->
 * [Xplore Path](#xplore-path)
   * [REPL Usage Guide](#repl-usage-guide)
   * [Library Usage Guide](#library-usage-guide)
+  * [Xplore Path vs XPath](#xplore-path-vs-xpath)
   * [Extension Guide](#extension-guide)
     * [Custom Formats](#custom-formats)
     * [Custom Functions](#custom-functions)
   * [TODOs](#todos)
 <!-- TOC -->
-
-</details>
 
 ## REPL Usage Guide
 
@@ -67,7 +64,7 @@ The following commands install Xplore Path in development mode, as if you're dev
 
    ```bash
    python --version
-   pip install poetry
+   poetry --version
    ```
 
 2. Clone the repository.
@@ -96,9 +93,7 @@ Regardless of the installation method, the last step launches the REPL with the 
 
 ![Screenshot of REPL interface](repl_example.png)
 
-The `playground` directory contains a mix of fabricated biological and general-purpose data, spread across many file formats. Xplore Path lets you query this data as if it were a single unified hierarchy.
-
-Try running a few of the example queries shown below. If you've used XPath before, the queries below should feel familiar as Xplore Path's query language is heavily inspired by XPath.
+The `playground` directory contains a mix of fabricated biological and general-purpose data, spread across many file formats. Xplore Path lets you query this data as if it were a single unified hierarchy.  Try running a few of the example queries shown below. If you've used XPath before, the queries below should feel familiar as Xplore Path's query language is heavily inspired by XPath.
 
 <details><summary>Walking hierarchy</summary>
 
@@ -141,26 +136,13 @@ Try running a few of the example queries shown below. If you've used XPath befor
 
 * `($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(.//l, '\d{7}') = $regex_extract(.//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
 
-The query above is made up of the two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` amd `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists grabs the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
+The query above is made up of the two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` and `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
 
 :warning: **Xplore Path joins are currently slow.** At the moment, the joining logic hasn't been optimized. Expect joins to be incredibly slow: O(n^2).
 
 </details>
 
-As highlighted in a few of the above examples, Xplore Path's syntax enhances basic XPath syntax in several helpful ways:
-
-* Fuzzy matching is available in various forms.
-  * Prefix a string with `i` for case-insensitive matching (e.g. `i'HeLLo'`) 
-  * Prefix a string with `g` for glob matching (e.g. `g'hello*'`).
-  * Prefix a string with `r` for regex matching (e.g. `r'hello.*'`).
-  * Prefix a string with `f` for approximate string matching (e.g. `f'hello'`).
-  * Prefix a string with `s` for strict matching, as in not fuzzy/approximate in any way (e.g. `s'hello'`).
-  * `~number:number` for number ranges, optionally using brackets to define open/closed-ness (e.g. `~[4:9)`)
-  * `~number@tolerance` for number within some tolerance (e.g. `~3.14@0.0001`)
-* Variables are denoted by a `$` followed by a word (e.g. `$distinct`), and may be called / searched.
-* Queries are joinable using `inner join`, `left join`, and `right join`.
-
-The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/XplorePathGrammar.g4).
+As highlighted in a few of the above examples, Xplore Path's syntax enhances basic XPath syntax in several helpful ways. For a list of major differences, jump to [Xplore Path vs XPath](#xplore-path-vs-xpath).
 
 ## Library Usage Guide
 
@@ -198,6 +180,90 @@ for v in result.unpack:
     else:
         print(f'{v}')
 ```
+
+
+## Xplore Path vs XPath
+
+While Xplore Path's query language is heavily inspired by XPath, it deviates in several important ways:
+
+1. <details><summary>0-based indexing.</summary>
+
+   XPath indexing is 1-based, while Xplore Path indexing is 0-based. Most programming languages and querying languages use 0-based indexing, and so Xplore Path sticks to that convention.
+
+   Examples:
+
+   ```xpath
+   # XPath: Get first "apple" under root.
+   /apple[1]
+   
+   # Xplore Path: Get first "apple" under root.
+   /apple[0]
+   ```
+   
+   </details>
+2. <details><summary>Fuzzy searching.</summary>
+
+   Xplore Path adds support for various types of fuzzy matching through the use of custom literals:
+
+   * String literal prefixed with `i` for case-insensitive matching (e.g. `i'HeLLo'`) 
+   * String literal prefixed with `g` for glob matching (e.g. `g'hello*'`).
+   * String literal prefixed with `r` for regex matching (e.g. `r'hello.*'`).
+   * String literal prefixed with `f` for approximate string matching (e.g. `f'hello'`).
+   * String literal prefixed with `s` for strict matching, as in not fuzzy/approximate in any way (e.g. `s'hello'`).
+   * `~number:number` for number ranges, optionally using brackets to define open/closed-ness (e.g. `~[4:9)`)
+   * `~number@tolerance` for number within some tolerance (e.g. `~3.14@0.0001`)
+
+   Examples:   
+
+   ```xpath
+   /mouse_assays.zip/g'*001.csv'//*
+   /mouse_assays.zip//*/GO_Term[. = g'GO:*']
+   ```
+
+   </details>
+3. <details><summary>Variables.</summary>
+
+   Xplore Path adds support for variables. Variables are denoted by a word prefixed with `$` (e.g. `$distinct`), and may be ...
+
+   * included in a query.
+   * invoked as a function (assuming the variable contains something that's invocable).
+
+   Examples:
+
+   ```xpath
+   /a/$my_variable/c         # Inject into path element
+   /a/b/c[. = $my_variable]  # Inject into condition
+   $my_variable()            # Invoke
+   ```
+   
+   </details>
+4. <details><summary>Joining.</summary>
+
+   Xplore Path adds experimental support for joining queries. Queries are joinable using `inner join`, `left join`, and `right join`.
+
+   Example:
+
+   ```xpath
+   ($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(.//l, '\d{7}') = $regex_extract(.//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
+   ```
+
+   The example above is made up of the two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` and+ `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
+
+   :warning: **Xplore Path joins are currently slow.** At the moment, the joining logic hasn't been optimized. Expect joins to be incredibly slow: O(n^2).
+
+   </details>
+5. <details><summary>Nodes with both children and value.</summary>
+
+   In XPath / XML, it isn't possible for a node to have both a value and children. With Xplore Path, it is possible. If the underlying hierarchy supports nodes that have both a value and children, Xplore Path has the capability to directly represent those nodes.
+
+   </details>
+6. <details><summary>No concept of namespaces/attributes.</summary>
+
+   XPath is specific to XML, and as such supports the concept of XML namespaces and attributes. Since Xplore Path's intent is to be more abstract (in that it can represent any type of hierarchical data, not just XML data), it doesn't have a concept of XML namespaces or attributes.
+
+   </details>
+
+The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/XplorePathGrammar.g4).
 
 ## Extension Guide
 
