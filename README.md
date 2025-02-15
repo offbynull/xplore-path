@@ -184,86 +184,110 @@ for v in result.unpack:
 
 ## Xplore Path vs XPath
 
-While Xplore Path's query language is heavily inspired by XPath, it deviates in several important ways:
+While Xplore Path's query language is heavily inspired by XPath, it deviates in several important ways. If you're coming here as someone experienced with XPath, here are the key differences between XPath and Xplore Path to be mindful of:
 
-1. <details><summary>0-based indexing.</summary>
+ * <details><summary>0-based indexing.</summary>
 
-   XPath indexing is 1-based, while Xplore Path indexing is 0-based. Most programming languages and querying languages use 0-based indexing, and so Xplore Path sticks to that convention.
-
-   Examples:
-
-   ```xpath
-   # XPath: Get first "apple" under root.
-   /apple[1]
-   
-   # Xplore Path: Get first "apple" under root.
-   /apple[0]
-   ```
-   
-   </details>
-2. <details><summary>Fuzzy searching.</summary>
-
-   Xplore Path adds support for various types of fuzzy matching through the use of custom literals:
-
-   * String literal prefixed with `i` for case-insensitive matching (e.g. `i'HeLLo'`) 
-   * String literal prefixed with `g` for glob matching (e.g. `g'hello*'`).
-   * String literal prefixed with `r` for regex matching (e.g. `r'hello.*'`).
-   * String literal prefixed with `f` for approximate string matching (e.g. `f'hello'`).
-   * String literal prefixed with `s` for strict matching, as in not fuzzy/approximate in any way (e.g. `s'hello'`).
-   * `~number:number` for number ranges, optionally using brackets to define open/closed-ness (e.g. `~[4:9)`)
-   * `~number@tolerance` for number within some tolerance (e.g. `~3.14@0.0001`)
-
-   Examples:   
-
-   ```xpath
-   /mouse_assays.zip/g'*001.csv'//*
-   /mouse_assays.zip//*/GO_Term[. = g'GO:*']
-   ```
-
-   </details>
-3. <details><summary>Variables.</summary>
-
-   Xplore Path adds support for variables. Variables are denoted by a word prefixed with `$` (e.g. `$distinct`), and may be ...
-
-   * included in a query.
-   * invoked as a function (assuming the variable contains something that's invocable).
+   XPath indexing is 1-based, whereas Xplore Path indexing is 0-based. Most programming languages and querying languages use 0-based indexing, and so Xplore Path sticks to that convention.
 
    Examples:
 
    ```xpath
-   /a/$my_variable/c         # Inject into path element
-   /a/b/c[. = $my_variable]  # Inject into condition
-   $my_variable()            # Invoke
+   /apple[1]    # XPath: Get first "apple" under root.
+   /apple[0]    # Xplore Path: Get first "apple" under root.
    ```
    
    </details>
-4. <details><summary>Joining.</summary>
+ * <details><summary>Queries must start with a path separator or a relative path indicator.</summary>
 
-   Xplore Path adds experimental support for joining queries. Queries are joinable using `inner join`, `left join`, and `right join`.
-
-   Example:
+   XPath queries have the option of starting with just a path element (e.g. `a/b/c`, treated as querying relative to the current context node). whereas Xplore Path requires that queries start with either a path separator (`/` or `//`) or a relative path indicator (e.g. `.` or `..`).
 
    ```xpath
-   ($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(.//l, '\d{7}') = $regex_extract(.//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
+   a/b/c     # NOT ALLOWED - Valid in XPath only
+   /a/b/c    # Allowed - Valid in both XPath and Xplore Path
+   //a/b/c   # Allowed - Valid in both XPath and Xplore Path
+   ./a/b/c   # Allowed - Valid in both XPath and Xplore Path
+   ../a/b/c  # Allowed - Valid in both XPath and Xplore Path
    ```
+   
+   </details>
+ * <details><summary>Subset of directives / operations / functions supported.</summary>
 
-   The example above is made up of the two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` and+ `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
+   Xplore Path supports a subset of the directives / operations / functions present in XPath. Many were left out because Xplore Path gives the user the ability to plug in their own [custom functions](#custom-functions).
 
-   :warning: **Xplore Path joins are currently slow.** At the moment, the joining logic hasn't been optimized. Expect joins to be incredibly slow: O(n^2).
+   Those supported include ...
+
+   * `not`
+   * `position`
+   * `label` (synonym for XPath's `name`)
+   * `intersect`
+   * `except`
+   * `union`
+   * `|`
 
    </details>
-5. <details><summary>Nodes with both children and value.</summary>
-
-   In XPath / XML, it isn't possible for a node to have both a value and children. With Xplore Path, it is possible. If the underlying hierarchy supports nodes that have both a value and children, Xplore Path has the capability to directly represent those nodes.
-
-   </details>
-6. <details><summary>No concept of namespaces/attributes.</summary>
+ * <details><summary>No concept of namespaces/attributes.</summary>
 
    XPath is specific to XML, and as such supports the concept of XML namespaces and attributes. Since Xplore Path's intent is to be more abstract (in that it can represent any type of hierarchical data, not just XML data), it doesn't have a concept of XML namespaces or attributes.
 
    </details>
+ * <details><summary>A node can have both children and a value.</summary>
 
-The Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/XplorePathGrammar.g4).
+   In XPath / XML, it isn't possible for a node to have both a value and children. With Xplore Path, it is possible. If the underlying hierarchy supports nodes that have both a value and children, Xplore Path has the capability to directly represent those nodes.
+
+   </details>
+
+In addition to the above points, the following subsections detail helpful additions provided by Xplore Path.
+
+The full Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_path/XplorePathGrammar.g4).
+
+### Fuzzy Search
+
+Xplore Path adds support for various types of fuzzy matching through the use of custom literals:
+
+* String literal prefixed with `i` for case-insensitive matching (e.g. `i'HeLLo'`) 
+* String literal prefixed with `g` for glob matching (e.g. `g'hello*'`).
+* String literal prefixed with `r` for regex matching (e.g. `r'hello.*'`).
+* String literal prefixed with `f` for approximate string matching (e.g. `f'hello'`).
+* String literal prefixed with `s` for strict matching, as in not fuzzy/approximate in any way (e.g. `s'hello'`).
+* `~number:number` for number ranges, optionally using brackets to define open/closed-ness (e.g. `~[4:9)`)
+* `~number@tolerance` for number within some tolerance (e.g. `~3.14@0.0001`)
+
+Examples:   
+
+```xpath
+/mouse_assays.zip/g'*001.csv'//*
+/mouse_assays.zip//*/GO_Term[. = g'GO:*']
+```
+
+### Variables
+
+Xplore Path adds support for variables. Variables are denoted by a word prefixed with `$` (e.g. `$distinct`), and may be ...
+
+* included in a query.
+* invoked as a function (assuming the variable contains something that's invocable).
+
+Examples:
+
+```xpath
+/a/$my_variable/c         # Inject into path element
+/a/b/c[. = $my_variable]  # Inject into condition
+$my_variable()            # Invoke
+```
+
+### Joining
+
+Xplore Path adds experimental support for joining queries. Queries are joinable using `inner join`, `left join`, and `right join`.
+
+Example:
+
+```xpath
+($distinct(/mouse_assays.zip/*/0/GO_Term) inner join /goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*'] on [$regex_extract(.//l, '\d{7}') = $regex_extract(.//r//id, '\d{7}')])` - Across all mouse assays, list gene ontology terms in the mouse assay that are related to neuro
+```
+
+The example above is made up of the two sub-queries `$distinct(/mouse_assays.zip/*/0/GO_Term)` and+ `/goslim_mouse.json/graphs//*[./meta/definition/val = g'*neuro*']`. The former lists the distinct gene ontology terms used across all mouse assays and the latter pulls out gene ontology terms related to neuro. The results are then inner joined.
+
+:warning: **Xplore Path joins are currently slow.** At the moment, the joining logic hasn't been optimized. Expect joins to be incredibly slow: O(n^2).
 
 ## Extension Guide
 
