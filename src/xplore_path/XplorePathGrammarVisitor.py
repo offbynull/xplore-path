@@ -14,73 +14,128 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprBoolAggregate.
-    def visitExprBoolAggregate(self, ctx:XplorePathGrammarParser.ExprBoolAggregateContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#expr.
+    def visitExpr(self, ctx:XplorePathGrammarParser.ExprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprSetIntersect.
-    def visitExprSetIntersect(self, ctx:XplorePathGrammarParser.ExprSetIntersectContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprJoinForward.
+    def visitExprJoinForward(self, ctx:XplorePathGrammarParser.ExprJoinForwardContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprComparison.
-    def visitExprComparison(self, ctx:XplorePathGrammarParser.ExprComparisonContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprJoinHit.
+    def visitExprJoinHit(self, ctx:XplorePathGrammarParser.ExprJoinHitContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprExtractLabel.
-    def visitExprExtractLabel(self, ctx:XplorePathGrammarParser.ExprExtractLabelContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprSetIntersectHit.
+    def visitExprSetIntersectHit(self, ctx:XplorePathGrammarParser.ExprSetIntersectHitContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprNot.
-    def visitExprNot(self, ctx:XplorePathGrammarParser.ExprNotContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprSetIntersectForward.
+    def visitExprSetIntersectForward(self, ctx:XplorePathGrammarParser.ExprSetIntersectForwardContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
-    def visitExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprSetUnionForward.
+    def visitExprSetUnionForward(self, ctx:XplorePathGrammarParser.ExprSetUnionForwardContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
-    def visitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprSetUnionHit.
+    def visitExprSetUnionHit(self, ctx:XplorePathGrammarParser.ExprSetUnionHitContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprAnd.
-    def visitExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprOrForward.
+    def visitExprOrForward(self, ctx:XplorePathGrammarParser.ExprOrForwardContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprExtractPosition.
-    def visitExprExtractPosition(self, ctx:XplorePathGrammarParser.ExprExtractPositionContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprOrHit.
+    def visitExprOrHit(self, ctx:XplorePathGrammarParser.ExprOrHitContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprOr.
-    def visitExprOr(self, ctx:XplorePathGrammarParser.ExprOrContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAndHit.
+    def visitExprAndHit(self, ctx:XplorePathGrammarParser.ExprAndHitContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprMultiplicative.
-    def visitExprMultiplicative(self, ctx:XplorePathGrammarParser.ExprMultiplicativeContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAndForward.
+    def visitExprAndForward(self, ctx:XplorePathGrammarParser.ExprAndForwardContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprSetUnion.
-    def visitExprSetUnion(self, ctx:XplorePathGrammarParser.ExprSetUnionContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprNotHit.
+    def visitExprNotHit(self, ctx:XplorePathGrammarParser.ExprNotHitContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprJoin.
-    def visitExprJoin(self, ctx:XplorePathGrammarParser.ExprJoinContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprNotForward.
+    def visitExprNotForward(self, ctx:XplorePathGrammarParser.ExprNotForwardContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#ExprUnary.
-    def visitExprUnary(self, ctx:XplorePathGrammarParser.ExprUnaryContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprComparisonForward.
+    def visitExprComparisonForward(self, ctx:XplorePathGrammarParser.ExprComparisonForwardContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprComparisonHit.
+    def visitExprComparisonHit(self, ctx:XplorePathGrammarParser.ExprComparisonHitContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAdditiveForward.
+    def visitExprAdditiveForward(self, ctx:XplorePathGrammarParser.ExprAdditiveForwardContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprAdditiveHit.
+    def visitExprAdditiveHit(self, ctx:XplorePathGrammarParser.ExprAdditiveHitContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprMultiplicativeForward.
+    def visitExprMultiplicativeForward(self, ctx:XplorePathGrammarParser.ExprMultiplicativeForwardContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprMultiplicativeHit.
+    def visitExprMultiplicativeHit(self, ctx:XplorePathGrammarParser.ExprMultiplicativeHitContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprUnaryNegateHit.
+    def visitExprUnaryNegateHit(self, ctx:XplorePathGrammarParser.ExprUnaryNegateHitContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprUnaryLabelHit.
+    def visitExprUnaryLabelHit(self, ctx:XplorePathGrammarParser.ExprUnaryLabelHitContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprUnaryPositionHit.
+    def visitExprUnaryPositionHit(self, ctx:XplorePathGrammarParser.ExprUnaryPositionHitContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprUnaryAnyAggregateHit.
+    def visitExprUnaryAnyAggregateHit(self, ctx:XplorePathGrammarParser.ExprUnaryAnyAggregateHitContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprUnaryAllAggregateHit.
+    def visitExprUnaryAllAggregateHit(self, ctx:XplorePathGrammarParser.ExprUnaryAllAggregateHitContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by XplorePathGrammarParser#ExprUnaryForward.
+    def visitExprUnaryForward(self, ctx:XplorePathGrammarParser.ExprUnaryForwardContext):
         return self.visitChildren(ctx)
 
 

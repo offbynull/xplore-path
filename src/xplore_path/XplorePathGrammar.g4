@@ -128,49 +128,65 @@ xplorePath
     : expr EOF
     ;
 
-// TODO: Having "coerceFallback?" at the end of expr's recursive alternatives introduces an ambigutaty. For example,
-//       "(KW_ANY | KW_ALL) expr coerceFallback?" - imagine the expression "any any True on error discard". The
-//       coerceFallback rule could be either part of the inner expr or the outer expr because both are at the end and
-//       both are optional.
+// TODO: Having "coerceFallback?" at the end of expr's recursive alternatives introduces an ambiguity. For example,
+//       think of the expression "5+4*3 on error discard" . There are two possible places where "coerceFallback"s
+//       can be applied - which of the two "coerceFallback" does it get it assigned to?
 //
-//       Think of "any any True on error discard" once expr is flattened:
-//       "(KW_ANY | KW_ALL) ((KW_ANY | KW_ALL) expr coerceFallback?) coerceFallback?". There are two optional
-//       "coerceFallback"s at the end but the expression only tries to insert one - which of the two "coerceFallback"
-//       does it get it assigned to?
+//                   INTERPRETATION 1                                              INTERPRETATION 2
 //
-//                   INTERPRETATION 1                                                   INTERPRETATION 2
-//
-//            any any True on error discard                                         any any True on error discard
-//               '-------------------------' inner expr                 inner expr     '--------'
-//           '-----------------------------' outer expr                 outer expr '-----------------------------'
-//
-//       In INTERPRETATION 1, "coerceFallbck" is consumed by the inner expr. In INTERPRETATION 2, it's consumed by the
-//       outer expr.
-expr
-    : (KW_ANY | KW_ALL) expr coerceFallback?            # ExprBoolAggregate
-    | expr joinOp expr joinCond                         # ExprJoin
-    | expr (KW_INTERSECT | KW_EXCEPT) expr              # ExprSetIntersect
-    | expr (KW_UNION | P) expr                          # ExprSetUnion
-    | KW_LABEL expr                                     # ExprExtractLabel
-    | KW_POSITION expr                                  # ExprExtractPosition
-    | KW_NOT expr coerceFallback?                       # ExprNot
-    | expr orOp expr coerceFallback?                    # ExprOr
-    | expr andOp expr coerceFallback?                   # ExprAnd
-    | expr relOp expr coerceFallback?                   # ExprComparison
-    | expr addOp expr coerceFallback?                   # ExprAdditive
-    | expr mulOp expr coerceFallback?                   # ExprMultiplicative
-    | negateOrPathOrAtomic                              # ExprAtomicOrPathOrEncapsulate
-    ;
+//            5 + 4 * 3 on error discard                                         5 + 4 * 3 on error discard
+//               '----------------------' inner expr                 inner expr     '-----'
+//           '--------------------------' outer expr                 outer expr '---------------------------'
+expr: exprJoin;
 
-// Why isn't negateOrPathOrAtomic directly tied embedded within expr? It was, and the ExprUnary alternative was defined
-// as "(MINUS | PLUS) expr". This worked fine except that when you did something like -1-1, it evaluated as -(1-1)
-// instead of (-1)-1. The later evaluation is the correct evaluation order, and that's what happens now with this
-// current grammar.
-negateOrPathOrAtomic
-    : (MINUS | PLUS) negateOrPathOrAtomic coerceFallback?  # ExprUnary
-    | path                                                 # ExprPath        // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
-    | path argumentList filter?                            # ExprPathInvoke  // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
-    | atomic                                               # ExprAtomic
+exprJoin
+    : exprJoin joinOp exprSetIntersect joinCond                 # ExprJoinHit
+    | exprSetIntersect                                          # ExprJoinForward
+    ;
+exprSetIntersect
+    : exprSetIntersect (KW_INTERSECT | KW_EXCEPT) exprSetUnion  # ExprSetIntersectHit
+    | exprSetUnion                                              # ExprSetIntersectForward
+    ;
+exprSetUnion
+    : exprSetUnion (KW_UNION | P) exprOr                        # ExprSetUnionHit
+    | exprOr                                                    # ExprSetUnionForward
+    ;
+exprOr
+    : exprOr orOp exprAnd coerceFallback?                       # ExprOrHit
+    | exprAnd                                                   # ExprOrForward
+    ;
+exprAnd
+    : exprAnd andOp exprNot coerceFallback?                     # ExprAndHit
+    | exprNot                                                   # ExprAndForward
+    ;
+exprNot
+    : KW_NOT exprNot coerceFallback?                            # ExprNotHit
+    | exprComparison                                            # ExprNotForward
+    ;
+exprComparison
+    : exprComparison relOp exprAdditive coerceFallback?         # ExprComparisonHit
+    | exprAdditive                                              # ExprComparisonForward
+    ;
+exprAdditive
+    : exprAdditive addOp exprMultiplicative coerceFallback?     # ExprAdditiveHit
+    | exprMultiplicative                                        # ExprAdditiveForward
+    ;
+exprMultiplicative
+    : exprMultiplicative mulOp exprUnary coerceFallback?        # ExprMultiplicativeHit
+    | exprUnary                                                 # ExprMultiplicativeForward
+    ;
+exprUnary
+    : (MINUS | PLUS) exprUnary coerceFallback?                  # ExprUnaryNegateHit
+    | KW_LABEL exprUnary                                        # ExprUnaryLabelHit
+    | KW_POSITION exprUnary                                     # ExprUnaryPositionHit
+    | KW_ANY exprUnary coerceFallback?                          # ExprUnaryAnyAggregateHit
+    | KW_ALL exprUnary coerceFallback?                          # ExprUnaryAllAggregateHit
+    | exprPathOrAtomic                                          # ExprUnaryForward
+    ;
+exprPathOrAtomic
+    : path                                                      # ExprPath        // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
+    | path argumentList filter?                                 # ExprPathInvoke  // REMINDER: Don't do "path filter? ..." - it'll cause ambiguity because each path element ends with "filter?" - so if there's a filter after the last element, it doesn't know which rule it should apply to (the element's filter or this rule's filter)
+    | atomic                                                    # ExprAtomic
     ;
 
 atomic

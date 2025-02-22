@@ -2,6 +2,7 @@ import unittest
 
 from xplore_path.evaluator import Evaluator
 from xplore_path.nodes.dummy.dummy_node import DummyNode
+from xplore_path.nodes.python_object.python_object_node import PythonObjectNode
 
 
 def evaluate(root, expr, variables = None):
@@ -1011,6 +1012,10 @@ class EvaluatorTest(unittest.TestCase):
         # empty
         self.assertEqual(evaluate(DummyNode(), '(true, true) and ()'), False)
 
+    # Regression test: Grammar ambiguity was causing the query below to fail
+    def test_must_apply_to_nodes(self):
+        root = PythonObjectNode.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': {'g': -2, 'h': -3}}, 'y': 3, 'z': 4}})
+        self.assertEqual(next(evaluate(root, '/a/b[./f/h=-3 and ../y=3]').unpack).label(), 'b')
 
 if __name__ == '__main__':
     unittest.main()

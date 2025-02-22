@@ -127,74 +127,6 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitXplorePath(self, ctx: XplorePathGrammarParser.XplorePathContext):
         return self.visit(ctx.expr())
 
-    def visitExprPath(self, ctx: XplorePathGrammarParser.ExprPathContext):
-        collection = self.visit(ctx.path())
-        return collection
-
-    def visitExprPathInvoke(self, ctx: XplorePathGrammarParser.ExprPathInvokeContext):
-        ret = self.visit(ctx.path())
-        ret = self._invoke(ret, ctx.argumentList(), ctx.filter_())
-        return ret
-
-    def visitExprAtomic(self, ctx: XplorePathGrammarParser.ExprAtomicContext):
-        return self.visit(ctx.atomic())
-
-    def visitExprLiteral(self, ctx: XplorePathGrammarParser.ExprLiteralContext):
-        return self.visit(ctx.literal())
-
-    def _get_var(self, ctx):
-        if ctx.varRef().Name():
-            name = ctx.varRef().Name().getText()
-        elif ctx.varRef().IntegerLiteral():
-            name = str(ctx.varRef().IntegerLiteral().getText())
-        elif ctx.varRef().StringLiteral():
-            name = self._decode_str(ctx.varRef().StringLiteral().getText())
-        else:
-            raise ValueError('Unexpected')
-        return self.context.get_variable(name, SequenceCollection.empty())
-
-    def visitExprVariable(self, ctx: XplorePathGrammarParser.ExprVariableContext):
-        ret = self._get_var(ctx)
-        ret = self._apply_filter(ret, ctx.filter_())
-        return ret
-
-    def visitExprVariableInvoke(self, ctx: XplorePathGrammarParser.ExprVariableInvokeContext):
-        ret = self._get_var(ctx)
-        ret = self._apply_filter(ret, ctx.filter_(0))
-        ret = self._invoke(ret, ctx.argumentList(), ctx.filter_(1))
-        return ret
-
-    def visitExprUnary(self, ctx: XplorePathGrammarParser.ExprUnaryContext):
-        if ctx.coerceFallback():
-            fallback = self.visit(ctx.coerceFallback())
-        else:
-            fallback = DiscardFallbackMode()
-        inner = self.visit(ctx.negateOrPathOrAtomic())
-        if ctx.MINUS():
-            inner = inner.transform(lambda _, e: e.coerce(float), fallback)
-            inner = inner.transform_unpacked(lambda _, v: -v, ErrorFallbackMode())
-            return inner
-        elif ctx.PLUS():
-            return inner  # Keep it as-is -- not required to do any manipulation here
-        raise ValueError('Unexpected')
-
-    def visitExprAtomicOrPathOrEncapsulate(self, ctx: XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
-        return self.visit(ctx.negateOrPathOrAtomic())
-
-    def _invoke(self, collection, arglist_ctx, result_filter_ctx):
-        # if ctx.coerceFallback():
-        #     fallback = self.visit(ctx.coerceFallback())
-        # else:
-        #     fallback = DiscardFallbackMode()
-        fallback = DiscardFallbackMode()
-
-        args = [self.visit(n) for n in arglist_ctx.expr()]
-        ret = itertools.chain(*(e.invoke(args) for e in collection))  # explicitly flatten each invocation result
-        ret = itertools.chain(*(fallback.evaluate(r) for r in ret))  # apply fallback
-        ret = SequenceCollection.from_entities(ret)
-        ret = self._apply_filter(ret, result_filter_ctx)
-        return ret
-
     # TODO: Deeply inefficient - rework this to properly index before joining based on the condition. For example, if
     #       condition is == and both operands are known to be hashable, then create hash table and use that for quick
     #       lookup. Likewise, if relational operator (e.g. > or <=) and operands support sorting, sort and lookup using
@@ -203,7 +135,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     #       Maybe, instead of passing around lists of Nodes (and singular values), create a Sequence class that holds
     #       these values. The Sequence class can generate an index (e.g. hash or sorted) based on the values within the
     #       sequence.
-    def visitExprJoin(self, ctx: XplorePathGrammarParser.ExprJoinContext):
+    def visitExprJoinHit(self, ctx: XplorePathGrammarParser.ExprJoinHitContext):
         def _create_join_obj(parent, parent_idx, l_item, r_item):
             test_node = SimpleNode(ParentBlock(parent, parent_idx, 'joined'), None)
             if isinstance(l_item, Node):
@@ -255,8 +187,8 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             test_node.seal()
             return test_node
 
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
+        l = self.visit(ctx.exprJoin())
+        r = self.visit(ctx.exprSetIntersect())
         root_node = SimpleNode(None, None)
         root_node_next_child_idx = 0
         if ctx.joinOp().KW_INNER():
@@ -313,9 +245,9 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         root_node.seal()
         return SequenceCollection.from_unpacked([root_node] + root_node.descendants())
 
-    def visitExprSetIntersect(self, ctx: XplorePathGrammarParser.ExprSetIntersectContext):
-        l = self.visit(ctx.expr(0)).to_set()
-        r = self.visit(ctx.expr(1)).to_set()
+    def visitExprSetIntersectHit(self, ctx: XplorePathGrammarParser.ExprSetIntersectHitContext):
+        l = self.visit(ctx.exprSetIntersect()).to_set()
+        r = self.visit(ctx.exprSetUnion()).to_set()
         if ctx.KW_INTERSECT():
             result_keys = l.keys() & r.keys()
         elif ctx.KW_EXCEPT():
@@ -324,95 +256,44 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
             raise ValueError('Unexpected')
         return SequenceCollection.from_entities(l[p] for p in result_keys)
 
-    def visitExprSetUnion(self, ctx: XplorePathGrammarParser.ExprSetUnionContext):
-        l = self.visit(ctx.expr(0)).to_set()
-        r = self.visit(ctx.expr(1)).to_set()
+    def visitExprSetUnionHit(self, ctx: XplorePathGrammarParser.ExprSetUnionHitContext):
+        l = self.visit(ctx.exprSetUnion()).to_set()
+        r = self.visit(ctx.exprOr()).to_set()
         result = l | r
         return SequenceCollection.from_entities(result.values())
 
-    def visitExprBoolAggregate(self, ctx: XplorePathGrammarParser.ExprBoolAggregateContext):
-        fallback_mode = self._to_fallback_mode(ctx, DefaultFallbackMode(False))
-        if ctx.KW_ANY():
-            op = any
-        elif ctx.KW_ALL():
-            op = all
-        else:
-            raise ValueError('Unexpected')
-        r = self.visit(ctx.expr())
+    def visitExprOrHit(self, ctx: XplorePathGrammarParser.ExprOrHitContext):
+        op = lambda lv, rv: lv or rv
+        op_required_type = bool
+        return combine_transform_aggregate(
+            lhs=self.visit(ctx.exprOr()),
+            rhs=self.visit(ctx.exprAnd()),
+            combine_mode=self._to_boolean_combine_mode(ctx.orOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
+            aggregate_mode=self._to_aggregate_mode(ctx.orOp())
+        )
+
+    def visitExprAndHit(self, ctx: XplorePathGrammarParser.ExprAndHitContext):
+        op = lambda lv, rv: lv and rv
+        op_required_type = bool
+        return combine_transform_aggregate(
+            lhs=self.visit(ctx.exprAnd()),
+            rhs=self.visit(ctx.exprNot()),
+            combine_mode=self._to_boolean_combine_mode(ctx.andOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
+            aggregate_mode=self._to_aggregate_mode(ctx.andOp())
+        )
+
+    def visitExprNotHit(self, ctx: XplorePathGrammarParser.ExprNotHitContext):
+        fallback_mode = self._to_fallback_mode(ctx, DiscardFallbackMode())
+        r = self.visit(ctx.exprNot())
         r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
-        return op(r.unpack)
+        r = r.transform(lambda _, e: Entity(not e.value), fallback_mode)
+        return r
 
-    def visitExprMultiplicative(self, ctx: XplorePathGrammarParser.ExprMultiplicativeContext):
-        lhs = self.visit(ctx.expr(0))
-        rhs = self.visit(ctx.expr(1))
-        if ctx.mulOp().STAR():
-            op=lambda _l, _r: _l * _r
-        elif ctx.mulOp().KW_DIV():
-            op=lambda _l, _r: _l / _r
-        elif ctx.mulOp().KW_IDIV():
-            op=lambda _l, _r: _l // _r
-        elif ctx.mulOp().KW_MOD():
-            op=lambda _l, _r: _l % _r
-        else:
-            raise ValueError('Unexpected')
-        op_required_type = float
-        return combine_transform_aggregate(
-            lhs=lhs,
-            rhs=rhs,
-            combine_mode=self._to_arithmetic_combine_mode(lhs, rhs, ctx.mulOp()),
-            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
-            transform_fallback_mode=self._to_fallback_mode(ctx, DiscardFallbackMode()),
-            aggregate_mode=AggregateMode.NONE
-        )
-
-    def visitExprAdditive(self, ctx: XplorePathGrammarParser.ExprAdditiveContext):
-        lhs = self.visit(ctx.expr(0))
-        rhs = self.visit(ctx.expr(1))
-        if ctx.addOp().PLUS():
-            op=lambda _l, _r: _l + _r
-            op_required_type=float
-        elif ctx.addOp().MINUS():
-            op = lambda _l, _r: _l - _r
-            op_required_type = float
-        elif ctx.addOp().PP():
-            op = lambda _l, _r: _l + _r
-            op_required_type = str
-        else:
-            raise ValueError('Unexpected')
-        return combine_transform_aggregate(
-            lhs=lhs,
-            rhs=rhs,
-            combine_mode=self._to_arithmetic_combine_mode(lhs, rhs, ctx.addOp()),
-            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
-            transform_fallback_mode=self._to_fallback_mode(ctx, DiscardFallbackMode()),
-            aggregate_mode=AggregateMode.NONE
-        )
-
-    def _to_arithmetic_combine_mode(self, lhs, rhs, ctx) -> CombineMode:
-        # default to zip if both are lists, otherwise use product as default - that's what xpath does
-        if isinstance(lhs, SequenceCollection) and isinstance(rhs, SequenceCollection):
-            ret = CombineMode.ZIP
-        else:
-            ret = CombineMode.PRODUCT
-        if ctx.KW_ZIP():
-            ret = CombineMode.ZIP
-        elif ctx.KW_PRODUCT():
-            ret = CombineMode.PRODUCT
-        return ret
-
-    def visitExprExtractLabel(self, ctx: XplorePathGrammarParser.ExprExtractLabelContext):
-        ret = self.visit(ctx.expr())
-        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Node))
-        ret = ret.transform_unpacked(lambda _, v: v.label(), ErrorFallbackMode())
-        return ret
-
-    def visitExprExtractPosition(self, ctx: XplorePathGrammarParser.ExprExtractPositionContext):
-        ret = self.visit(ctx.expr())
-        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Node))
-        ret = ret.transform_unpacked(lambda _, v: v.position(), ErrorFallbackMode())
-        return ret
-
-    def visitExprComparison(self, ctx: XplorePathGrammarParser.ExprComparisonContext):
+    def visitExprComparisonHit(self, ctx: XplorePathGrammarParser.ExprComparisonHitContext):
         def _eq_op(_l, _r):
             if isinstance(_l, Matcher) and isinstance(_r, Matcher):
                 return False
@@ -449,43 +330,12 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         else:
             raise ValueError('Unexpected')
         return combine_transform_aggregate(
-            lhs=self.visit(ctx.expr(0)),
-            rhs=self.visit(ctx.expr(1)),
+            lhs=self.visit(ctx.exprComparison()),
+            rhs=self.visit(ctx.exprAdditive()),
             combine_mode=self._to_boolean_combine_mode(ctx.relOp()),
             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
             transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
             aggregate_mode=self._to_aggregate_mode(ctx.relOp())
-        )
-
-    def visitExprNot(self, ctx: XplorePathGrammarParser.ExprNotContext):
-        fallback_mode = self._to_fallback_mode(ctx, DiscardFallbackMode())
-        r = self.visit(ctx.expr())
-        r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
-        r = r.transform(lambda _, e: Entity(not e.value), fallback_mode)
-        return r
-
-    def visitExprOr(self, ctx: XplorePathGrammarParser.ExprAndContext):
-        op = lambda lv, rv: lv or rv
-        op_required_type = bool
-        return combine_transform_aggregate(
-            lhs=self.visit(ctx.expr(0)),
-            rhs=self.visit(ctx.expr(1)),
-            combine_mode=self._to_boolean_combine_mode(ctx.orOp()),
-            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
-            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
-            aggregate_mode=self._to_aggregate_mode(ctx.orOp())
-        )
-
-    def visitExprAnd(self, ctx: XplorePathGrammarParser.ExprAndContext):
-        op = lambda lv, rv: lv and rv
-        op_required_type = bool
-        return combine_transform_aggregate(
-            lhs=self.visit(ctx.expr(0)),
-            rhs=self.visit(ctx.expr(1)),
-            combine_mode=self._to_boolean_combine_mode(ctx.andOp()),
-            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
-            transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
-            aggregate_mode=self._to_aggregate_mode(ctx.andOp())
         )
 
     def _to_boolean_combine_mode(self, ctx) -> CombineMode:
@@ -504,10 +354,157 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         else:  # if ctx.KW_ANY or no agg was explicitly specified (in which case it should default to ANY)
             return AggregateMode.ANY
 
+    def visitExprAdditiveHit(self, ctx: XplorePathGrammarParser.ExprAdditiveHitContext):
+        lhs = self.visit(ctx.exprAdditive())
+        rhs = self.visit(ctx.exprMultiplicative())
+        if ctx.addOp().PLUS():
+            op=lambda _l, _r: _l + _r
+            op_required_type=float
+        elif ctx.addOp().MINUS():
+            op = lambda _l, _r: _l - _r
+            op_required_type = float
+        elif ctx.addOp().PP():
+            op = lambda _l, _r: _l + _r
+            op_required_type = str
+        else:
+            raise ValueError('Unexpected')
+        return combine_transform_aggregate(
+            lhs=lhs,
+            rhs=rhs,
+            combine_mode=self._to_arithmetic_combine_mode(lhs, rhs, ctx.addOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DiscardFallbackMode()),
+            aggregate_mode=AggregateMode.NONE
+        )
+
+    def visitExprMultiplicativeHit(self, ctx: XplorePathGrammarParser.ExprMultiplicativeHitContext):
+        lhs = self.visit(ctx.exprMultiplicative())
+        rhs = self.visit(ctx.exprUnary())
+        if ctx.mulOp().STAR():
+            op=lambda _l, _r: _l * _r
+        elif ctx.mulOp().KW_DIV():
+            op=lambda _l, _r: _l / _r
+        elif ctx.mulOp().KW_IDIV():
+            op=lambda _l, _r: _l // _r
+        elif ctx.mulOp().KW_MOD():
+            op=lambda _l, _r: _l % _r
+        else:
+            raise ValueError('Unexpected')
+        op_required_type = float
+        return combine_transform_aggregate(
+            lhs=lhs,
+            rhs=rhs,
+            combine_mode=self._to_arithmetic_combine_mode(lhs, rhs, ctx.mulOp()),
+            transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
+            transform_fallback_mode=self._to_fallback_mode(ctx, DiscardFallbackMode()),
+            aggregate_mode=AggregateMode.NONE
+        )
+
+    def _to_arithmetic_combine_mode(self, lhs, rhs, ctx) -> CombineMode:
+        # default to zip if both are lists, otherwise use product as default - that's what xpath does
+        if isinstance(lhs, SequenceCollection) and isinstance(rhs, SequenceCollection):
+            ret = CombineMode.ZIP
+        else:
+            ret = CombineMode.PRODUCT
+        if ctx.KW_ZIP():
+            ret = CombineMode.ZIP
+        elif ctx.KW_PRODUCT():
+            ret = CombineMode.PRODUCT
+        return ret
+
+    def visitExprUnaryNegateHit(self, ctx: XplorePathGrammarParser.ExprUnaryNegateHitContext):
+        if ctx.coerceFallback():
+            fallback = self.visit(ctx.coerceFallback())
+        else:
+            fallback = DiscardFallbackMode()
+        inner = self.visit(ctx.exprUnary())
+        if ctx.MINUS():
+            inner = inner.transform(lambda _, e: e.coerce(float), fallback)
+            inner = inner.transform_unpacked(lambda _, v: -v, ErrorFallbackMode())
+            return inner
+        elif ctx.PLUS():
+            return inner  # Keep it as-is -- not required to do any manipulation here
+        raise ValueError('Unexpected')
+
+    def visitExprUnaryLabelHit(self, ctx: XplorePathGrammarParser.ExprUnaryLabelHitContext):
+        ret = self.visit(ctx.exprUnary())
+        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Node))
+        ret = ret.transform_unpacked(lambda _, v: v.label(), ErrorFallbackMode())
+        return ret
+
+    def visitExprUnaryPositionHit(self, ctx: XplorePathGrammarParser.ExprUnaryPositionHitContext):
+        ret = self.visit(ctx.exprUnary())
+        ret = ret.filter_unpacked(lambda _, v: isinstance(v, Node))
+        ret = ret.transform_unpacked(lambda _, v: v.position(), ErrorFallbackMode())
+        return ret
+
+    def visitExprUnaryAnyAggregateHit(self, ctx: XplorePathGrammarParser.ExprUnaryAnyAggregateHitContext):
+        fallback_mode = self._to_fallback_mode(ctx, DefaultFallbackMode(False))
+        r = self.visit(ctx.exprUnary())
+        r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
+        return any(r.unpack)
+
+    def visitExprUnaryAllAggregateHit(self, ctx: XplorePathGrammarParser.ExprUnaryAllAggregateHitContext):
+        fallback_mode = self._to_fallback_mode(ctx, DefaultFallbackMode(False))
+        r = self.visit(ctx.exprUnary())
+        r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
+        return all(r.unpack)
+
     def _to_fallback_mode(self, ctx, default: FallbackMode) -> FallbackMode:
         if ctx.coerceFallback():
             return self.visit(ctx.coerceFallback())
         return default
+
+    def visitExprPath(self, ctx: XplorePathGrammarParser.ExprPathContext):
+        collection = self.visit(ctx.path())
+        return collection
+
+    def visitExprPathInvoke(self, ctx: XplorePathGrammarParser.ExprPathInvokeContext):
+        ret = self.visit(ctx.path())
+        ret = self._invoke(ret, ctx.argumentList(), ctx.filter_())
+        return ret
+
+    def visitExprAtomic(self, ctx: XplorePathGrammarParser.ExprAtomicContext):
+        return self.visit(ctx.atomic())
+
+    def visitExprLiteral(self, ctx: XplorePathGrammarParser.ExprLiteralContext):
+        return self.visit(ctx.literal())
+
+    def _get_var(self, ctx):
+        if ctx.varRef().Name():
+            name = ctx.varRef().Name().getText()
+        elif ctx.varRef().IntegerLiteral():
+            name = str(ctx.varRef().IntegerLiteral().getText())
+        elif ctx.varRef().StringLiteral():
+            name = self._decode_str(ctx.varRef().StringLiteral().getText())
+        else:
+            raise ValueError('Unexpected')
+        return self.context.get_variable(name, SequenceCollection.empty())
+
+    def visitExprVariable(self, ctx: XplorePathGrammarParser.ExprVariableContext):
+        ret = self._get_var(ctx)
+        ret = self._apply_filter(ret, ctx.filter_())
+        return ret
+
+    def visitExprVariableInvoke(self, ctx: XplorePathGrammarParser.ExprVariableInvokeContext):
+        ret = self._get_var(ctx)
+        ret = self._apply_filter(ret, ctx.filter_(0))
+        ret = self._invoke(ret, ctx.argumentList(), ctx.filter_(1))
+        return ret
+
+    def _invoke(self, collection, arglist_ctx, result_filter_ctx):
+        # if ctx.coerceFallback():
+        #     fallback = self.visit(ctx.coerceFallback())
+        # else:
+        #     fallback = DiscardFallbackMode()
+        fallback = DiscardFallbackMode()
+
+        args = [self.visit(n) for n in arglist_ctx.expr()]
+        ret = itertools.chain(*(e.invoke(args) for e in collection))  # explicitly flatten each invocation result
+        ret = itertools.chain(*(fallback.evaluate(r) for r in ret))  # apply fallback
+        ret = SequenceCollection.from_entities(ret)
+        ret = self._apply_filter(ret, result_filter_ctx)
+        return ret
     
     def visitExprWrapOrVar(self, ctx: XplorePathGrammarParser.ExprWrapOrVarContext):
         return self.visit(ctx.wrapOrVar())

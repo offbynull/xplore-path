@@ -17,129 +17,228 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprBoolAggregate.
-    def enterExprBoolAggregate(self, ctx:XplorePathGrammarParser.ExprBoolAggregateContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#expr.
+    def enterExpr(self, ctx:XplorePathGrammarParser.ExprContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprBoolAggregate.
-    def exitExprBoolAggregate(self, ctx:XplorePathGrammarParser.ExprBoolAggregateContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprSetIntersect.
-    def enterExprSetIntersect(self, ctx:XplorePathGrammarParser.ExprSetIntersectContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprSetIntersect.
-    def exitExprSetIntersect(self, ctx:XplorePathGrammarParser.ExprSetIntersectContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#expr.
+    def exitExpr(self, ctx:XplorePathGrammarParser.ExprContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprComparison.
-    def enterExprComparison(self, ctx:XplorePathGrammarParser.ExprComparisonContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprJoinForward.
+    def enterExprJoinForward(self, ctx:XplorePathGrammarParser.ExprJoinForwardContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprComparison.
-    def exitExprComparison(self, ctx:XplorePathGrammarParser.ExprComparisonContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprExtractLabel.
-    def enterExprExtractLabel(self, ctx:XplorePathGrammarParser.ExprExtractLabelContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprExtractLabel.
-    def exitExprExtractLabel(self, ctx:XplorePathGrammarParser.ExprExtractLabelContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprJoinForward.
+    def exitExprJoinForward(self, ctx:XplorePathGrammarParser.ExprJoinForwardContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprNot.
-    def enterExprNot(self, ctx:XplorePathGrammarParser.ExprNotContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprJoinHit.
+    def enterExprJoinHit(self, ctx:XplorePathGrammarParser.ExprJoinHitContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprNot.
-    def exitExprNot(self, ctx:XplorePathGrammarParser.ExprNotContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
-    def enterExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprAtomicOrPathOrEncapsulate.
-    def exitExprAtomicOrPathOrEncapsulate(self, ctx:XplorePathGrammarParser.ExprAtomicOrPathOrEncapsulateContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprJoinHit.
+    def exitExprJoinHit(self, ctx:XplorePathGrammarParser.ExprJoinHitContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprAdditive.
-    def enterExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprSetIntersectHit.
+    def enterExprSetIntersectHit(self, ctx:XplorePathGrammarParser.ExprSetIntersectHitContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprAdditive.
-    def exitExprAdditive(self, ctx:XplorePathGrammarParser.ExprAdditiveContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprAnd.
-    def enterExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprAnd.
-    def exitExprAnd(self, ctx:XplorePathGrammarParser.ExprAndContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprSetIntersectHit.
+    def exitExprSetIntersectHit(self, ctx:XplorePathGrammarParser.ExprSetIntersectHitContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprExtractPosition.
-    def enterExprExtractPosition(self, ctx:XplorePathGrammarParser.ExprExtractPositionContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprSetIntersectForward.
+    def enterExprSetIntersectForward(self, ctx:XplorePathGrammarParser.ExprSetIntersectForwardContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprExtractPosition.
-    def exitExprExtractPosition(self, ctx:XplorePathGrammarParser.ExprExtractPositionContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprOr.
-    def enterExprOr(self, ctx:XplorePathGrammarParser.ExprOrContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprOr.
-    def exitExprOr(self, ctx:XplorePathGrammarParser.ExprOrContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprSetIntersectForward.
+    def exitExprSetIntersectForward(self, ctx:XplorePathGrammarParser.ExprSetIntersectForwardContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprMultiplicative.
-    def enterExprMultiplicative(self, ctx:XplorePathGrammarParser.ExprMultiplicativeContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprSetUnionForward.
+    def enterExprSetUnionForward(self, ctx:XplorePathGrammarParser.ExprSetUnionForwardContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprMultiplicative.
-    def exitExprMultiplicative(self, ctx:XplorePathGrammarParser.ExprMultiplicativeContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprSetUnion.
-    def enterExprSetUnion(self, ctx:XplorePathGrammarParser.ExprSetUnionContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprSetUnion.
-    def exitExprSetUnion(self, ctx:XplorePathGrammarParser.ExprSetUnionContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprSetUnionForward.
+    def exitExprSetUnionForward(self, ctx:XplorePathGrammarParser.ExprSetUnionForwardContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprJoin.
-    def enterExprJoin(self, ctx:XplorePathGrammarParser.ExprJoinContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprSetUnionHit.
+    def enterExprSetUnionHit(self, ctx:XplorePathGrammarParser.ExprSetUnionHitContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprJoin.
-    def exitExprJoin(self, ctx:XplorePathGrammarParser.ExprJoinContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprSetUnionHit.
+    def exitExprSetUnionHit(self, ctx:XplorePathGrammarParser.ExprSetUnionHitContext):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#ExprUnary.
-    def enterExprUnary(self, ctx:XplorePathGrammarParser.ExprUnaryContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprOrForward.
+    def enterExprOrForward(self, ctx:XplorePathGrammarParser.ExprOrForwardContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#ExprUnary.
-    def exitExprUnary(self, ctx:XplorePathGrammarParser.ExprUnaryContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprOrForward.
+    def exitExprOrForward(self, ctx:XplorePathGrammarParser.ExprOrForwardContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprOrHit.
+    def enterExprOrHit(self, ctx:XplorePathGrammarParser.ExprOrHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprOrHit.
+    def exitExprOrHit(self, ctx:XplorePathGrammarParser.ExprOrHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprAndHit.
+    def enterExprAndHit(self, ctx:XplorePathGrammarParser.ExprAndHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprAndHit.
+    def exitExprAndHit(self, ctx:XplorePathGrammarParser.ExprAndHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprAndForward.
+    def enterExprAndForward(self, ctx:XplorePathGrammarParser.ExprAndForwardContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprAndForward.
+    def exitExprAndForward(self, ctx:XplorePathGrammarParser.ExprAndForwardContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprNotHit.
+    def enterExprNotHit(self, ctx:XplorePathGrammarParser.ExprNotHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprNotHit.
+    def exitExprNotHit(self, ctx:XplorePathGrammarParser.ExprNotHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprNotForward.
+    def enterExprNotForward(self, ctx:XplorePathGrammarParser.ExprNotForwardContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprNotForward.
+    def exitExprNotForward(self, ctx:XplorePathGrammarParser.ExprNotForwardContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprComparisonForward.
+    def enterExprComparisonForward(self, ctx:XplorePathGrammarParser.ExprComparisonForwardContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprComparisonForward.
+    def exitExprComparisonForward(self, ctx:XplorePathGrammarParser.ExprComparisonForwardContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprComparisonHit.
+    def enterExprComparisonHit(self, ctx:XplorePathGrammarParser.ExprComparisonHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprComparisonHit.
+    def exitExprComparisonHit(self, ctx:XplorePathGrammarParser.ExprComparisonHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprAdditiveForward.
+    def enterExprAdditiveForward(self, ctx:XplorePathGrammarParser.ExprAdditiveForwardContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprAdditiveForward.
+    def exitExprAdditiveForward(self, ctx:XplorePathGrammarParser.ExprAdditiveForwardContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprAdditiveHit.
+    def enterExprAdditiveHit(self, ctx:XplorePathGrammarParser.ExprAdditiveHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprAdditiveHit.
+    def exitExprAdditiveHit(self, ctx:XplorePathGrammarParser.ExprAdditiveHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprMultiplicativeForward.
+    def enterExprMultiplicativeForward(self, ctx:XplorePathGrammarParser.ExprMultiplicativeForwardContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprMultiplicativeForward.
+    def exitExprMultiplicativeForward(self, ctx:XplorePathGrammarParser.ExprMultiplicativeForwardContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprMultiplicativeHit.
+    def enterExprMultiplicativeHit(self, ctx:XplorePathGrammarParser.ExprMultiplicativeHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprMultiplicativeHit.
+    def exitExprMultiplicativeHit(self, ctx:XplorePathGrammarParser.ExprMultiplicativeHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprUnaryNegateHit.
+    def enterExprUnaryNegateHit(self, ctx:XplorePathGrammarParser.ExprUnaryNegateHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprUnaryNegateHit.
+    def exitExprUnaryNegateHit(self, ctx:XplorePathGrammarParser.ExprUnaryNegateHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprUnaryLabelHit.
+    def enterExprUnaryLabelHit(self, ctx:XplorePathGrammarParser.ExprUnaryLabelHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprUnaryLabelHit.
+    def exitExprUnaryLabelHit(self, ctx:XplorePathGrammarParser.ExprUnaryLabelHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprUnaryPositionHit.
+    def enterExprUnaryPositionHit(self, ctx:XplorePathGrammarParser.ExprUnaryPositionHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprUnaryPositionHit.
+    def exitExprUnaryPositionHit(self, ctx:XplorePathGrammarParser.ExprUnaryPositionHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprUnaryAnyAggregateHit.
+    def enterExprUnaryAnyAggregateHit(self, ctx:XplorePathGrammarParser.ExprUnaryAnyAggregateHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprUnaryAnyAggregateHit.
+    def exitExprUnaryAnyAggregateHit(self, ctx:XplorePathGrammarParser.ExprUnaryAnyAggregateHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprUnaryAllAggregateHit.
+    def enterExprUnaryAllAggregateHit(self, ctx:XplorePathGrammarParser.ExprUnaryAllAggregateHitContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprUnaryAllAggregateHit.
+    def exitExprUnaryAllAggregateHit(self, ctx:XplorePathGrammarParser.ExprUnaryAllAggregateHitContext):
+        pass
+
+
+    # Enter a parse tree produced by XplorePathGrammarParser#ExprUnaryForward.
+    def enterExprUnaryForward(self, ctx:XplorePathGrammarParser.ExprUnaryForwardContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#ExprUnaryForward.
+    def exitExprUnaryForward(self, ctx:XplorePathGrammarParser.ExprUnaryForwardContext):
         pass
 
 
