@@ -201,7 +201,7 @@ While Xplore Path's query language is heavily inspired by XPath, it deviates in 
    ```
    
    </details>
- * <details><summary>Queries must start with a path separator or a relative path indicator.</summary>
+ * <details><summary>Query must start with a path separator or relative path indicator.</summary>
 
    XPath queries have the option of starting with just a path element (e.g. `a/b/c`, treated as querying relative to the current context node). whereas Xplore Path requires that queries start with either a path separator (`/` or `//`) or a relative path indicator (e.g. `.` or `..`).
 
@@ -234,7 +234,7 @@ While Xplore Path's query language is heavily inspired by XPath, it deviates in 
    XPath is specific to XML, and as such supports the concept of XML namespaces and attributes. Since Xplore Path's intent is to be more abstract (in that it can represent any type of hierarchical data, not just XML data), it doesn't have a concept of XML namespaces or attributes.
 
    </details>
- * <details><summary>A node can have both children and a value.</summary>
+ * <details><summary>Node can have both children and a value.</summary>
 
    In XPath / XML, it isn't possible for a node to have both a value and children. With Xplore Path, it is possible. If the underlying hierarchy supports nodes that have both a value and children, Xplore Path has the capability to directly represent those nodes.
 
