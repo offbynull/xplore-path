@@ -59,6 +59,7 @@ KW_ANY                    : 'any';
 KW_ALL                    : 'all';
 KW_ZIP                    : 'zip';
 KW_PRODUCT                : 'product';
+KW_EXPAND                 : 'expand';
 KW_SEQUENCE               : 'sequence';
 KW_ON                     : 'on';
 KW_ERROR                  : 'error';
@@ -160,7 +161,7 @@ exprAnd
     | exprNot                                                   # ExprAndForward
     ;
 exprNot
-    : KW_NOT exprNot coerceFallback?                            # ExprNotHit
+    : notOp exprNot coerceFallback?                             # ExprNotHit
     | exprComparison                                            # ExprNotForward
     ;
 exprComparison
@@ -245,12 +246,16 @@ addOp
     : (KW_ZIP | KW_PRODUCT)? (PLUS | MINUS | PP)
     ;
 
+notOp
+    : KW_EXPAND? KW_NOT
+    ;
+
 andOp
-    : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_AND
+    : KW_EXPAND? (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_AND
     ;
 
 orOp
-    : (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_OR
+    : KW_EXPAND? (KW_ZIP | KW_PRODUCT)? (KW_ANY | KW_ALL | KW_SEQUENCE)? KW_OR
     ;
 
 path

@@ -254,6 +254,11 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by XplorePathGrammarParser#notOp.
+    def visitNotOp(self, ctx:XplorePathGrammarParser.NotOpContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by XplorePathGrammarParser#andOp.
     def visitAndOp(self, ctx:XplorePathGrammarParser.AndOpContext):
         return self.visitChildren(ctx)

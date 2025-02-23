@@ -263,11 +263,16 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         return SequenceCollection.from_entities(result.values())
 
     def visitExprOrHit(self, ctx: XplorePathGrammarParser.ExprOrHitContext):
+        lhs = self.visit(ctx.exprOr())
+        rhs = self.visit(ctx.exprAnd())
+        if ctx.orOp().KW_EXPAND() is None:
+            lhs = self._collapseSequenceCollectionToBoolSingleValueCollection(lhs)
+            rhs = self._collapseSequenceCollectionToBoolSingleValueCollection(rhs)
         op = lambda lv, rv: lv or rv
         op_required_type = bool
         return combine_transform_aggregate(
-            lhs=self.visit(ctx.exprOr()),
-            rhs=self.visit(ctx.exprAnd()),
+            lhs=lhs,
+            rhs=rhs,
             combine_mode=self._to_boolean_combine_mode(ctx.orOp()),
             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
             transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
@@ -275,11 +280,16 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         )
 
     def visitExprAndHit(self, ctx: XplorePathGrammarParser.ExprAndHitContext):
+        lhs = self.visit(ctx.exprAnd())
+        rhs = self.visit(ctx.exprNot())
+        if ctx.andOp().KW_EXPAND() is None:
+            lhs = self._collapseSequenceCollectionToBoolSingleValueCollection(lhs)
+            rhs = self._collapseSequenceCollectionToBoolSingleValueCollection(rhs)
         op = lambda lv, rv: lv and rv
         op_required_type = bool
         return combine_transform_aggregate(
-            lhs=self.visit(ctx.exprAnd()),
-            rhs=self.visit(ctx.exprNot()),
+            lhs=lhs,
+            rhs=rhs,
             combine_mode=self._to_boolean_combine_mode(ctx.andOp()),
             transformer=lambda _, l_, __, r_: Entity.apply_binary_boolean_op(l_, r_, op, op_required_type),
             transform_fallback_mode=self._to_fallback_mode(ctx, DefaultFallbackMode(False)),
@@ -289,9 +299,21 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitExprNotHit(self, ctx: XplorePathGrammarParser.ExprNotHitContext):
         fallback_mode = self._to_fallback_mode(ctx, DiscardFallbackMode())
         r = self.visit(ctx.exprNot())
+        if ctx.notOp().KW_EXPAND() is None:
+            r = self._collapseSequenceCollectionToBoolSingleValueCollection(r)
         r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
         r = r.transform(lambda _, e: Entity(not e.value), fallback_mode)
         return r
+
+    # For boolean operations (AND/OR/NOT), an operand that's a SequenceCollection should get treated as a bool (True for
+    # non-empty) - this is the default xpath behavior.
+    def _collapseSequenceCollectionToBoolSingleValueCollection(self, c: Collection) -> Collection:
+        if isinstance(c, SingleValueCollection):
+            return c
+        elif isinstance(c, SequenceCollection):
+            return SingleValueCollection(bool(c))
+        else:
+            raise ValueError()
 
     def visitExprComparisonHit(self, ctx: XplorePathGrammarParser.ExprComparisonHitContext):
         def _eq_op(_l, _r):

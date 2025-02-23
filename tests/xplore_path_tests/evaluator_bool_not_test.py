@@ -20,13 +20,21 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluate(DummyNode(), 'not 1'), False)  # 1 coerces to true
         self.assertEqual(evaluate(DummyNode(), 'not nan'), True)  # nan coerces to false
 
-    def test_must_apply_not_seq(self):
-        self.assertEqual(evaluate(DummyNode(), 'not (true, true)'), [False, False])
-        self.assertEqual(evaluate(DummyNode(), 'not (true, false)'), [False, True])
-        self.assertEqual(evaluate(DummyNode(), 'not (1, nan, "s", "")'), [False, True, False, True])
-        self.assertEqual(evaluate(DummyNode(), 'not (1, "s", true)'), [False, False, False])
-        self.assertEqual(evaluate(DummyNode(), 'not (0, nan, "")'), [True, True, True])
-        self.assertEqual(evaluate(DummyNode(), 'not ()'), [])
+    def test_must_apply_expanded_not_seq(self):
+        self.assertEqual(evaluate(DummyNode(), 'expand not (true, true)'), [False, False])
+        self.assertEqual(evaluate(DummyNode(), 'expand not (true, false)'), [False, True])
+        self.assertEqual(evaluate(DummyNode(), 'expand not (1, nan, "s", "")'), [False, True, False, True])
+        self.assertEqual(evaluate(DummyNode(), 'expand not (1, "s", true)'), [False, False, False])
+        self.assertEqual(evaluate(DummyNode(), 'expand not (0, nan, "")'), [True, True, True])
+        self.assertEqual(evaluate(DummyNode(), 'expand not ()'), [])
+
+    def test_must_apply_collapsed_not_seq(self):
+        self.assertEqual(evaluate(DummyNode(), 'not (true, true)'), False)
+        self.assertEqual(evaluate(DummyNode(), 'not (true, false)'), False)
+        self.assertEqual(evaluate(DummyNode(), 'not (1, nan, "s", "")'), False)
+        self.assertEqual(evaluate(DummyNode(), 'not (1, "s", true)'), False)
+        self.assertEqual(evaluate(DummyNode(), 'not (0, nan, "")'), False)
+        self.assertEqual(evaluate(DummyNode(), 'not ()'), True)
 
 
 if __name__ == '__main__':

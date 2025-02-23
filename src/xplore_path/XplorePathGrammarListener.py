@@ -449,6 +449,15 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by XplorePathGrammarParser#notOp.
+    def enterNotOp(self, ctx:XplorePathGrammarParser.NotOpContext):
+        pass
+
+    # Exit a parse tree produced by XplorePathGrammarParser#notOp.
+    def exitNotOp(self, ctx:XplorePathGrammarParser.NotOpContext):
+        pass
+
+
     # Enter a parse tree produced by XplorePathGrammarParser#andOp.
     def enterAndOp(self, ctx:XplorePathGrammarParser.AndOpContext):
         pass
