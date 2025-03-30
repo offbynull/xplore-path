@@ -9,7 +9,7 @@ class TestCase(unittest.TestCase):
         actual = PdfFileLoader().load(
             Path(__file__).parent / 'test.pdf'
         )
-        expected = {0: 'Test\ndoc'}
+        expected = {0: 'Test doc'}
 
         self.assertEqual(expected, actual)
 

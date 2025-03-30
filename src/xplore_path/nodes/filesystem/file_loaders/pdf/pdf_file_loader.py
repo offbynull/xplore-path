@@ -3,7 +3,7 @@ from __future__ import annotations
 import pathlib
 from typing import Any
 
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 from xplore_path.nodes.filesystem.file_loader import FileLoader
 

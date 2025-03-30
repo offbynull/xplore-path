@@ -4,7 +4,7 @@ Xplore Path is a tool for quick-and-dirty data exploration, built for messy, unt
 
  * **Simple syntax**: Query data with an intuitive, XPath-like syntax.
  * **Broad format support**: Search through CSVs, XLSXs, JSONs, YAMLs, DOCXs, PDFs, XMLs, HTMLs, ...
- * **Fuzzy search support**: Search using globs, regexs, fuzzy strings, and numeric tolerances.
+ * **Fuzzy search support**: Search using globs, regexs, fuzzy strings, numeric tolerances, ...
  * **Unified environment**: Search through disparate files and formats within a single context.
  * **Extendable**: Add formats and functions for your custom use cases (e.g. 3D scene graphs, flow cytometry, ...).
 
@@ -248,19 +248,21 @@ The full Xplore Path grammar is available at [XplorePathGrammar.g4](src/xplore_p
 
 Xplore Path adds support for various types of fuzzy matching through the use of custom literals:
 
-* String literal prefixed with `i` for case-insensitive matching (e.g. `i'HeLLo'`) 
-* String literal prefixed with `g` for glob matching (e.g. `g'hello*'`).
-* String literal prefixed with `r` for regex matching (e.g. `r'hello.*'`).
-* String literal prefixed with `f` for approximate string matching (e.g. `f'hello'`).
-* String literal prefixed with `s` for strict matching, as in not fuzzy/approximate in any way (e.g. `s'hello'`).
+* `i~value` / `i'value'` for case-insensitive matching (e.g. `i'HeLLo'`) 
+* `g~value` / `g'value'` for glob matching (e.g. `g'hello*'`) 
+* `r~value` / `r'value'` for regex matching (e.g. `r'hello.*'`) 
+* `f~value` / `f'value'` for fuzzy matching (e.g. `f'hello'`) 
+* `a~value` / `a'value'` for camelcase/snakecase/titlecase acronym matching (e.g. `a~IBM`)
 * `~number:number` for number ranges, optionally using brackets to define open/closed-ness (e.g. `~[4:9)`)
 * `~number@tolerance` for number within some tolerance (e.g. `~3.14@0.0001`)
 
 Examples:   
 
 ```xpath
+/mouse_assays.zip/g~*001.csv//*
 /mouse_assays.zip/g'*001.csv'//*
 /mouse_assays.zip//*/GO_Term[. = g'GO:*']
+/mouse_assays.zip//*/GO_Term[. = g~GO:*]
 ```
 
 ### Variables

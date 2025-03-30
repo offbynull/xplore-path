@@ -665,48 +665,12 @@ class XplorePathGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by XplorePathGrammarParser#MatcherStrict.
-    def enterMatcherStrict(self, ctx:XplorePathGrammarParser.MatcherStrictContext):
+    # Enter a parse tree produced by XplorePathGrammarParser#MatcherString.
+    def enterMatcherString(self, ctx:XplorePathGrammarParser.MatcherStringContext):
         pass
 
-    # Exit a parse tree produced by XplorePathGrammarParser#MatcherStrict.
-    def exitMatcherStrict(self, ctx:XplorePathGrammarParser.MatcherStrictContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#MatcherRegex.
-    def enterMatcherRegex(self, ctx:XplorePathGrammarParser.MatcherRegexContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#MatcherRegex.
-    def exitMatcherRegex(self, ctx:XplorePathGrammarParser.MatcherRegexContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#MatcherGlob.
-    def enterMatcherGlob(self, ctx:XplorePathGrammarParser.MatcherGlobContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#MatcherGlob.
-    def exitMatcherGlob(self, ctx:XplorePathGrammarParser.MatcherGlobContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#MatcherFuzzy.
-    def enterMatcherFuzzy(self, ctx:XplorePathGrammarParser.MatcherFuzzyContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#MatcherFuzzy.
-    def exitMatcherFuzzy(self, ctx:XplorePathGrammarParser.MatcherFuzzyContext):
-        pass
-
-
-    # Enter a parse tree produced by XplorePathGrammarParser#MatcherCaseInsensitive.
-    def enterMatcherCaseInsensitive(self, ctx:XplorePathGrammarParser.MatcherCaseInsensitiveContext):
-        pass
-
-    # Exit a parse tree produced by XplorePathGrammarParser#MatcherCaseInsensitive.
-    def exitMatcherCaseInsensitive(self, ctx:XplorePathGrammarParser.MatcherCaseInsensitiveContext):
+    # Exit a parse tree produced by XplorePathGrammarParser#MatcherString.
+    def exitMatcherString(self, ctx:XplorePathGrammarParser.MatcherStringContext):
         pass
 
 

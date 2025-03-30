@@ -27,6 +27,7 @@ from xplore_path.invocables.whitespace_collapse_invocable import WhitespaceColla
 from xplore_path.invocables.whitespace_remove_invocable import WhitespaceRemoveInvocable
 from xplore_path.invocables.whitespace_strip_invocable import WhitespaceStripInvocable
 from xplore_path.matcher import Matcher
+from xplore_path.matchers.acronym_matcher import AcronymMatcher
 from xplore_path.matchers.combined_matcher import CombinedMatcher
 from xplore_path.matchers.fuzzy_matcher import FuzzyMatcher
 from xplore_path.matchers.glob_matcher import GlobMatcher
@@ -921,25 +922,28 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
     def visitExprMatcher(self, ctx: XplorePathGrammarParser.ExprMatcherContext):
         return self.visit(ctx.matcher())
 
-    def visitMatcherStrict(self, ctx: XplorePathGrammarParser.MatcherStrictContext):
-        pattern = self._decode_str(ctx.getText()[1:])
-        return SingleValueCollection(StrictMatcher(pattern))
-
-    def visitMatcherRegex(self, ctx: XplorePathGrammarParser.MatcherRegexContext):
-        pattern = self._decode_str(ctx.getText()[1:])
-        return SingleValueCollection(RegexMatcher(pattern))
-
-    def visitMatcherGlob(self, ctx: XplorePathGrammarParser.MatcherGlobContext):
-        pattern = self._decode_str(ctx.getText()[1:])
-        return SingleValueCollection(GlobMatcher(pattern))
-
-    def visitMatcherFuzzy(self, ctx: XplorePathGrammarParser.MatcherGlobContext):
-        pattern = self._decode_str(ctx.getText()[1:])
-        return SingleValueCollection(FuzzyMatcher(pattern))
-
-    def visitMatcherCaseInsensitive(self, ctx: XplorePathGrammarParser.MatcherCaseInsensitiveContext):
-        pattern = self._decode_str(ctx.getText()[1:])
-        return SingleValueCollection(IgnoreCaseMatcher(pattern))
+    def visitMatcherString(self, ctx: XplorePathGrammarParser.MatcherStringContext):
+        mode = ctx.getText()[0]
+        if ctx.StringMatcher():
+            pattern = self._decode_str(ctx.getText()[1:])
+        elif ctx.StringMatcherRaw():
+            pattern = ctx.getText()[2:]
+        else:
+            raise ValueError('Unexpected')
+        if mode == 'r':
+            return SingleValueCollection(RegexMatcher(pattern))
+        elif mode == 'g':
+            return SingleValueCollection(GlobMatcher(pattern))
+        elif mode == 's':
+            return SingleValueCollection(StrictMatcher(pattern))
+        elif mode == 'f':
+            return SingleValueCollection(FuzzyMatcher(pattern))
+        elif mode == 'i':
+            return SingleValueCollection(IgnoreCaseMatcher(pattern))
+        elif mode == 'a':
+            return SingleValueCollection(AcronymMatcher(pattern))
+        else:
+            raise ValueError(f'Unrecognized matcher: {mode}')
 
     def visitMatcherNumericRange(self, ctx: XplorePathGrammarParser.MatcherNumericRangeContext):
         return SingleValueCollection(self.visit(ctx.numericRangeMatcher()))

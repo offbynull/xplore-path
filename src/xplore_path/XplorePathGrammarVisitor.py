@@ -374,28 +374,8 @@ class XplorePathGrammarVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by XplorePathGrammarParser#MatcherStrict.
-    def visitMatcherStrict(self, ctx:XplorePathGrammarParser.MatcherStrictContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#MatcherRegex.
-    def visitMatcherRegex(self, ctx:XplorePathGrammarParser.MatcherRegexContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#MatcherGlob.
-    def visitMatcherGlob(self, ctx:XplorePathGrammarParser.MatcherGlobContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#MatcherFuzzy.
-    def visitMatcherFuzzy(self, ctx:XplorePathGrammarParser.MatcherFuzzyContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by XplorePathGrammarParser#MatcherCaseInsensitive.
-    def visitMatcherCaseInsensitive(self, ctx:XplorePathGrammarParser.MatcherCaseInsensitiveContext):
+    # Visit a parse tree produced by XplorePathGrammarParser#MatcherString.
+    def visitMatcherString(self, ctx:XplorePathGrammarParser.MatcherStringContext):
         return self.visitChildren(ctx)
 
 

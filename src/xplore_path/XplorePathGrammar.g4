@@ -73,21 +73,18 @@ KW_LEFT                   : 'left';
 KW_RIGHT                  : 'right';
 KW_INNER                  : 'inner';
 KW_JOIN                   : 'join';
-KW_CONCATENATE            : 'concat';
 KW_TRUE                   : 'true';
 KW_FALSE                  : 'false';
 KW_NOT                    : 'not';
 KW_NULL                   : 'null';
 
-RegexMatcher      : 'r' FragStringLiteral;
-GlobMatcher       : 'g' FragStringLiteral;
-StrictMatcher     : 's' FragStringLiteral;
-FuzzyMatcher      : 'f' FragStringLiteral;
-IgnoreCaseMatcher : 'i' FragStringLiteral;
-IntegerLiteral    : FragDigits;
-DecimalLiteral    : '.' FragDigits | FragDigits '.' [0-9]*;
-DoubleLiteral     : ('.' FragDigits | FragDigits ('.' [0-9]*)?) [eE] [+-]? FragDigits;
-StringLiteral     : FragStringLiteral;
+StringMatcherRaw: FragNameStartChar '~' FragStringMatcherLiteral;
+StringMatcher   : FragNameStartChar FragStringLiteral;
+IntegerLiteral  : FragDigits;
+DecimalLiteral  : '.' FragDigits | FragDigits '.' [0-9]*;
+DoubleLiteral   : ('.' FragDigits | FragDigits ('.' [0-9]*)?) [eE] [+-]? FragDigits;
+StringLiteral   : FragStringLiteral;
+fragment FragStringMatcherLiteral: ~[/[\]()\u000d\u000a\u0020\u0009]+;
 fragment FragStringLiteral : '"' (~["] | FragEscapeQuot)* '"' | '\'' (~['] | FragEscapeApos)* '\'';
 fragment FragEscapeQuot : '""';
 fragment FragEscapeApos : '\'\'';
@@ -317,13 +314,9 @@ literal
     ;
 
 matcher
-    : StrictMatcher        # MatcherStrict
-    | RegexMatcher         # MatcherRegex
-    | GlobMatcher          # MatcherGlob
-    | FuzzyMatcher         # MatcherFuzzy
-    | IgnoreCaseMatcher    # MatcherCaseInsensitive
-    | numericRangeMatcher  # MatcherNumericRange
-    | STAR                 # MatcherWildcard
+    : (StringMatcher | StringMatcherRaw)  # MatcherString
+    | numericRangeMatcher                 # MatcherNumericRange
+    | STAR                                # MatcherWildcard
     ;
 
 numericRangeMatcher
