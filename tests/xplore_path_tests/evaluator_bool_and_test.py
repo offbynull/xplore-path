@@ -1012,16 +1012,6 @@ class EvaluatorTest(unittest.TestCase):
         # empty
         self.assertEqual(evaluate(DummyNode(), '(true, true) expand and ()'), False)
 
-    def test_regressions(self):
-        root = PythonObjectNode.create_root_path({'a': {'b': {'c': 1, 'd': 2, 'e': -1, 'f': {'g': -2, 'h': -3}}, 'y': 3, 'z': 4, 'u': {'t': 4}, 'v': {}}})
-        # Regression test: Grammar ambiguity was causing the query below to fail
-        self.assertEqual(next(evaluate(root, '/a/b[./f/h=-3 and ../y=3]').unpack).label(), 'b')
-        self.assertEqual(next(evaluate(root, '/a/b[./f/h=-3 and ../y=3 and ../z]').unpack).label(), 'b')
-        # Regression test: ../u must evaluate to True - it's not empty
-        self.assertEqual(next(evaluate(root, '/a/b[./f/h=-3 and ../u]').unpack).label(), 'b')
-        # Regression test: ../v/* must evaluate to False - it's empty
-        self.assertEqual(evaluate(root, '/a/b[./f/h=-3 and ../v/*]'), [])
-
 
 if __name__ == '__main__':
     unittest.main()

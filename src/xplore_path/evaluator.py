@@ -465,13 +465,13 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         fallback_mode = self._to_fallback_mode(ctx, DefaultFallbackMode(False))
         r = self.visit(ctx.exprUnary())
         r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
-        return any(r.unpack)
+        return SingleValueCollection(any(r.unpack))
 
     def visitExprUnaryAllAggregateHit(self, ctx: XplorePathGrammarParser.ExprUnaryAllAggregateHitContext):
         fallback_mode = self._to_fallback_mode(ctx, DefaultFallbackMode(False))
         r = self.visit(ctx.exprUnary())
         r = r.transform(lambda _, e: e.coerce(bool), fallback_mode)
-        return all(r.unpack)
+        return SingleValueCollection(all(r.unpack))
 
     def _to_fallback_mode(self, ctx, default: FallbackMode) -> FallbackMode:
         if ctx.coerceFallback():
