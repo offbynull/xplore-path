@@ -82,7 +82,7 @@ class PythonAstNode(Node):
         elif isinstance(this, ast.AST):
             # inject('@type', this.__class__.__name__)
             # inject('@unparsed', ast.unparse(this))
-            if hasattr(this, 'lineno'):
+            if hasattr(this, 'lineno') and getattr(this, 'lineno') is not None:
                 line_idx = getattr(this, 'lineno')
                 # Insert inline comment
                 if line_idx in self._inline_comments:
@@ -94,7 +94,7 @@ class PythonAstNode(Node):
                         break
                     if i not in self._empty_lines:
                         break
-            if hasattr(this, 'end_lineno'):
+            if hasattr(this, 'end_lineno') and getattr(this, 'end_lineno') is not None:
                 line_idx = getattr(this, 'end_lineno')
                 # Insert block comment after
                 for i in range(line_idx+1, self._max_lines):

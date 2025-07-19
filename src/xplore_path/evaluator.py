@@ -59,7 +59,11 @@ class _EvaluatorVisitorContext:
             root: Node
     ):
         self._root = root
-        self._collection = SequenceCollection.from_unpacked([root])
+        self._collection = SequenceCollection.from_unpacked(
+            values=[root],
+            order_nodes=False,
+            deduplicate_nodes=False
+        )
         self._save_stack = []
         self._variables = {}
 
@@ -71,7 +75,11 @@ class _EvaluatorVisitorContext:
         if isinstance(collection, Collection):
             self._collection = collection
         elif collection == _CollectionResetMode.RESET_WITH_ROOT:
-            self._collection = SequenceCollection.from_unpacked([self._root])
+            self._collection = SequenceCollection.from_unpacked(
+                values=[self._root],
+                order_nodes=False,
+                deduplicate_nodes=False
+            )
         elif collection == _CollectionResetMode.RESET_WITH_SELF:
             ... # It's asking to be reset to a "copy" what it already is, but Collection is immutable so this is a no-op
         elif collection == _CollectionResetMode.RESET_WITH_EMPTY:
@@ -788,7 +796,18 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
                 label = v
             if combined_matcher.match(label):
                 ret.append(v)
-        return SequenceCollection.from_unpacked(ret)
+        # Given that ...
+        #
+        #  1. self.context.collection is guaranteed to be ordered and deduped
+        #  2. we're iterating over self.context.collection (inorder) and filtering out elements
+        #
+        # ... ret is guaranteed to be sorted and contain no dupes. As such, don't apply sorting/deduping when creating
+        # the collection.
+        return SequenceCollection.from_unpacked(
+            values=ret,
+            order_nodes=False,
+            deduplicate_nodes=False
+        )
 
     def _apply_filter(self, collection: Collection, ctx: XplorePathGrammarParser.FilterContext | None):
         if ctx is None:
@@ -821,7 +840,14 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         root = self.context.root
 
         def transformer(idx: int, e: Entity) -> Entity | None:
-            self.context.save(SequenceCollection.from_entities([e]), root)
+            self.context.save(
+                new_collection=SequenceCollection.from_entities(
+                    entities=[e],
+                    order_nodes=False,
+                    deduplicate_nodes=False
+                ),
+                new_root=root
+            )
             try:
                 filter_res_exp = self.visit(ctx.expr())
                 # /a/b[bool] - Return if true.

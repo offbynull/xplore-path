@@ -151,4 +151,8 @@ class SequenceCollection(Collection):
 
         :return: Newly created ``SequenceCollection`` object, which is empty.
         """
-        return SequenceCollection(iter([]), False, False)
+        return SequenceCollection(
+            entities=iter([]),
+            order_nodes=False,
+            deduplicate_nodes=False
+        )
