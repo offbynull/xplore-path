@@ -5,7 +5,7 @@ import tokenize
 from typing import Any
 
 from xplore_path.nodes.simple.simple_node import SimpleNode
-from xplore_path.null import Null
+from xplore_path.null import Null, NULL_INSTANCE
 from xplore_path.node import Node, ParentBlock
 
 
@@ -31,7 +31,7 @@ class PythonAstNode(Node):
         :param value: Backing Python AST object, collection, or scalar type.
         """
         if value is None:
-            value = Null()
+            value = NULL_INSTANCE
         super().__init__(parent, value if type(value) in {bool, int, float, str, Null} else None)
         self._data = value
         self._inline_comments = inline_comments

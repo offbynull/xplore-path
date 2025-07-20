@@ -14,39 +14,39 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/ptrs/f_ptr/ancestor-or-self::*').unpack],
             [
-                [],
-                ['ptrs'],
-                ['ptrs', 'f_ptr']
+                tuple(),
+                ('ptrs', ),
+                ('ptrs', 'f_ptr')
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/d/ancestor-or-self::*').unpack],
             [
-                [],
-                ['a'],
-                ['a', 'b'],
-                ['a', 'b', 'd']
+                tuple(),
+                ('a', ),
+                ('a', 'b'),
+                ('a', 'b', 'd')
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/d/ancestor-or-self::(label .)').unpack],
             [
-                [],
-                ['a'],
-                ['a', 'b'],
-                ['a', 'b', 'd']
+                tuple(),
+                ('a', ),
+                ('a', 'b'),
+                ('a', 'b', 'd')
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/d/ancestor-or-self::a').unpack],
             [
-                ['a']
+                ('a', )
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/ancestor-or-self::*').unpack],
             [
-                []
+                tuple()
             ]
         )
 

@@ -14,39 +14,39 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/following::*').unpack],
             [
-                ['y'],
-                ['z'],
-                ['ptrs'],
-                ['ptrs', 'd_ptr'],
-                ['ptrs', 'f_ptr'],
+                ('y', ),
+                ('z', ),
+                ('ptrs', ),
+                ('ptrs', 'd_ptr'),
+                ('ptrs', 'f_ptr'),
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/e/following::*').unpack],
             [
-                ['a','b','f'],
-                ['y'],
-                ['z'],
-                ['ptrs'],
-                ['ptrs', 'd_ptr'],
-                ['ptrs', 'f_ptr'],
+                ('a','b','f'),
+                ('y', ),
+                ('z', ),
+                ('ptrs', ),
+                ('ptrs', 'd_ptr'),
+                ('ptrs', 'f_ptr'),
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/e/following::(label .)').unpack],
             [
-                ['a','b','f'],
-                ['y'],
-                ['z'],
-                ['ptrs'],
-                ['ptrs', 'd_ptr'],
-                ['ptrs', 'f_ptr'],
+                ('a','b','f'),
+                ('y', ),
+                ('z', ),
+                ('ptrs', ),
+                ('ptrs', 'd_ptr'),
+                ('ptrs', 'f_ptr'),
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/e/following::ptrs').unpack],
             [
-                ['ptrs']
+                ('ptrs', )
             ]
         )
         self.assertEqual(

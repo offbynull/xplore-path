@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from xplore_path.null import Null
+from xplore_path.null import Null, NULL_INSTANCE
+
 if TYPE_CHECKING:
     from xplore_path.core_types import CoreTypeAlias
 
@@ -61,9 +62,9 @@ class Node(ABC):
         # TODO: It may be better to remove the distinction between Null vs None and just use one of them for everything
         #       - then, add a metadata flag or attribute or something that represents how the value should be
         #       interpreted when querying / how it should be shown in the REPL?
-        self._parent = None if parent is None else parent.parent
-        self._label = None if parent is None else parent.child_label
-        self._position = None if parent is None else parent.child_position
+        self._parent = NULL_INSTANCE if parent is None else parent.parent
+        self._label = NULL_INSTANCE if parent is None else parent.child_label
+        self._position = NULL_INSTANCE if parent is None else parent.child_position
         self._value = value
         self._full_position_cache = None
 
@@ -133,8 +134,6 @@ class Node(ABC):
 
         :return: Parent node, or ``Null`` if this node has no parent (node is root).
         """
-        if self._parent is None:
-            return Null()
         return self._parent
 
     def position(self) -> int | Null:
@@ -144,8 +143,6 @@ class Node(ABC):
 
         :return: Position of this node within parent, or ``Null`` if this node has no parent (node is root).
         """
-        if self._position is None:
-            return Null()
         return self._position
 
     def full_position(self) -> tuple[int, ...]:
@@ -159,12 +156,11 @@ class Node(ABC):
         #       so as not to recompute full position every time.
         if self._full_position_cache is not None:
             return self._full_position_cache
-        p_list = []
-        p = self
-        while type(p) != Null:
-            p_list.append(p)
-            p = p.parent()
-        ret = tuple(p.position() for p in reversed(p_list[:-1]))
+        parent = self.parent()
+        if type(parent) == Null:
+            ret = tuple()
+        else:
+            ret = parent.full_position() + (self.position(), )
         self._full_position_cache = ret
         return ret
 
@@ -235,23 +231,21 @@ class Node(ABC):
 
         :return: Label of this node within parent, or ``Null`` if this node has no parent (node is root).
         """
-        if self._label is None:
-            return Null()
         return self._label
 
-    def full_label(self) -> list[str | int | float | bool]:
+    def full_label(self) -> tuple[str | int | float | bool]:
         """
         Get labels of nodes descending to this node, as if invoking ``label()`` on each element of
         ``ancestors()[1:] + [self]``.
 
         :return: Labels of ancestors and this node with their respective parents.
         """
-        p_list = []
-        p = self
-        while type(p) != Null:
-            p_list.append(p)
-            p = p.parent()
-        return [p.label() for p in reversed(p_list[:-1])]
+        parent = self.parent()
+        if type(parent) == Null:
+            ret = tuple()
+        else:
+            ret = parent.full_label() + (self.label(), )  # noqa - label() call here will never return Null
+        return ret
 
     def to_dict(self) -> dict[str | int | float | bool | Null, tuple[CoreTypeAlias | None, dict]]:
         """

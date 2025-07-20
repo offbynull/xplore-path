@@ -14,25 +14,25 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/parent::a').unpack],
             [
-                ['a']
+                ('a', )
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/parent::*').unpack],
             [
-                ['a']
+                ('a', )
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/parent::(label .)').unpack],
             [
-                ['a']
+                ('a', )
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/parent::(label .)').unpack],
             [
-                []
+                tuple()
             ]
         )
         self.assertEqual(

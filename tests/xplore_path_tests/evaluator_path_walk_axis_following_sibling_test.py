@@ -14,21 +14,21 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/following-sibling::*').unpack],
             [
-                ['y'],
-                ['z'],
-                ['ptrs']
+                ('y', ),
+                ('z', ),
+                ('ptrs', )
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/e/following-sibling::*').unpack],
             [
-                ['a','b','f']
+                ('a','b','f')
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/b/e/following-sibling::(label .)').unpack],
             [
-                ['a','b','f']
+                ('a','b','f')
             ]
         )
         self.assertEqual(

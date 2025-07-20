@@ -31,7 +31,7 @@ def evaluate(root, expr, variables = None):
 class EvaluatorTest(unittest.TestCase):
     def _pop_first_and_assert_path(self, p_list, p_expected_label, p_expected_value):
         p = p_list.pop(0)
-        self.assertEqual(p_expected_label, p.full_label())
+        self.assertEqual(tuple(p_expected_label), p.full_label())
         self.assertEqual(p_expected_value, p.value())
         
     def test_must_inner_join_path_vs_path(self):

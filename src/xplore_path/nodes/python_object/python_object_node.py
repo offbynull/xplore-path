@@ -3,7 +3,7 @@ from __future__ import annotations
 import types
 from typing import Any
 
-from xplore_path.null import Null
+from xplore_path.null import Null, NULL_INSTANCE
 from xplore_path.node import Node, ParentBlock
 
 
@@ -30,7 +30,7 @@ class PythonObjectNode(Node):
         :param value: Backing Python object.
         """
         if value is None:
-            value = Null()
+            value = NULL_INSTANCE
         super().__init__(parent, value if type(value) in {bool, int, float, str, Null} else None)
         self._data = value
 

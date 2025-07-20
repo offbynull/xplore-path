@@ -14,17 +14,17 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/descendant::f').unpack],
             [
-                ['a', 'b', 'f']
+                ('a', 'b', 'f')
             ]
         )
         self.assertEqual(
             [e.full_label() for e in evaluate(root, '/a/descendant::(label .)').unpack],
             [
-                ['a', 'b'],
-                ['a', 'b', 'c'],
-                ['a', 'b', 'd'],
-                ['a', 'b', 'e'],
-                ['a', 'b', 'f']
+                ('a', 'b'),
+                ('a', 'b', 'c'),
+                ('a', 'b', 'd'),
+                ('a', 'b', 'e'),
+                ('a', 'b', 'f')
             ]
         )
         self.assertEqual(

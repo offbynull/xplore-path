@@ -8,10 +8,13 @@ class Null:
         return 0
 
     def __eq__(self, other):
-        return isinstance(other, Null)
+        return type(other) == Null  # return isinstance(other, Null)
 
     def __str__(self):
         return 'null'
 
     def __repr__(self):
         return 'null'
+
+
+NULL_INSTANCE = Null()

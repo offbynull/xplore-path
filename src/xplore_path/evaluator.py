@@ -36,7 +36,7 @@ from xplore_path.matchers.numeric_range_matcher import NumericRangeMatcher
 from xplore_path.matchers.regex_matcher import RegexMatcher
 from xplore_path.matchers.strict_matcher import StrictMatcher
 from xplore_path.matchers.wildcard_matcher import WildcardMatcher
-from xplore_path.null import Null
+from xplore_path.null import Null, NULL_INSTANCE
 from xplore_path.node import Node, ParentBlock
 from xplore_path.nodes.mirror.mirror_node import MirrorNode
 from xplore_path.nodes.simple.simple_node import SimpleNode
@@ -942,7 +942,7 @@ class _EvaluatorVisitor(XplorePathGrammarVisitor):
         elif ctx.Name():
             return SingleValueCollection(ctx.Name().getText())
         elif ctx.KW_NULL():
-            return SingleValueCollection(Null())
+            return SingleValueCollection(NULL_INSTANCE)
         raise ValueError('Unexpected')
 
     def visitExprMatcher(self, ctx: XplorePathGrammarParser.ExprMatcherContext):
